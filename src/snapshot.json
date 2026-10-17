@@ -12,14 +12,6 @@
       "pct": 25
     },
     {
-      "name": "Astro",
-      "pct": 17
-    },
-    {
-      "name": "HTML",
-      "pct": 17
-    },
-    {
       "name": "Python",
       "pct": 17
     },
@@ -28,9 +20,17 @@
       "pct": 17
     },
     {
+      "name": "HTML",
+      "pct": 17
+    },
+    {
+      "name": "Astro",
+      "pct": 17
+    },
+    {
       "name": "C++",
       "pct": 8
     }
   ],
-  "fetchedAt": "2026-10-17T10:18:38.094Z"
+  "fetchedAt": "2026-10-17T10:19:13.068Z"
 }
