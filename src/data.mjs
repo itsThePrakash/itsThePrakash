@@ -9,6 +9,7 @@
 export const SITE = {
   name: 'Prakash',
   fullName: 'Prakash Gothwal',
+  fullNameHi: 'प्रकाश गोथवाल',
   displayName: 'PRAKASH',
   handle: 'itsThePrakash',
   title: 'Founder & CEO @ EkGuru · Full-Stack & AI Engineer',
@@ -34,6 +35,7 @@ export const SITE = {
     'Prakash Gothwal MNIT',
     'Prakash Gothwal Dausa',
     'itsThePrakash',
+    'प्रकाश गोथवाल',
   ],
   keywords: [
     'Prakash Gothwal',
@@ -58,6 +60,24 @@ export const SITE = {
   yearsCoding: 4,
   resumeUrl: '/resume',
   github: 'https://github.com/itsThePrakash',
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  SPONSORSHIP — one block controls every sponsor surface on the site.
+ *  Turn a rail on by filling its field. Nothing else needs editing.
+ *  · github   → works once github.com/sponsors/itsThePrakash is live
+ *  · upi      → set the VPA (e.g. 'prakash@okhdfcbank') and the UPI card appears
+ *  · razorpay → set a payment-page URL and that card appears
+ *  · buymeacoffee → set the page URL and a coffee card appears
+ *  · wall     → names of people who actually sponsored; empty = honest empty state
+ * ───────────────────────────────────────────────────────────────────────────── */
+export const SPONSOR = {
+  github: 'https://github.com/sponsors/itsThePrakash',
+  githubLive: false,
+  upi: null,
+  razorpay: null,
+  buymeacoffee: null, // e.g. 'https://buymeacoffee.com/itsThePrakash'
+  wall: [],
 };
 
 /* ── Social graph. Every link the profile owns, in one place. ─────────────── */
@@ -820,6 +840,13 @@ export function buildIndex() {
     url: '/about',
     kind: 'Page',
     keywords: SITE.aliases.join(' '),
+  });
+  out.push({
+    title: 'Sponsor the work',
+    subtitle: 'GitHub Sponsors · any amount',
+    url: '/sponsor',
+    kind: 'Page',
+    keywords: 'support sponsor donate coffee fund',
   });
   out.push({ title: 'Email me', subtitle: SITE.email, url: `mailto:${SITE.email}`, kind: 'Contact', keywords: 'hire contact work' });
   out.push({ title: 'GitHub profile', subtitle: '@itsThePrakash', url: SITE.github, kind: 'Profile', keywords: 'code repos stars' });

@@ -18,9 +18,10 @@ npm run refresh    # pull fresh GitHub numbers into src/snapshot.json
 | `dist/index.html` | the portfolio — hero, telemetry, projects, achievements, timeline, stack, contact |
 | `dist/resume.html` | print-ready résumé (`/resume`, `/cv`, `/resume.pdf` all land here) |
 | `dist/about.html` | the bio page, aimed at name searches (`/about`) |
+| `dist/sponsor.html` | the sponsor page (`/sponsor`) — tiers, rails, wall, FAQ |
 | `dist/404.html` | themed 404 |
 | `dist/medals/*.svg` | hand-drawn achievement medals, referenced by this README |
-| `dist/banner.svg`, `dist/og.svg` | the profile banner and the social card |
+| `dist/banner.svg`, `dist/og*.svg` | the profile banner and per-page social cards |
 | `dist/data/github.json` | the build-time telemetry snapshot |
 | `dist/robots.txt`, `sitemap.xml`, `manifest.webmanifest`, `icon.svg` | the usual |
 
@@ -131,3 +132,22 @@ token without the `workflows` scope cannot create or update anything under
 
 The Vercel project `itstheprakash` is linked to this repository. Every push to
 the branch builds with `node src/build.mjs` and publishes `dist/`.
+
+
+## Sponsorship rails
+
+Every sponsor surface is driven by `SPONSOR` in `src/data.mjs`.
+
+| Field | What happens when it is set |
+|---|---|
+| `github` | the GitHub Sponsors URL |
+| `githubLive` | `true` → the page says **Live now** and every CTA points at GitHub. `false` → CTAs fall back to email and the page says **Profile in review** |
+| `upi` | a copy-able UPI card appears, with the VPA and a copy button |
+| `razorpay` | a Razorpay payment-page card appears |
+| `buymeacoffee` | a Buy Me a Coffee card appears |
+| `wall` | `{ name, url? }[]`; empty renders an honest "nobody yet" line |
+
+Only `githubLive: true`, a non-null `upi` or a non-null `razorpay` gives people a
+way to actually pay. Nothing is invented: if a rail is off, the page does not
+pretend it is on. Activation steps for GitHub Sponsors are in
+[`SPONSOR.md`](SPONSOR.md).

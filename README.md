@@ -7,6 +7,7 @@
 <a href="https://itstheprakash.vercel.app"><img src="https://img.shields.io/badge/%E2%80%BA%20OPEN%20PORTFOLIO-itstheprakash.vercel.app-7c5cff?style=for-the-badge&labelColor=05060b" alt="Portfolio"/></a>
 <a href="mailto:itsThePrakash@gmail.com"><img src="https://img.shields.io/badge/%E2%80%BA%20HIRE%20ME-itsThePrakash%40gmail.com-00e5ff?style=for-the-badge&labelColor=05060b" alt="Hire me"/></a>
 <a href="https://itstheprakash.vercel.app/resume"><img src="https://img.shields.io/badge/%E2%80%BA%20R%C3%89SUM%C3%89-print%20ready-ff4d8d?style=for-the-badge&labelColor=05060b" alt="Résumé"/></a>
+<a href="https://itstheprakash.vercel.app/sponsor"><img src="https://img.shields.io/badge/%E2%80%BA%20SPONSOR-keep%20it%20free-22e07a?style=for-the-badge&labelColor=05060b" alt="Sponsor"/></a>
 
 <br/><br/>
 
@@ -40,27 +41,33 @@ My house style: **zero dependencies, zero framework runtimes, sub-second first p
 
 ---
 
+## Sponsor
+
+Everything on this site is free: no ads, no trackers, no paywall, no email capture. If one of these tools saved you an afternoon, you can [sponsor the work](https://itstheprakash.vercel.app/sponsor) — any amount, one time or monthly, through GitHub Sponsors.
+
+Sponsors get their name on the wall on [/sponsor](https://itstheprakash.vercel.app/sponsor), and only if they want it there. Nothing gets locked behind a payment. The rails (GitHub, and optionally UPI or Razorpay for India) are documented in [`docs/SPONSOR.md`](docs/SPONSOR.md).
+
 ## Deployments and archives
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### 🟣 [EkGuru](https://ekguru.shop) — *Founder &amp; CEO*
+### [EkGuru](https://ekguru.shop) — *Founder &amp; CEO*
 **A language bridge that turns Hindi into a door, not a wall.**
 2,754 hand-tuned static pages · 11 locale directories · 31 "learn Hindi for *your* language" bridges · spaced repetition · voice practice · offline PWA · **zero framework runtime.**
 <sub>HTML · CSS · JS · Python · Service Worker</sub>
 
 <br/>
 
-### 🔵 [EkGuru Questions](https://ekguru-questions.vercel.app) — *Exam engine* · [Pages](https://ekgurulearning.github.io/Questions-/)
+### [EkGuru Questions](https://ekguru-questions.vercel.app) — *Exam engine* · [Pages](https://ekgurulearning.github.io/Questions-/)
 **A CBT platform that survives a whole campus sitting an exam at once.**
 All-subject computer-based tests, server-rendered results, Supabase backend, CI-gated content pipeline.
 <sub>Node.js · Supabase · PostgreSQL · CI/CD</sub>
 
 <br/>
 
-### 🩷 [Print$Buddy](https://printsbuddy.vercel.app) — *Founder* · [Pages](https://print-buddy.github.io/PrintsBuddy/)
+### [Print$Buddy](https://printsbuddy.vercel.app) — *Founder* · [Pages](https://print-buddy.github.io/PrintsBuddy/)
 **Born at 1 a.m. in a boys hostel. Print delivered to your door.**
 **Archived — permanently closed after graduation; the site stays up as a record.**
 Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. MNIT Jaipur campus.
@@ -69,25 +76,25 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 </td>
 <td width="50%" valign="top">
 
-### 🟢 [Saransh](https://saranshne.vercel.app) — *AI summarizer*
+### [Saransh](https://saranshne.vercel.app) — *AI summarizer*
 **Long documents in, clean structured digests out.** Gemini-powered: key points, tone, reading time.
 <sub>TypeScript · Gemini API</sub>
 
 <br/>
 
-### 🟡 [TANIK News India](https://tanik-news-india.vercel.app) — *AI newsroom*
+### [TANIK News India](https://tanik-news-india.vercel.app) — *AI newsroom*
 **India-focused news, curated and rewritten into scannable briefs** with category filtering and a fast static shell.
 <sub>TypeScript · Gemini API</sub>
 
 <br/>
 
-### 🟠 [PDF Forensics](https://github.com/itsThePrakash/PDF-Forensics-) · [Pages](https://itstheprakash.github.io/PDF-Forensics-/) — *Major project*
+### [PDF Forensics](https://github.com/itsThePrakash/PDF-Forensics-) · [Pages](https://itstheprakash.github.io/PDF-Forensics-/) — *Major project*
 **Read the metadata nobody thinks to check.** Metadata extraction, anomaly detection, structure inspection, generated reporting.
 <sub>Python · TypeScript</sub>
 
 <br/>
 
-### 🔴 [Astro × Supabase Starter](https://github.com/itsThePrakash/astro-supabase-starter) — *Open source*
+### [Astro × Supabase Starter](https://github.com/itsThePrakash/astro-supabase-starter) — *Open source*
 **Ship a full-stack Astro app with a database in one click.** MIT licensed.
 <sub>Astro · Supabase · TypeScript</sub>
 
@@ -307,7 +314,7 @@ graph LR
         C --> B
     end
 
-    B --> OUT["dist/<br/><small>index · resume · 404 · medals · og · sitemap</small>"]
+    B --> OUT["dist/<br/><small>index · about · sponsor · resume · 404 · medals · og</small>"]
 
     OUT --> V["Vercel Edge<br/><small>Brotli · immutable cache · HSTS</small>"]
     OUT --> GH["GitHub Pages / Profile README"]
@@ -334,7 +341,7 @@ graph LR
 ```
 
 <div align="center">
-<sub>One data file in, a portfolio + a résumé + a profile README out. No framework, no runtime, no supply chain.</sub>
+<sub>One data file in, a portfolio + a résumé + a sponsor page + a profile README out. No framework, no runtime, no supply chain.</sub>
 </div>
 
 ---

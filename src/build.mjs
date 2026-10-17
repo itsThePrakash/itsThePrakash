@@ -6,7 +6,7 @@
 import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, SOCIALS, PROJECTS, ORGS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, buildIndex } from './data.mjs';
+import { SITE, SOCIALS, PROJECTS, ORGS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
 import { medal, logoMark, favicon, ogCard, banner, constellation } from './art.mjs';
@@ -118,7 +118,7 @@ function pageSprite(body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs>${defs}</defs></svg>`;
 }
 
-function page({ title, description, body, path = '/', jsonld = '', extraHead = '' }) {
+function page({ title, description, body, path = '/', jsonld = '', extraHead = '', og = 'og.svg' }) {
   const canonical = BASE + path;
   return `<!doctype html>
 <html lang="en" data-theme="dark">
@@ -140,20 +140,20 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <meta property="og:title" content="${attr(title)}"/>
 <meta property="og:description" content="${attr(description)}"/>
 <meta property="og:url" content="${canonical}"/>
-<meta property="og:image" content="${BASE}/og.svg"/>
+<meta property="og:image" content="${BASE}/${og}"/>
+<meta property="og:image:alt" content="${attr(SITE.fullName)} — ${attr(title)}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${attr(title)}"/>
 <meta name="twitter:description" content="${attr(description)}"/>
-<meta name="twitter:image" content="${BASE}/og.svg"/>
+<meta name="twitter:image" content="${BASE}/${og}"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
-<link rel="apple-touch-icon" href="/icon.svg"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="preconnect" href="https://api.github.com" crossorigin/>
-<link rel="dns-prefetch" href="https://api.github.com"/>
 <style>${minCSS(CSS)}</style>
 ${extraHead}${jsonld}
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 ${pageSprite(body)}
 ${body}
 </body>
@@ -179,6 +179,7 @@ function nav(home = false) {
     <button class="palette-btn" data-palette aria-label="Open command palette">
       ${icon('search')}<span>Search</span><span class="kbd">⌘K</span>
     </button>
+    <a class="icbtn" href="/sponsor" aria-label="Sponsor this work" title="Sponsor">${icon('coffee')}</a>
     <button class="icbtn" id="themeBtn" aria-label="Toggle colour theme">${icon('moon')}</button>
     <a class="btn btn-p btn-s" href="/resume">Résumé</a>
   </div>
@@ -191,6 +192,7 @@ function footer() {
   <span class="mono">© <span id="yr"></span> ${esc(SITE.fullName)} · hand-written HTML, no framework</span>
   <span class="mono">Jaipur, IN · <span id="clk"></span></span>
   <span><a href="/about">About</a> ·
+        <a href="/sponsor">Sponsor</a> ·
         <a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
         <a href="mailto:${esc(SITE.email)}">Email</a> ·
         <a href="/resume">Résumé</a></span>
@@ -291,7 +293,7 @@ function achievements() {
     const pct = a.next ? Math.min(100, Math.round((a.progress / a.next) * 100)) : 100;
     return `<article class="ach tilt rv">
   <span class="shine"></span>
-  <div class="ach-medal">${medal(a.id, a.tierRank)}</div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${esc(a.tier)}</span>
     <h4>${esc(a.name)}</h4>
@@ -307,7 +309,7 @@ function achievements() {
   const locked = ACHIEVEMENTS_CATALOG.filter((a) => !unlockedIds.has(a.id)).map((a) => {
     const t = a.tiers.map((x) => (x.need ? `${x.name} · ${x.need}` : x.name)).join('  ·  ');
     return `<article class="ach ach-locked tilt rv">
-  <div class="ach-medal">${medal(a.id, 0)}</div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${icon('lock')} Locked</span>
     <h4>${esc(a.name)}</h4>
@@ -370,14 +372,15 @@ function contact() {
       <p>Freelance, full-time, collaboration, or just a good problem — I read everything.</p>
       <div class="copyrow">
         <input id="mailInput" value="${attr(SITE.email)}" readonly aria-label="Email address"/>
-        <button class="btn btn-p" id="copyBtn" data-v="${attr(SITE.email)}">${icon('copy')}<span id="copyLbl">Copy</span></button>
+        <button class="btn btn-p" data-copy data-v="${attr(SITE.email)}">${icon('copy')}<span>Copy</span></button>
       </div>
       <ul class="facts">
-        <li>${icon('check')}<span>Usually replies within 24 hours</span></li>
-        <li>${icon('location')}<span>${esc(SITE.location)} · remote-friendly</span></li>
-        <li>${icon('clock')}<span>Available for internships and full-time roles</span></li>
-        <li>${icon('mail')}<span>Also reachable at ${esc(SITE.emailAlt)}</span></li>
+        <li><span>Usually replies within 24 hours</span></li>
+        <li><span>${esc(SITE.location)} · remote-friendly</span></li>
+        <li><span>Available for internships and full-time roles</span></li>
+        <li><span>Also reachable at ${esc(SITE.emailAlt)}</span></li>
       </ul>
+      <p class="sponsor-line">Everything here is free and stays free. If it saved you time, you can <a href="/sponsor">sponsor the work</a>.</p>
     </div>
   </div>
 </div>
@@ -451,6 +454,7 @@ function personNode() {
       alternateName: 'MNIT Jaipur',
       url: 'https://mnit.ac.in',
     },
+    knowsLanguage: ['en', 'hi'],
     knowsAbout: [...new Set([...STACK.flatMap((s) => s.items), 'Computer Science', 'Web Development'])],
     worksFor: [
       { '@type': 'Organization', name: 'EkGuru', url: 'https://ekguru.shop' },
@@ -479,7 +483,7 @@ function jsonld() {
 
 function homePage() {
   const body = `${nav(true)}
-<main>
+<main id="main">
 ${hero()}
 ${marquee()}
 ${telemetry()}
@@ -518,7 +522,7 @@ function resumePage() {
   const skills = STACK.map((s) => `<div class="rs-skill"><h4>${esc(s.group)}</h4><p>${esc(s.items.join(' · '))}</p></div>`).join('');
   const liveProjects = PROJECTS.filter((p) => p.status === 'live' && p.live);
   const body = `${nav()}
-<main>
+<main id="main">
 <section style="padding-top:120px">
 <div class="wrap">
   <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px">
@@ -590,7 +594,7 @@ ${footer()}
   return page({
     title: `Résumé — ${SITE.fullName} · MNIT Jaipur CSE`,
     description: `Résumé of Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026), founder of EkGuru and Print$Buddy. Print-ready.`,
-    body, path: '/resume', jsonld: jsonld(),
+    body, path: '/resume', jsonld: jsonld(), og: 'og-resume.svg',
     extraHead: `<style>${minCSS(RESUME_CSS)}</style>`,
   });
 }
@@ -649,6 +653,7 @@ const ABOUT_CSS = `
 .faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
 .faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
 .faq p{margin-top:8px;font-size:13.5px;color:var(--fg2)}
+.hi-name{border-left:2px solid var(--c);padding-left:13px;color:var(--fg2)}
 
 `;
 
@@ -697,7 +702,7 @@ function aboutJsonld() {
 
 function aboutPage() {
   const body = `${nav()}
-<main>
+<main id="main">
 <section style="padding-top:128px">
 <div class="wrap about-wrap">
   <p class="eyebrow">About</p>
@@ -708,6 +713,7 @@ function aboutPage() {
     <p>I finished Class X in 2020 and Class XII in 2022, then joined <a href="https://mnit.ac.in" target="_blank" rel="noopener">MNIT Jaipur</a> for a B.Tech in Computer Science &amp; Engineering. I graduated in 2026.</p>
     <p>In college I started <a href="https://ekguru.shop" target="_blank" rel="noopener">EkGuru</a>, a Hindi learning site built from plain HTML, and <a href="https://printsbuddy.vercel.app" target="_blank" rel="noopener">Print$Buddy</a>, a print delivery service for hostel rooms. I also built <a href="/#work">smaller tools</a> when something annoyed me enough.</p>
     <p>People search for me under a few different names: Prakash MNIT, Prakash CSE, Prakash Kolwa, Prakash Dausa. They all land on the same person. This site has everything in one place: the <a href="/#work">projects</a>, the <a href="/resume">résumé</a> and the <a href="/#contact">contact links</a>.</p>
+    <p lang="hi" class="hi-name">हिंदी में: नाम प्रकाश गोथवाल है, गाँव कोलवा, ज़िला दौसा (राजस्थान) से। एमएनआईटी जयपुर में कंप्यूटर साइंस इंजीनियरिंग, 2022 से 2026 तक।</p>
     <p>I write the pages myself and keep the build small. One HTML file per page, no framework, nothing that needs a server to render.</p>
   </div>
   <div class="faq">
@@ -718,6 +724,7 @@ function aboutPage() {
     <a class="btn btn-p" href="/resume">${icon('print')}Résumé</a>
     <a class="btn btn-g" href="mailto:${esc(SITE.email)}">${icon('mail')}Email</a>
     <a class="btn btn-g" href="https://github.com/itsThePrakash" target="_blank" rel="noopener">${icon('github')}GitHub</a>
+    <a class="btn btn-g" href="/sponsor">${icon('coffee')}Sponsor the work</a>
   </div>
 </div>
 </section>
@@ -728,14 +735,196 @@ ${footer()}
     title: `About Prakash Gothwal — Kolwa, Dausa · MNIT Jaipur CSE`,
     description: `Prakash Gothwal (Prakash) is from Kolwa, Dausa district, Rajasthan. B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy.`,
     body, path: '/about', jsonld: aboutJsonld(),
-    extraHead: `<style>${minCSS(ABOUT_CSS)}</style>`,
+    extraHead: `<style>${minCSS(ABOUT_CSS)}</style>`, og: 'og-about.svg',
+  });
+}
+
+
+/* ── sponsor ─────────────────────────────────────────────────────────────── */
+const SPONSOR_FAQ = [
+  {
+    q: 'Where does the money actually go?',
+    a: 'Domains, hosting and API credits for these projects, plus the hours I spend on tools that do not make money. Nothing else.',
+  },
+  {
+    q: 'Does sponsoring unlock anything?',
+    a: 'Only your name on the sponsor wall, and only if you want it there. No paywall, no locked posts, no control over what I write.',
+  },
+  {
+    q: 'Can I sponsor from India?',
+    a: 'Yes. GitHub Sponsors works for Indian bank accounts and the payout reaches me in rupees. If your card gets declined, email me and we will find another way.',
+  },
+  {
+    q: 'Can I stay anonymous?',
+    a: 'Yes. Tick the private option while sponsoring on GitHub and your name never appears on the wall.',
+  },
+  {
+    q: 'Do I get a receipt?',
+    a: 'GitHub emails a receipt for every payment. Keep it — that is the document you need for your own books.',
+  },
+  {
+    q: 'Will any of this become paid?',
+    a: 'No. Everything on this site and on the linked projects stays free, now and later.',
+  },
+];
+
+const SPONSOR_CSS = `
+.sp-card{border:1px solid var(--line2);border-radius:var(--r2);background:var(--surface);padding:26px;display:grid;gap:13px;margin-top:26px;position:relative;overflow:hidden}
+.sp-card::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;top:-140px;right:-120px;background:radial-gradient(circle,var(--v),transparent 65%);opacity:.18;filter:blur(26px);pointer-events:none}
+.sp-card h2{font-size:20px}
+.sp-card .badge{width:max-content}
+.sp-note{font-size:13px;color:var(--fg3);line-height:1.6;max-width:58ch}
+.sp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.sp-box{border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--bg2)}
+.sp-box b{display:block;font-size:13.5px;margin-bottom:4px}
+.sp-box span{font-size:12.5px;color:var(--fg2);line-height:1.55}
+.sp-hi{font-size:14px;color:var(--fg2);border-left:2px solid var(--c);padding-left:13px;margin-top:18px;line-height:1.7}
+.sp-wall{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.sp-wall li{border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:13px;background:var(--surface);color:var(--fg2)}
+.sp-wall a{color:var(--fg2)}
+.sp-empty{margin-top:12px;font-size:13.5px;color:var(--fg3)}
+.sponsor-line{margin-top:18px;font-size:13px;color:var(--fg3);line-height:1.6}
+.sponsor-line a{color:var(--c);text-decoration:underline;text-underline-offset:3px}
+`;
+
+function sponsorJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'WebPage',
+        '@id': `${BASE}/sponsor#page`,
+        url: `${BASE}/sponsor`,
+        name: 'Sponsor Prakash Gothwal',
+        isPartOf: { '@id': `${BASE}/#website` },
+        potentialAction: {
+          '@type': 'DonateAction',
+          name: 'Sponsor on GitHub Sponsors',
+          target: SPONSOR.github,
+          recipient: { '@id': `${BASE}/#person` },
+        },
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function sponsorPage() {
+  const live = SPONSOR.githubLive;
+  const href = live ? SPONSOR.github : `mailto:${SITE.email}?subject=Sponsor%20the%20work`;
+  const label = live ? 'Sponsor on GitHub' : 'Email to sponsor';
+  const note = live
+    ? 'Pick any amount, one-time or monthly. GitHub charges in USD and pays out to an Indian bank account in INR; my profile is set up for that.'
+    : 'My GitHub Sponsors profile is in review. Until it goes live, email me and I will send a UPI ID or a plain invoice, whichever suits you.';
+
+  const upi = SPONSOR.upi
+    ? `<div class="sp-card">
+  <h2>UPI</h2>
+  <p class="sp-note">Fastest option inside India. Any amount, no account needed.</p>
+  <div class="sp-row">
+    <code id="upiId" style="font-family:var(--mono);font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)">${esc(SPONSOR.upi)}</code>
+    <button class="btn btn-g btn-s" data-copy data-v="${attr(SPONSOR.upi)}">${icon('copy')}<span>Copy UPI ID</span></button>
+  </div>
+</div>`
+    : '';
+
+  const razorpay = SPONSOR.razorpay
+    ? `<div class="sp-card">
+  <h2>Card, netbanking, wallet</h2>
+  <p class="sp-note">Razorpay handles Indian cards, UPI and netbanking on one page.</p>
+  <div class="sp-row"><a class="btn btn-p" href="${attr(SPONSOR.razorpay)}" target="_blank" rel="noopener">${icon('arrow')}Open payment page</a></div>
+</div>`
+    : '';
+
+  const bmc = SPONSOR.buymeacoffee
+    ? `<div class="sp-card">
+  <h2>Buy me a coffee</h2>
+  <p class="sp-note">Card or wallet, any amount, no account needed.</p>
+  <div class="sp-row"><a class="btn btn-g" href="${attr(SPONSOR.buymeacoffee)}" target="_blank" rel="noopener">${icon('coffee')}Open the page</a></div>
+</div>`
+    : '';
+
+  const wall = SPONSOR.wall.length
+    ? `<ul class="sp-wall">${SPONSOR.wall
+        .map((w) =>
+          w.url
+            ? `<li><a href="${attr(w.url)}" target="_blank" rel="noopener">${esc(w.name)}</a></li>`
+            : `<li>${esc(w.name)}</li>`
+        )
+        .join('')}</ul>`
+    : `<p class="sp-empty">Nobody here yet. The first name on this wall can be yours.</p>`;
+
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap about-wrap">
+  <p class="eyebrow">Sponsor</p>
+  <h1 style="font-size:clamp(36px,6vw,64px)">Keep the small stuff free.</h1>
+  <p class="lede">Every project on this site is free, has no ads, and sends nothing to an analytics dashboard. If something here saved you an afternoon, you can put something back.</p>
+  <p class="sp-hi" lang="hi">हिंदी में: यहाँ सब कुछ मुफ़्त है और मुफ़्त रहेगा। कुछ काम आया हो तो GitHub से सपोर्ट कर सकते हैं — कोई भी रकम, कोई ज़बरदस्ती नहीं।</p>
+
+  <div class="sp-card">
+    <span class="badge ${live ? 'ok' : 'src'}">${live ? 'Live now' : 'Profile in review'}</span>
+    <h2>GitHub Sponsors</h2>
+    <p class="sp-note">${note}</p>
+    <div class="sp-row">
+      <a class="btn btn-p" href="${attr(href)}">${icon('coffee')}${label}</a>
+      <a class="btn btn-g" href="${attr(SITE.github)}" target="_blank" rel="noopener">${icon('github')}GitHub profile</a>
+    </div>
+  </div>
+
+  ${upi}
+  ${bmc}
+  ${razorpay}
+
+  <div class="sp-card">
+    <h2>What it pays for</h2>
+    <div class="sp-grid">
+      <div class="sp-box"><b>Domains and hosting</b><span>Keeping ekguru.shop and the side projects online.</span></div>
+      <div class="sp-box"><b>API credits</b><span>The AI parts of EkGuru and the PDF tools run on paid calls.</span></div>
+      <div class="sp-box"><b>Time</b><span>The hours behind tools that never had a business model.</span></div>
+    </div>
+    <p class="sp-note">No ads, no trackers, no affiliate links. Sponsorship is the only thing this page asks for.</p>
+  </div>
+
+  <div class="sp-card">
+    <h2>People who sponsored</h2>
+    ${wall}
+    <p class="sp-note">Want your name here? Mention it while sponsoring, or email me after. Private sponsors stay private.</p>
+  </div>
+
+  <div class="faq">
+    <h2 style="font-size:clamp(22px,3vw,30px);margin-top:34px">Questions</h2>
+    ${SPONSOR_FAQ.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}
+  </div>
+
+  <div class="hero-cta" style="margin-top:30px">
+    <a class="btn btn-p" href="${attr(href)}">${icon('coffee')}${label}</a>
+    <a class="btn btn-g" href="mailto:${esc(SITE.email)}">${icon('mail')}Email me</a>
+  </div>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: 'Sponsor Prakash Gothwal — keep the small tools free',
+    description:
+      'Sponsor Prakash Gothwal on GitHub Sponsors. Any amount, one-time or monthly. Everything on this site stays free — no ads, no paywall.',
+    body,
+    path: '/sponsor',
+    jsonld: sponsorJsonld(),
+    extraHead: `<style>${minCSS(ABOUT_CSS + SPONSOR_CSS)}</style>`,
+    og: 'og-sponsor.svg',
   });
 }
 
 /* ── 404 ─────────────────────────────────────────────────────────────────── */
 function notFound() {
   const body = `${nav()}
-<main><section style="padding-top:150px;min-height:70vh;display:flex;align-items:center">
+<main id="main"><section style="padding-top:150px;min-height:70vh;display:flex;align-items:center">
 <div class="wrap" style="text-align:center">
   <p class="eyebrow" style="justify-content:center">Error 404</p>
   <h1 style="font-size:clamp(48px,10vw,110px);letter-spacing:-.05em" class="grad">Signal lost.</h1>
@@ -744,6 +933,7 @@ function notFound() {
     <a class="btn btn-p" href="/">${icon('arrow')}Home</a>
     <a class="btn btn-g" href="/resume">Résumé</a>
     <a class="btn btn-g" href="https://github.com/itsThePrakash" target="_blank" rel="noopener">${icon('github')}GitHub</a>
+    <a class="btn btn-g" href="/sponsor">${icon('coffee')}Sponsor the work</a>
   </div>
 </div></section></main>
 ${footer()}
@@ -764,6 +954,7 @@ Sitemap: ${BASE}/sitemap.xml
   <url><loc>${BASE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>${BASE}/resume</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>${BASE}/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>${BASE}/sponsor</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
 `;
   const manifest = {
@@ -790,6 +981,7 @@ function main() {
     ['index.html', homePage()],
     ['resume.html', resumePage()],
     ['about.html', aboutPage()],
+    ['sponsor.html', sponsorPage()],
     ['404.html', notFound()],
   ];
   for (const [f, html] of pages) writeFileSync(join(DIST, f), minHTML(html));
@@ -801,6 +993,9 @@ function main() {
   writeFileSync(join(DIST, 'data', 'github.json'), s.ghJson);
   writeFileSync(join(DIST, 'icon.svg'), favicon());
   writeFileSync(join(DIST, 'og.svg'), ogCard());
+  writeFileSync(join(DIST, 'og-about.svg'), ogCard({ sub: 'About · Kolwa, Dausa · MNIT Jaipur CSE', tag: 'ABOUT' }));
+  writeFileSync(join(DIST, 'og-resume.svg'), ogCard({ sub: 'Résumé · B.Tech CSE, MNIT Jaipur 2022–2026', tag: 'RÉSUMÉ' }));
+  writeFileSync(join(DIST, 'og-sponsor.svg'), ogCard({ sub: 'Sponsor the work · any amount', tag: 'SPONSOR' }));
   writeFileSync(join(DIST, 'banner.svg'), banner());
 
   // static passthrough: anything in public/ is copied verbatim (résumé photo, etc.)

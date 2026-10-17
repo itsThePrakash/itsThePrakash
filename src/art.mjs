@@ -52,7 +52,7 @@ export function favicon() {
 }
 
 /* ── Open Graph card (1200×630) ──────────────────────────────────────────── */
-export function ogCard() {
+export function ogCard({ sub = 'Founder &amp; CEO @ EkGuru', tag = 'SIGNAL CORE · ONLINE' } = {}) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="ui-monospace,Menlo,Consolas,monospace">
 <defs>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -73,9 +73,9 @@ export function ogCard() {
 <rect width="1200" height="630" fill="url(#glow)"/>
 <g transform="translate(88 96)">
   <rect x="-14" y="-34" width="300" height="34" rx="17" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/>
-  <circle cx="6" cy="-17" r="5" fill="#22e07a"/><text x="22" y="-12" fill="#a8b2cf" font-size="14" letter-spacing="3">SIGNAL CORE · ONLINE</text>
+  <circle cx="6" cy="-17" r="5" fill="#22e07a"/><text x="22" y="-12" fill="#a8b2cf" font-size="14" letter-spacing="3">${tag}</text>
   <text y="42" fill="#e9edf9" font-size="76" font-weight="700" letter-spacing="-3" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
-  <text y="104" fill="url(#acc)" font-size="32" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru</text>
+  <text y="104" fill="url(#acc)" font-size="30" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">${sub}</text>
   <text y="160" fill="#6b7594" font-size="20">B.Tech CSE, MNIT Jaipur · Kolwa, Dausa · Jaipur, India</text>
 </g>
 <g transform="translate(88 430)" font-size="17" fill="#a8b2cf">

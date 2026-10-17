@@ -139,14 +139,15 @@ function countUp(el,to,suffix,dur){
   });
 })();
 
-/* ── copy email ────────────────────────────────────────────────────────── */
+/* ── copy (email, UPI, anything with data-copy) ────────────────────────── */
 (function(){
-  var b=$('#copyBtn'); if(!b)return;
-  b.addEventListener('click',function(){
-    var v=b.getAttribute('data-v')||'';
-    function done(){b.classList.add('copied');var l=$('#copyLbl');if(l)l.textContent='Copied';setTimeout(function(){b.classList.remove('copied');if(l)l.textContent='Copy'},1800)}
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(done,done)}
-    else{var i=$('#mailInput');if(i){i.select();try{d.execCommand('copy')}catch(e){}}done()}
+  [].forEach.call(document.querySelectorAll('[data-copy]'),function(b){
+    b.addEventListener('click',function(){
+      var v=b.getAttribute('data-v')||'',l=b.querySelector('span');
+      function done(){b.classList.add('copied');if(l)l.textContent='Copied';setTimeout(function(){b.classList.remove('copied');if(l)l.textContent='Copy'},1800)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(done,done)}
+      else{var i=$('#mailInput');if(i){i.select();try{d.execCommand('copy')}catch(e){}}done()}
+    });
   });
 })();
 

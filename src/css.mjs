@@ -249,7 +249,7 @@ p{margin:0}
   transform:translateX(-100%);transition:transform .8s var(--ease)}
 .ach:hover .shine{transform:translateX(100%)}
 .ach-medal{width:60px;height:60px;flex:0 0 auto;position:relative;display:grid;place-items:center}
-.ach-medal svg{width:100%;height:100%}
+.ach-medal svg,.ach-medal img{width:100%;height:100%}
 .ach h4{font-size:15px;margin-bottom:3px}
 .ach .flv{font-size:12.5px;color:var(--fg2);line-height:1.5}
 .ach .when{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3);margin-top:8px;display:flex;align-items:center;gap:6px}
@@ -258,7 +258,7 @@ p{margin:0}
 .bar{height:4px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:10px}
 .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--v),var(--c));width:0;transition:width 1.2s var(--ease)}
 .ach-locked{opacity:.62;filter:saturate(.25)}
-.ach-locked .ach-medal svg{opacity:.4}
+.ach-locked .ach-medal svg,.ach-locked .ach-medal img{opacity:.4}
 
 /* ── timeline ───────────────────────────────────────────────────────────── */
 .tl{position:relative;padding-left:30px}
@@ -311,9 +311,11 @@ p{margin:0}
   color:var(--fg);padding:0 14px;font-family:var(--mono);font-size:12.5px}
 .facts{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:10px}
 .facts li{display:flex;gap:10px;font-size:13px;color:var(--fg2)}
-.facts svg{width:15px;height:15px;color:var(--v);flex:0 0 auto;margin-top:3px}
+.facts li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--v);flex:0 0 auto;margin-top:7px}
 
 /* ── footer ─────────────────────────────────────────────────────────────── */
+.skip{position:absolute;left:-9999px;top:12px;z-index:300;padding:9px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);color:var(--fg);font-size:13px}
+.skip:focus{left:12px}
 .foot{border-top:1px solid var(--line);padding-block:34px;margin-top:20px}
 .foot-in{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--fg3)}
 .foot-in a:hover{color:var(--fg2)}
@@ -368,6 +370,10 @@ p{margin:0}
   .pj-grid{grid-template-columns:1fr}
   .tel b{font-size:26px}
   .constel{min-height:380px}
+}
+@media (max-width:520px){
+  .palette-btn span{display:none}
+  .palette-btn{width:36px;justify-content:center;padding:0}
 }
 @media (max-width:420px){
   .brand b{display:none}

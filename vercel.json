@@ -148,6 +148,16 @@
       "source": "/gfg",
       "destination": "https://www.geeksforgeeks.org/profile/istheprakash",
       "permanent": false
+    },
+    {
+      "source": "/donate",
+      "destination": "/sponsor",
+      "permanent": false
+    },
+    {
+      "source": "/support",
+      "destination": "/sponsor",
+      "permanent": false
     }
   ],
   "rewrites": [
