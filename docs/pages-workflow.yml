@@ -1,10 +1,9 @@
-# Builds the site and publishes ./dist to GitHub Pages.
-# The build runs with SITE_BASE so every link and asset works under /itsThePrakash/.
+# Copy this file to .github/workflows/pages.yml in the GitHub web editor.
+# (The automation token used here cannot write workflow files.)
+# Then: Settings → Pages → Source → GitHub Actions.
 name: pages
 
 on:
-  # Enable Settings → Pages → Source: GitHub Actions once; after that every
-  # push to main republishes the site. Run manually from the Actions tab too.
   push:
     branches: [main]
   workflow_dispatch:

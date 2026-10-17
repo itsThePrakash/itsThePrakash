@@ -198,7 +198,8 @@ npm run build && SITE_BASE=/itsThePrakash npm run verify
 Open Graph and JSON-LD URLs follow `SITE_URL`, so each host canonicalises to
 itself.
 
-`.github/workflows/pages.yml` runs exactly that and publishes `dist/`.
+`docs/pages-workflow.yml` is that job. Copy it to `.github/workflows/pages.yml`
+(the automation token here has no `workflows` permission, so this step is manual).
 
 **One manual step, once:** repo → Settings → Pages → *Source* → **GitHub Actions**.
 After that every push to `main` (or a manual run from the Actions tab) republishes
