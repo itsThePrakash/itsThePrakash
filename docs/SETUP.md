@@ -180,3 +180,42 @@ Paste the output into `PUBLIC_REPOS`, rebuild, push.
 Add a sponsor to `SPONSOR.wall`, rebuild, commit. The site and the repo can never
 show different names. The build skips these writes on Vercel (`VERCEL` env), so a
 deploy never rewrites your repo files.
+
+## GitHub Pages
+
+The site is built for two hosts from one source. Vercel uses clean URLs
+(`/projects/ekguru`). GitHub Pages has no clean URLs and serves this repo under
+`/itsThePrakash/`, so the Pages build is generated with two env vars:
+
+```bash
+SITE_URL=https://itstheprakash.github.io/itsThePrakash \
+SITE_BASE=/itsThePrakash \
+npm run build && SITE_BASE=/itsThePrakash npm run verify
+```
+
+`SITE_BASE` does three things: prefixes every root-absolute link and asset, adds
+`.html` to page links, and rewrites `start_url`/icons in the manifest. Canonical,
+Open Graph and JSON-LD URLs follow `SITE_URL`, so each host canonicalises to
+itself.
+
+`.github/workflows/pages.yml` runs exactly that and publishes `dist/`.
+
+**One manual step, once:** repo → Settings → Pages → *Source* → **GitHub Actions**.
+After that every push to `main` (or a manual run from the Actions tab) republishes
+the site. Without it, Pages stays on the legacy "deploy from a branch" mode,
+which serves the repo root — and the repo root has no `index.html`.
+
+## README images
+
+`npm run build` writes the profile-page art into `assets/` (committed):
+
+| File | Used for |
+|---|---|
+| `assets/banner.svg` | the header banner |
+| `assets/stats.svg` | the numbers card (repos, stars, followers, badges, languages) |
+| `assets/medals/*.svg` | the four unlocked badges |
+| `assets/og.svg` | the social card |
+
+The README references them with relative paths, so GitHub serves them from the
+repo itself. No third-party stats service can break the profile page. The stats
+card is generated from `src/snapshot.json`.

@@ -17,6 +17,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const BUDGET = 26 * 1024;
+/* Pages builds prefix every link with a sub-path; strip it before resolving. */
+const SITE_BASE = (process.env.SITE_BASE || '').replace(/\/$/, '');
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 const RAW = new Set(['script', 'style']);
@@ -62,6 +64,7 @@ function checkTags(file, html) {
 /* ── 2. internal links ──────────────────────────────────────────────────── */
 function resolveInternal(url) {
   let p = url.split('#')[0].split('?')[0];
+  if (SITE_BASE && (p === SITE_BASE || p.startsWith(SITE_BASE + '/'))) p = p.slice(SITE_BASE.length) || '/';
   if (!p.startsWith('/')) return null;
   if (p === '/') return join(DIST, 'index.html');
   if (p.startsWith('/api/')) return null; // edge function, not a static file

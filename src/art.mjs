@@ -219,3 +219,53 @@ export function constellation(projects) {
   }
   return out + `</svg>`;
 }
+
+/* ── README stats card (900×260) ──────────────────────────────────────────
+ * Generated from the telemetry snapshot so the profile page never depends on
+ * github-readme-stats, streak-stats or trophy services that keep dying.
+ */
+export function statsCard(snap = {}, achievements = 0) {
+  const langs = (snap.topLanguages || []).slice(0, 5);
+  const bar = (l, i) => {
+    const y = 168 + i * 20;
+    return `<text x="516" y="${y + 10}" fill="#8b93ad" font-size="12">${l.name}</text>
+  <rect x="596" y="${y}" width="200" height="8" rx="4" fill="#1a1f36"/>
+  <rect x="596" y="${y}" width="${Math.max(4, Math.round((l.pct / 100) * 200))}" height="8" rx="4" fill="#7c5cff"/>
+  <text x="808" y="${y + 9}" fill="#6b7594" font-size="11">${l.pct}%</text>`;
+  };
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260" font-family="ui-monospace,Menlo,Consolas,monospace">
+<defs>
+  <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#05060b"/><stop offset=".55" stop-color="#0a0d1c"/><stop offset="1" stop-color="#05060b"/>
+  </linearGradient>
+  <linearGradient id="sa" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#7c5cff"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#ff4d8d"/>
+  </linearGradient>
+  <pattern id="sgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0v40" fill="none" stroke="#ffffff" stroke-opacity=".04"/>
+  </pattern>
+</defs>
+<rect width="900" height="260" rx="16" fill="url(#sg)"/>
+<rect width="900" height="260" rx="16" fill="url(#sgrid)"/>
+<rect x="0" y="0" width="900" height="3" fill="url(#sa)"/>
+<text x="32" y="48" fill="#e9edf9" font-size="21" font-weight="700" letter-spacing="-0.5">Prakash Gothwal</text>
+<text x="32" y="70" fill="#6b7594" font-size="12">@itsThePrakash · MNIT Jaipur · CSE 2022–2026</text>
+<g font-size="26" font-weight="700" fill="#00e5ff">
+  <text x="32" y="118">${snap.publicRepos ?? 0}</text>
+  <text x="152" y="118">${snap.totalStars ?? 0}</text>
+  <text x="272" y="118">${snap.followers ?? 0}</text>
+  <text x="392" y="118">${achievements}</text>
+</g>
+<g font-size="11" fill="#6b7594" letter-spacing="1">
+  <text x="32" y="138">REPOSITORIES</text>
+  <text x="152" y="138">STARS</text>
+  <text x="272" y="138">FOLLOWERS</text>
+  <text x="392" y="138">BADGES</text>
+</g>
+<text x="516" y="138" fill="#6b7594" font-size="11" letter-spacing="1">LANGUAGES</text>
+<line x1="32" y1="154" x2="868" y2="154" stroke="#ffffff" stroke-opacity=".08"/>
+${langs.map(bar).join('')}
+<text x="32" y="232" fill="#8b93ad" font-size="11">${snap.fetchedAt ? 'snapshot ' + String(snap.fetchedAt).slice(0, 10) : ''}</text>
+<text x="868" y="232" fill="#8b93ad" font-size="11" text-anchor="end">itstheprakash.vercel.app</text>
+</svg>`;
+}

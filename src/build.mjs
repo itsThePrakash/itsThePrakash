@@ -9,12 +9,38 @@ import { fileURLToPath } from 'node:url';
 import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
-import { medal, logoMark, favicon, ogCard, banner, constellation } from './art.mjs';
+import { medal, logoMark, favicon, ogCard, banner, constellation, statsCard } from './art.mjs';
 import { icon, ICONS } from './icons.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
-const BASE = process.env.SITE_URL || 'https://itstheprakash.vercel.app';
+const BASE = (process.env.SITE_URL || 'https://itstheprakash.vercel.app').replace(/\/$/, '');
+/* GitHub Pages serves this repo from /itsThePrakash/ and has no clean URLs.
+   Setting SITE_BASE turns on sub-path links + .html suffixes for that build. */
+const BASE_PATH = (process.env.SITE_BASE || '').replace(/\/$/, '');
+
+/** Make a page path work on a plain static host under a sub-path. */
+function hostPath(href) {
+  if (!BASE_PATH) return href;
+  let out = href;
+  if (/^\/(projects|orgs)\/[a-z0-9-]+$/.test(out)) out += '.html';
+  else if (/^\/(projects|orgs|repos|about|resume|sponsor|404)$/.test(out)) out += '.html';
+  return BASE_PATH + out;
+}
+
+/** Rewrite every root-absolute link in a finished page. Runs once, after minHTML. */
+function rebase(html) {
+  if (!BASE_PATH) return html;
+  return html
+    .replace(/\b(href|src)="\/(?!\/)/g, (_m, a) => `${a}="${BASE_PATH}/`)
+    .replace(/(href|src)="([^"]*\/[a-z0-9-]+)"/g, (m, a, u) => {
+      if (!u.startsWith(BASE_PATH + '/')) return m;
+      const rest = u.slice(BASE_PATH.length);
+      if (!/^\/(projects|orgs)\/[a-z0-9-]+$/.test(rest) && !/^\/(projects|orgs|repos|about|resume|sponsor|404)$/.test(rest)) return m;
+      return `${a}="${BASE_PATH}${rest}.html"`;
+    })
+    .replace(/url\(\/(?!\/)/g, `url(${BASE_PATH}/`);
+}
 /** Merge a build-time snapshot (from `npm run refresh`) over the baked default. */
 function loadSnapshot() {
   try {
@@ -118,7 +144,7 @@ function pageSprite(body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs>${defs}</defs></svg>`;
 }
 
-function page({ title, description, body, path = '/', jsonld = '', extraHead = '', og = 'og.svg' }) {
+function page({ title, description, body, path = '/', jsonld = '', extraHead = '', og = 'og.svg', keywords = SITE.keywords }) {
   const canonical = BASE + path;
   return `<!doctype html>
 <html lang="en" data-theme="dark">
@@ -130,7 +156,7 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <title>${esc(title)}</title>
 <meta name="description" content="${attr(description)}"/>
 <meta name="author" content="${attr(SITE.fullName)}"/>
-<meta name="keywords" content="${attr(SITE.keywords.join(', '))}"/>
+<meta name="keywords" content="${attr(keywords.join(', '))}"/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
 <link rel="canonical" href="${canonical}"/>
 <link rel="me" href="https://github.com/itsThePrakash"/>
@@ -167,7 +193,7 @@ const NAV_LINKS = [
 ];
 
 function nav(home = false) {
-  const href = (hash) => (home ? hash : `/${hash}`);
+  const href = (hash) => (home || hash === '#work' ? (home ? hash : '/projects') : `/${hash}`);
   return `<nav class="nav" id="nav" aria-label="Primary">
 <div class="wrap nav-in">
   <a class="brand" href="${home ? '#home' : '/'}" aria-label="Home">
@@ -294,7 +320,7 @@ function achievements() {
     const pct = a.next ? Math.min(100, Math.round((a.progress / a.next) * 100)) : 100;
     return `<article class="ach tilt rv">
   <span class="shine"></span>
-  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy"/></div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy" decoding="async" onerror="this.remove()"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${esc(a.tier)}</span>
     <h4>${esc(a.name)}</h4>
@@ -310,7 +336,7 @@ function achievements() {
   const locked = ACHIEVEMENTS_CATALOG.filter((a) => !unlockedIds.has(a.id)).map((a) => {
     const t = a.tiers.map((x) => (x.need ? `${x.name} · ${x.need}` : x.name)).join('  ·  ');
     return `<article class="ach ach-locked tilt rv">
-  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy"/></div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy" decoding="async" onerror="this.remove()"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${icon('lock')} Locked</span>
     <h4>${esc(a.name)}</h4>
@@ -352,7 +378,7 @@ function stack() {
 <div class="wrap">
   <div class="sec-head rv"><span class="eyebrow">Tools</span><h2>What I <span class="grad">work with</span>.</h2>
   <p class="lede">Things I've used enough to have an opinion about.</p></div>
-  <div class="stack-grid">${STACK.map((s, i) => `<div class="stack-col rv rv-d${(i % 4) + 1}">
+  <div class="stack-list">${STACK.map((s, i) => `<div class="stack-row rv rv-d${(i % 4) + 1}">
     <h4>${esc(s.group)}</h4><ul>${s.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
 </div>
 </section>`;
@@ -798,6 +824,10 @@ const SEO_CSS = `
 .repo-table a{color:var(--fg)}
 .repo-table a:hover{color:var(--c)}
 @media(max-width:560px){.repo-table .hide-s{display:none}}
+.faq{display:grid;gap:8px;margin-top:14px}
+.faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
+.faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
+.faq p{margin-top:8px;font-size:13.5px;color:var(--fg2);line-height:1.6}
 `;
 
 const statusLabel = (p) => (p.status === 'live' ? 'Live' : p.status === 'closed' ? 'Closed' : 'Source only');
@@ -844,6 +874,7 @@ ${footer()}
     description: `${PROJECTS.length} projects built by Prakash Gothwal (MNIT Jaipur CSE): EkGuru, Bhasha Bridge, Print$Buddy, Saransh, TANIK, PDF Forensics and more. Live links and source.`,
     body,
     path: '/projects',
+    keywords: ['Prakash Gothwal projects', 'Prakash MNIT projects', ...PROJECTS.map((p) => p.name)],
     jsonld: itemListJsonld('Projects by Prakash Gothwal', '/projects', PROJECTS.map((p) => ({ name: p.name, url: `${BASE}/projects/${p.id}` }))),
     extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
     og: 'og-projects.svg',
@@ -893,6 +924,15 @@ function projectJsonld(p) {
         keywords: p.stack.join(', '),
       },
       {
+        '@type': 'FAQPage',
+        '@id': `${BASE}/projects/${p.id}#faq`,
+        mainEntity: projectFaq(p).map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
@@ -903,6 +943,26 @@ function projectJsonld(p) {
     ],
   };
   return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function projectFaq(p) {
+  const qa = [
+    {
+      q: `What is ${p.name}?`,
+      a: `${p.tagline} ${p.description}`,
+    },
+    {
+      q: `What is ${p.name} built with?`,
+      a: `${p.name} is built with ${p.stack.join(', ')}. ${p.repo ? 'The source is public on GitHub.' : 'The source is not public.'}`,
+    },
+    {
+      q: `Where can I use ${p.name}?`,
+      a: p.live
+        ? `It runs at ${p.live.replace(/^https?:\/\//, '')}, in any modern browser. ${p.status === 'closed' ? 'The service itself is closed; the site stays online as a record.' : ''}`.trim()
+        : `It is a source-only project. The code is at ${p.repo || 'github.com/itsThePrakash'}.`,
+    },
+  ];
+  return qa;
 }
 
 function projectPage(p) {
@@ -926,6 +986,8 @@ function projectPage(p) {
   </div>
   ${related.length ? `<h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Related projects</h2>
   <ul class="plist">${related.map((r) => `<li><div><a class="t" href="/projects/${r.id}">${esc(r.name)}</a><small>${esc(r.tagline)}</small></div></li>`).join('')}</ul>` : ''}
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Questions</h2>
+  <div class="faq">${projectFaq(p).map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>
   <p class="seo-body" style="margin-top:30px">More about me on the <a href="/about">about page</a>, or the <a href="/resume">résumé</a>. If one of these saved you time, you can <a href="/sponsor">sponsor the work</a>.</p>
 </div>
 </section>
@@ -938,6 +1000,7 @@ ${footer()}
     body,
     path: `/projects/${p.id}`,
     jsonld: projectJsonld(p),
+    keywords: [...new Set([p.name, p.kicker, ...p.stack, 'Prakash Gothwal', 'Prakash MNIT', 'MNIT Jaipur'])],
     extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
     og: 'og-projects.svg',
   });
@@ -969,6 +1032,7 @@ ${footer()}
     description: `${o.display} — ${o.tagline} The ${o.handle} organisation on GitHub, founded by Prakash Gothwal (MNIT Jaipur CSE).`,
     body,
     path: `/orgs/${o.id}`,
+    keywords: [o.display, o.handle, `${o.display} GitHub`, 'Prakash Gothwal', 'MNIT Jaipur'],
     jsonld: `<script type="application/ld+json">${JSON.stringify({
       '@context': 'https://schema.org',
       '@graph': [
@@ -1024,6 +1088,7 @@ ${footer()}
     description: `All ${PUBLIC_REPOS.length} public repositories from Prakash Gothwal (@itsThePrakash), including EkGuru, PDF-Forensics-, id-maker, saransh and TANIK-News-India-.`,
     body,
     path: '/repos',
+    keywords: ['itsThePrakash repositories', 'Prakash Gothwal GitHub', ...PUBLIC_REPOS.slice(0, 12).map((r) => r.name)],
     jsonld: itemListJsonld('Repositories by Prakash Gothwal', '/repos', PUBLIC_REPOS.map((r) => ({ name: r.name, url: `${BASE}/repos#${r.name}` }))),
     extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
     og: 'og-projects.svg',
@@ -1239,27 +1304,34 @@ Allow: /
 
 Sitemap: ${BASE}/sitemap.xml
 `;
+  const pageSuffix = (p) => {
+  if (!BASE_PATH) return p;
+  if (/^\/(projects|orgs)\/[a-z0-9-]+$/.test(p)) return p + '.html';
+  if (/^\/(projects|orgs|repos|about|resume|sponsor)$/.test(p)) return p + '.html';
+  return p;
+};
+  const pageUrl = (p) => `${BASE}${pageSuffix(p)}`;
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${BASE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>${BASE}/resume</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>${BASE}/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>${BASE}/sponsor</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>${BASE}/projects</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>${BASE}/repos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-${PROJECTS.map((p) => `  <url><loc>${BASE}/projects/${p.id}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
-${ORGS.map((o) => `  <url><loc>${BASE}/orgs/${o.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
+  <url><loc>${pageUrl('/')}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>${pageUrl('/resume')}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${pageUrl('/about')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>${pageUrl('/sponsor')}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>${pageUrl('/projects')}</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>${pageUrl('/repos')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+${PROJECTS.map((p) => `  <url><loc>${pageUrl('/projects/${p.id}')}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
+${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
 `;
   const manifest = {
     name: `${SITE.name} — ${SITE.title}`,
     short_name: SITE.name,
     description: 'Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026). Founder of EkGuru and Print$Buddy.',
-    start_url: '/',
+    start_url: `${BASE_PATH}/`,
     display: 'standalone',
     background_color: '#05060b',
     theme_color: '#05060b',
-    icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
+    icons: [{ src: `${BASE_PATH}/icon.svg`, sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
   };
   const ghJson = JSON.stringify(SNAP, null, 2);
   return { robots, sitemap, manifest, ghJson };
@@ -1286,10 +1358,10 @@ function main() {
     ...seoPages,
   ];
   for (const dir of ['projects', 'orgs']) mkdirSync(join(DIST, dir), { recursive: true });
-  for (const [f, html] of pages) writeFileSync(join(DIST, f), minHTML(html));
+  for (const [f, html] of pages) writeFileSync(join(DIST, f), rebase(minHTML(html)));
 
   const s = sidecars();
-  writeFileSync(join(DIST, 'robots.txt'), s.robots);
+  writeFileSync(join(DIST, 'robots.txt'), s.robots.replace(new RegExp(`Sitemap: ${BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), `Sitemap: ${BASE}`));
   writeFileSync(join(DIST, 'sitemap.xml'), s.sitemap);
   writeFileSync(join(DIST, 'manifest.webmanifest'), JSON.stringify(s.manifest, null, 2));
   writeFileSync(join(DIST, 'data', 'github.json'), s.ghJson);
@@ -1306,6 +1378,16 @@ function main() {
 
   for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
     writeFileSync(join(DIST, 'medals', `${a.id}.svg`), medal(a.id, 0));
+  }
+
+  /* README assets live in the repo so the profile page never hotlinks a
+     service that can go down. Same art the site uses, committed once. */
+  mkdirSync(join(ROOT, 'assets', 'medals'), { recursive: true });
+  writeFileSync(join(ROOT, 'assets', 'banner.svg'), banner());
+  writeFileSync(join(ROOT, 'assets', 'og.svg'), ogCard());
+  writeFileSync(join(ROOT, 'assets', 'stats.svg'), statsCard(SNAP, ACHIEVEMENTS_UNLOCKED.length));
+  for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
+    writeFileSync(join(ROOT, 'assets', 'medals', `${a.id}.svg`), medal(a.id, 0));
   }
 
   sponsorWall();

@@ -972,7 +972,7 @@ export function buildIndex() {
     out.push({
       title: p.name,
       subtitle: p.tagline,
-      url: p.live || p.repo,
+      url: `/projects/${p.id}`,
       repo: p.repo,
       kind: 'Project',
       keywords: [...p.tags, ...p.stack].join(' '),
