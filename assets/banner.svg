@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="480" viewBox="0 0 1500 480" font-family="ui-monospace,Menlo,Consolas,monospace">
+<defs>
+  <linearGradient id="bbg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#05060b"/><stop offset=".45" stop-color="#0b0e20"/><stop offset="1" stop-color="#05060b"/>
+  </linearGradient>
+  <linearGradient id="bacc" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#7c5cff"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#ff4d8d"/>
+  </linearGradient>
+  <radialGradient id="bglow" cx=".18" cy=".2" r=".85">
+    <stop offset="0" stop-color="#7c5cff" stop-opacity=".42"/><stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="bglow2" cx=".85" cy=".85" r=".7">
+    <stop offset="0" stop-color="#00e5ff" stop-opacity=".22"/><stop offset="1" stop-color="#00e5ff" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="bgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0v40" fill="none" stroke="#ffffff" stroke-opacity=".045"/>
+  </pattern>
+</defs>
+<rect width="1500" height="480" fill="url(#bbg)"/>
+<rect width="1500" height="480" fill="url(#bgrid)"/>
+<rect width="1500" height="480" fill="url(#bglow)"/>
+<rect width="1500" height="480" fill="url(#bglow2)"/>
+<g stroke="#ffffff" stroke-opacity=".07" fill="none">
+  <path d="M0 380 C 300 340 620 420 1500 300"/>
+  <path d="M0 420 C 380 380 700 460 1500 350"/>
+  <path d="M0 460 C 420 420 780 500 1500 400"/>
+</g>
+<g transform="translate(80 84)">
+  <rect x="-10" y="-30" width="278" height="30" rx="15" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".13"/>
+  <circle cx="8" cy="-15" r="4.5" fill="#22e07a"/>
+  <text x="24" y="-10" fill="#a8b2cf" font-size="12.5" letter-spacing="3.5">SIGNAL CORE // ACTIVE</text>
+  <text y="58" fill="#e9edf9" font-size="66" font-weight="700" letter-spacing="-2.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
+  <text y="104" fill="url(#bacc)" font-size="26" letter-spacing="-.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru · Full-Stack &amp; AI Engineer</text>
+  <text y="152" fill="#6b7594" font-size="16">B.Tech CSE, MNIT Jaipur (2022–2026) · Kolwa, Dausa · Jaipur, India</text>
+</g>
+<g transform="translate(80 356)" font-size="14.5">
+  <text y="0" fill="#22e07a">▸</text><text x="22" y="0" fill="#a8b2cf">ekguru.shop</text>
+  <text x="200" y="0" fill="#22e07a">▸</text><text x="222" y="0" fill="#a8b2cf">printsbuddy.vercel.app</text>
+  <text x="520" y="0" fill="#22e07a">▸</text><text x="542" y="0" fill="#a8b2cf">saranshne.vercel.app</text>
+  <text x="820" y="0" fill="#22e07a">▸</text><text x="842" y="0" fill="#a8b2cf">github.com/itsThePrakash</text>
+</g>
+<g transform="translate(1270 240)">
+  <circle r="130" fill="none" stroke="#ffffff" stroke-opacity=".08"/>
+  <circle r="96" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-dasharray="3 7"/>
+  <circle r="56" fill="url(#bacc)" opacity=".92"/>
+  <circle r="56" fill="none" stroke="#ffffff" stroke-opacity=".35"/>
+  <text y="8" text-anchor="middle" fill="#05060b" font-size="34" font-weight="700">P</text>
+  <circle cx="130" cy="-86" r="9" fill="#00e5ff"/>
+  <circle cx="-120" cy="66" r="8" fill="#ff4d8d"/>
+  <circle cx="40" cy="128" r="6" fill="#7c5cff"/>
+</g>
+<rect y="472" width="1500" height="4" fill="url(#bacc)"/>
+</svg>

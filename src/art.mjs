@@ -52,7 +52,7 @@ export function favicon() {
 }
 
 /* ── Open Graph card (1200×630) ──────────────────────────────────────────── */
-export function ogCard() {
+export function ogCard({ sub = 'Founder &amp; CEO @ EkGuru', tag = 'SIGNAL CORE · ONLINE' } = {}) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="ui-monospace,Menlo,Consolas,monospace">
 <defs>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -73,10 +73,10 @@ export function ogCard() {
 <rect width="1200" height="630" fill="url(#glow)"/>
 <g transform="translate(88 96)">
   <rect x="-14" y="-34" width="300" height="34" rx="17" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/>
-  <circle cx="6" cy="-17" r="5" fill="#22e07a"/><text x="22" y="-12" fill="#a8b2cf" font-size="14" letter-spacing="3">SIGNAL CORE · ONLINE</text>
-  <text y="42" fill="#e9edf9" font-size="96" font-weight="700" letter-spacing="-4" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH</text>
-  <text y="104" fill="url(#acc)" font-size="34" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru</text>
-  <text y="160" fill="#6b7594" font-size="20">Full-Stack · AI/ML · MNIT Jaipur · Jaipur, India</text>
+  <circle cx="6" cy="-17" r="5" fill="#22e07a"/><text x="22" y="-12" fill="#a8b2cf" font-size="14" letter-spacing="3">${tag}</text>
+  <text y="42" fill="#e9edf9" font-size="76" font-weight="700" letter-spacing="-3" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
+  <text y="104" fill="url(#acc)" font-size="30" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">${sub}</text>
+  <text y="160" fill="#6b7594" font-size="20">B.Tech CSE, MNIT Jaipur · Kolwa, Dausa · Jaipur, India</text>
 </g>
 <g transform="translate(88 430)" font-size="17" fill="#a8b2cf">
   <text y="0">$ whoami</text>
@@ -129,9 +129,9 @@ export function banner() {
   <rect x="-10" y="-30" width="278" height="30" rx="15" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".13"/>
   <circle cx="8" cy="-15" r="4.5" fill="#22e07a"/>
   <text x="24" y="-10" fill="#a8b2cf" font-size="12.5" letter-spacing="3.5">SIGNAL CORE // ACTIVE</text>
-  <text y="58" fill="#e9edf9" font-size="86" font-weight="700" letter-spacing="-3.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH</text>
-  <text y="104" fill="url(#bacc)" font-size="27" letter-spacing="-.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru · Full-Stack &amp; AI Engineer</text>
-  <text y="152" fill="#6b7594" font-size="16">MNIT Jaipur · CSE 2022–2026 · Jaipur, India</text>
+  <text y="58" fill="#e9edf9" font-size="66" font-weight="700" letter-spacing="-2.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
+  <text y="104" fill="url(#bacc)" font-size="26" letter-spacing="-.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru · Full-Stack &amp; AI Engineer</text>
+  <text y="152" fill="#6b7594" font-size="16">B.Tech CSE, MNIT Jaipur (2022–2026) · Kolwa, Dausa · Jaipur, India</text>
 </g>
 <g transform="translate(80 356)" font-size="14.5">
   <text y="0" fill="#22e07a">▸</text><text x="22" y="0" fill="#a8b2cf">ekguru.shop</text>
@@ -176,13 +176,6 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function panelHTML(p) {
-  return `<div class="k">${esc(p.kicker)}</div><h3>${esc(p.name)}</h3>
-<p class="tg">${esc(p.tagline)}</p><div class="lnks">
-${p.live ? `<a href="${esc(p.live)}" target="_blank" rel="noopener">Live ↗</a>` : ''}
-<a href="${esc(p.repo)}" target="_blank" rel="noopener">Source ↗</a></div>`;
-}
-
 export function constellation(projects) {
   const W = 1000, H = 560, cx = W / 2, cy = H / 2;
   const rings = [165, 250, 335];
@@ -204,12 +197,12 @@ export function constellation(projects) {
   out += `<circle cx="${cx}" cy="${cy}" r="34" fill="#0b0e1c" stroke="#7c5cff" stroke-opacity=".55"/>`;
   out += `<text x="${cx}" y="${cy + 5}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" fill="#a8b2cf" letter-spacing="2">CORE</text>`;
   for (const n of nodes) {
+    const idx = projects.indexOf(n.p);
     const x = cx + Math.cos(n.a) * n.r, y = cy + Math.sin(n.a) * n.r;
     const rad = n.big ? 15 : 10;
     out += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${n.p.accent}" stroke-opacity=".2" stroke-width="1"/>`;
     out += `<g class="node" tabindex="0" role="button" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"
-      data-tags="${n.p.tags.join(',')}" data-url="${n.p.live || n.p.repo}"
-      data-panel="${esc(panelHTML(n.p))}">
+      data-tags="${n.p.tags.join(',')}" data-url="${n.p.live || n.p.repo || '/projects/' + n.p.id}" data-i="${idx}">
       <circle class="hit" r="${rad + 14}"/>
       <circle r="${rad + 8}" fill="${n.p.accent}" opacity=".12"/>
       <circle class="glowc" r="${rad}" fill="#0b0e1c" stroke="${n.p.accent}" stroke-width="2" color="${n.p.accent}"/>
@@ -218,4 +211,54 @@ export function constellation(projects) {
     </g>`;
   }
   return out + `</svg>`;
+}
+
+/* ── README stats card (900×260) ──────────────────────────────────────────
+ * Generated from the telemetry snapshot so the profile page never depends on
+ * github-readme-stats, streak-stats or trophy services that keep dying.
+ */
+export function statsCard(snap = {}, achievements = 0) {
+  const langs = (snap.topLanguages || []).slice(0, 5);
+  const bar = (l, i) => {
+    const y = 168 + i * 20;
+    return `<text x="516" y="${y + 10}" fill="#8b93ad" font-size="12">${l.name}</text>
+  <rect x="596" y="${y}" width="200" height="8" rx="4" fill="#1a1f36"/>
+  <rect x="596" y="${y}" width="${Math.max(4, Math.round((l.pct / 100) * 200))}" height="8" rx="4" fill="#7c5cff"/>
+  <text x="808" y="${y + 9}" fill="#6b7594" font-size="11">${l.pct}%</text>`;
+  };
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260" font-family="ui-monospace,Menlo,Consolas,monospace">
+<defs>
+  <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#05060b"/><stop offset=".55" stop-color="#0a0d1c"/><stop offset="1" stop-color="#05060b"/>
+  </linearGradient>
+  <linearGradient id="sa" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#7c5cff"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#ff4d8d"/>
+  </linearGradient>
+  <pattern id="sgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0v40" fill="none" stroke="#ffffff" stroke-opacity=".04"/>
+  </pattern>
+</defs>
+<rect width="900" height="260" rx="16" fill="url(#sg)"/>
+<rect width="900" height="260" rx="16" fill="url(#sgrid)"/>
+<rect x="0" y="0" width="900" height="3" fill="url(#sa)"/>
+<text x="32" y="48" fill="#e9edf9" font-size="21" font-weight="700" letter-spacing="-0.5">Prakash Gothwal</text>
+<text x="32" y="70" fill="#6b7594" font-size="12">@itsThePrakash · MNIT Jaipur · CSE 2022–2026</text>
+<g font-size="26" font-weight="700" fill="#00e5ff">
+  <text x="32" y="118">${snap.publicRepos ?? 0}</text>
+  <text x="152" y="118">${snap.totalStars ?? 0}</text>
+  <text x="272" y="118">${snap.followers ?? 0}</text>
+  <text x="392" y="118">${achievements}</text>
+</g>
+<g font-size="11" fill="#6b7594" letter-spacing="1">
+  <text x="32" y="138">REPOSITORIES</text>
+  <text x="152" y="138">STARS</text>
+  <text x="272" y="138">FOLLOWERS</text>
+  <text x="392" y="138">BADGES</text>
+</g>
+<text x="516" y="138" fill="#6b7594" font-size="11" letter-spacing="1">LANGUAGES</text>
+<line x1="32" y1="154" x2="868" y2="154" stroke="#ffffff" stroke-opacity=".08"/>
+${langs.map(bar).join('')}
+<text x="32" y="232" fill="#8b93ad" font-size="11">${snap.fetchedAt ? 'snapshot ' + String(snap.fetchedAt).slice(0, 10) : ''}</text>
+<text x="868" y="232" fill="#8b93ad" font-size="11" text-anchor="end">itstheprakash.vercel.app</text>
+</svg>`;
 }

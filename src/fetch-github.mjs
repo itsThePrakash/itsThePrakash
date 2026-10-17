@@ -27,6 +27,7 @@ try {
 
   const own = repos.filter((r) => !r.fork);
   const langBytes = own.reduce((acc, r) => {
+    if (!r.language) return acc; // repos with no detected language are not a language
     acc[r.language] = (acc[r.language] || 0) + 1;
     return acc;
   }, {});

@@ -1,0 +1,36 @@
+{
+  "login": "itsThePrakash",
+  "name": "PRAKASH",
+  "publicRepos": 15,
+  "followers": 0,
+  "following": 15,
+  "totalStars": 15,
+  "ownRepos": 13,
+  "topLanguages": [
+    {
+      "name": "JavaScript",
+      "pct": 25
+    },
+    {
+      "name": "Python",
+      "pct": 17
+    },
+    {
+      "name": "TypeScript",
+      "pct": 17
+    },
+    {
+      "name": "HTML",
+      "pct": 17
+    },
+    {
+      "name": "Astro",
+      "pct": 17
+    },
+    {
+      "name": "C++",
+      "pct": 8
+    }
+  ],
+  "fetchedAt": "2026-10-17T11:45:48.782Z"
+}

@@ -3,18 +3,49 @@
  * Zero dependencies. Node 18+. Outputs a fully static, edge-cacheable site
  * into ./dist. Run with `npm run build`.
  */
-import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, SOCIALS, PROJECTS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, buildIndex } from './data.mjs';
+import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, REPO_LINKS, repoLinksFor, repoUrl, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
-import { medal, logoMark, favicon, ogCard, banner, constellation } from './art.mjs';
+import { medal, logoMark, favicon, ogCard, banner, constellation, statsCard } from './art.mjs';
 import { icon, ICONS } from './icons.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
-const BASE = process.env.SITE_URL || 'https://itstheprakash.vercel.app';
+const BASE = (process.env.SITE_URL || 'https://itstheprakash.vercel.app').replace(/\/$/, '');
+/* GitHub Pages serves this repo from /itsThePrakash/ and has no clean URLs.
+   Setting SITE_BASE turns on sub-path links + .html suffixes for that build. */
+const BASE_PATH = (process.env.SITE_BASE || '').replace(/\/$/, '');
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+/* Cache-busting stamp for the shared CSS/JS, which Vercel serves as immutable. */
+const ASSET_V = createHash('sha1').update(CSS + JS).digest('hex').slice(0, 10);
+
+/** Make a page path work on a plain static host under a sub-path. */
+function hostPath(href) {
+  if (!BASE_PATH) return href;
+  let out = href;
+  if (/^\/(projects|orgs)\/[a-z0-9-]+$/.test(out)) out += '.html';
+  else if (/^\/(projects|orgs|repos|about|resume|sponsor|404)$/.test(out)) out += '.html';
+  return BASE_PATH + out;
+}
+
+/** Rewrite every root-absolute link in a finished page. Runs once, after minHTML. */
+function rebase(html) {
+  if (!BASE_PATH) return html;
+  return html
+    .replace(/\b(href|src)="\/(?!\/)/g, (_m, a) => `${a}="${BASE_PATH}/`)
+    .replace(/(href|src)="([^"]*\/[a-z0-9-]+)"/g, (m, a, u) => {
+      if (!u.startsWith(BASE_PATH + '/')) return m;
+      const rest = u.slice(BASE_PATH.length);
+      if (!/^\/(projects|orgs)\/[a-z0-9-]+$/.test(rest) && !/^\/(projects|orgs|repos|about|resume|sponsor|404)$/.test(rest)) return m;
+      return `${a}="${BASE_PATH}${rest}.html"`;
+    })
+    .replace(/url\(\/(?!\/)/g, `url(${BASE_PATH}/`);
+}
 /** Merge a build-time snapshot (from `npm run refresh`) over the baked default. */
 function loadSnapshot() {
   try {
@@ -96,6 +127,62 @@ function minHTML(h) {
   return masked.replace(/\u0000(\d+)\u0000/g, (_, i) => keep[+i]);
 }
 
+/* ── recent activity ─────────────────────────────────────────────────────── */
+/** Last site commits, read from git at build time. Silent if git is absent. */
+function recentCommits(n = 4) {
+  try {
+    const out = execFileSync('git', ['log', '--no-merges', '--date=short', '--pretty=format:%ad|%s', '-n', '40'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return out
+      .split('\n')
+      .filter((l) => l.includes('|') && !/refresh github telemetry/i.test(l))
+      .slice(0, n)
+      .map((l) => {
+        const [date, ...rest] = l.split('|');
+        let msg = rest.join('|').replace(/^(feat|fix|docs|content|seo|refactor|chore):\s*/i, '');
+        msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        return { date, msg };
+      });
+  } catch {
+    return [];
+  }
+}
+
+function shortDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return String(d);
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function recent() {
+  const pushes = [...REPO_LINKS]
+    .sort((a, b) => String(b.pushed).localeCompare(String(a.pushed)))
+    .slice(0, 5);
+  const commits = recentCommits(5);
+  const repoRow = (r) => `<div class="rrow">
+    <div><b><a href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a></b><small>${esc(r.what)}${r.owner !== SITE.handle ? ` · ${esc(r.owner)}` : ''}</small></div>
+    <time datetime="${esc(r.pushed)}">${esc(shortDate(r.pushed))}</time>
+  </div>`;
+  const commitRow = (c) => `<div class="rrow">
+    <div><b>${esc(c.msg)}</b><small>this site</small></div>
+    <time datetime="${esc(c.date)}">${esc(shortDate(c.date))}</time>
+  </div>`;
+  return `<section id="recent">
+<div class="wrap">
+  <div class="sec-head rv"><span class="eyebrow">Recent</span><h2>What moved <span class="grad">lately</span>.</h2>
+  <p class="lede">Straight from the GitHub API and this repo's own commit log, not a hand-written feed.</p></div>
+  <div class="recent-grid">
+    <div class="rv"><h3 class="recent-h">Last pushes</h3><div class="recent">${pushes.map(repoRow).join('')}</div></div>
+    <div class="rv rv-d2"><h3 class="recent-h">On this site</h3><div class="recent">${commits.length ? commits.map(commitRow).join('') : '<div class="rrow"><div><b>Build and content pass</b><small>this site</small></div><time>today</time></div>'}</div></div>
+  </div>
+</div>
+</section>`;
+}
+
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -103,6 +190,9 @@ const attr = (s) => esc(s);
 const num = (v) => Number(v).toLocaleString('en-US');
 
 const ALL_TAGS = [...new Set(PROJECTS.flatMap((p) => p.tags))];
+/** A Pages link only when it points somewhere the Live button does not. */
+const pagesHref = (p) =>
+  p.pages && p.pages.replace(/\/+$/, '') !== (p.live || '').replace(/\/+$/, '') ? p.pages : null;
 
 /** Emit only the <symbol>s this page actually references. */
 function pageSprite(body) {
@@ -115,7 +205,7 @@ function pageSprite(body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs>${defs}</defs></svg>`;
 }
 
-function page({ title, description, body, path = '/', jsonld = '', extraHead = '' }) {
+function page({ title, description, body, path = '/', jsonld = '', extraHead = '', og = 'og.svg', keywords = SITE.keywords }) {
   const canonical = BASE + path;
   return `<!doctype html>
 <html lang="en" data-theme="dark">
@@ -126,28 +216,44 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <meta name="theme-color" content="#05060b"/>
 <title>${esc(title)}</title>
 <meta name="description" content="${attr(description)}"/>
-<meta name="author" content="${attr(SITE.name)}"/>
+<meta name="author" content="${attr(SITE.fullName)}"/>
+<meta name="keywords" content="${attr(keywords.join(', '))}"/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
 <link rel="canonical" href="${canonical}"/>
-<meta property="og:type" content="website"/>
+<link rel="alternate" hreflang="en-in" href="${canonical}"/>
+<link rel="alternate" hreflang="x-default" href="${canonical}"/>
+<link rel="alternate" type="application/rss+xml" title="Prakash Gothwal — projects and notes" href="${BASE}/feed.xml"/>
+${SOCIALS.filter((x) => !x.url.startsWith('mailto:')).map((x) => `<link rel="me" href="${attr(x.url)}"/>`).join('\n')}
+<link rel="author" href="/about"/>
+<meta property="profile:first_name" content="Prakash"/>
+<meta property="profile:last_name" content="Gothwal"/>
+<meta property="profile:username" content="itsThePrakash"/>
+<meta property="og:type" content="profile"/>
+<meta property="og:locale" content="en_IN"/>
+<meta name="twitter:site" content="@itsThePrakash"/>
+<meta name="twitter:creator" content="@itsThePrakash"/>
 <meta property="og:site_name" content="${attr(SITE.name)}"/>
 <meta property="og:title" content="${attr(title)}"/>
 <meta property="og:description" content="${attr(description)}"/>
 <meta property="og:url" content="${canonical}"/>
-<meta property="og:image" content="${BASE}/og.svg"/>
+<meta property="og:image" content="${BASE}/${og}"/>
+<meta property="og:image:alt" content="${attr(SITE.fullName)} — ${attr(title)}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${attr(title)}"/>
 <meta name="twitter:description" content="${attr(description)}"/>
-<meta name="twitter:image" content="${BASE}/og.svg"/>
+<meta name="twitter:image" content="${BASE}/${og}"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
-<link rel="apple-touch-icon" href="/icon.svg"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="preconnect" href="https://api.github.com" crossorigin/>
-<link rel="dns-prefetch" href="https://api.github.com"/>
-<style>${minCSS(CSS)}</style>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}"/>
+<script>try{var t=localStorage.getItem('sc:theme')||((window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 ${extraHead}${jsonld}
 </head>
 <body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="world" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="spot" id="spot" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
 ${pageSprite(body)}
 ${body}
 </body>
@@ -156,22 +262,24 @@ ${body}
 
 /* ── shared chrome ───────────────────────────────────────────────────────── */
 const NAV_LINKS = [
-  ['#work', 'Work'], ['#achievements', 'Achievements'], ['#about', 'About'],
-  ['#stack', 'Stack'], ['#contact', 'Contact'],
+  ['#work', 'Work'], ['#orgs', 'Orgs'], ['#achievements', 'Achievements'],
+  ['#about', 'About'], ['#stack', 'Stack'], ['#contact', 'Contact'],
 ];
 
-function nav() {
+function nav(home = false) {
+  const href = (hash) => (home || hash === '#work' ? (home ? hash : '/projects') : `/${hash}`);
   return `<nav class="nav" id="nav" aria-label="Primary">
 <div class="wrap nav-in">
-  <a class="brand" href="#home" aria-label="Home">
+  <a class="brand" href="${home ? '#home' : '/'}" aria-label="Home">
     <span class="mark">${logoMark()}</span>
     <span>${esc(SITE.name)}<b>/${esc(SITE.handle)}</b></span>
   </a>
-  <div class="nav-links">${NAV_LINKS.map(([h, l]) => `<a href="${h}">${l}</a>`).join('')}</div>
+  <div class="nav-links">${NAV_LINKS.map(([h, l]) => `<a href="${href(h)}">${l}</a>`).join('')}</div>
   <div class="nav-acts">
     <button class="palette-btn" data-palette aria-label="Open command palette">
       ${icon('search')}<span>Search</span><span class="kbd">⌘K</span>
     </button>
+    <a class="icbtn" href="/sponsor" aria-label="Sponsor this work" title="Sponsor">${icon('coffee')}</a>
     <button class="icbtn" id="themeBtn" aria-label="Toggle colour theme">${icon('moon')}</button>
     <a class="btn btn-p btn-s" href="/resume">Résumé</a>
   </div>
@@ -181,9 +289,13 @@ function nav() {
 
 function footer() {
   return `<footer class="foot"><div class="wrap foot-in">
-  <span class="mono">© <span id="yr"></span> ${esc(SITE.name)} · built static, served at the edge</span>
-  <span class="mono">Jaipur, IN · <span id="clk"></span></span>
-  <span><a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
+  <span class="mono">© <span id="yr"></span> ${esc(SITE.fullName)} · hand-written HTML, no framework</span>
+  <span class="mono">Jaipur, IN · <span id="clk"></span> · <span id="views" hidden></span></span>
+  <span><a href="/about">About</a> ·
+        <a href="/projects">Projects</a> ·
+        <a href="/repos">Repos</a> ·
+        <a href="/sponsor">Sponsor</a> ·
+        <a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
         <a href="mailto:${esc(SITE.email)}">Email</a> ·
         <a href="/resume">Résumé</a></span>
 </div></footer>`;
@@ -194,8 +306,8 @@ function hero() {
   return `<section id="home" class="hero">
 <div class="wrap hero-grid">
   <div>
-    <span class="status"><span class="dot"></span>${esc(SITE.status)} · open to work</span>
-    <h1><span class="ln">Building the</span><span class="ln grad">improbable</span><span class="ln">at scale.</span></h1>
+    <a class="hero-name" href="/about">${esc(SITE.fullName)} · ${esc(SITE.hometown)} → Jaipur</a>
+    <h1><span class="ln">I build</span><span class="ln grad">small things</span><span class="ln">that work.</span></h1>
     <div class="typed" id="typed" data-words='${attr(JSON.stringify(SITE.roles))}' aria-live="polite"><span class="caret"></span></div>
     <p class="lede">${esc(SITE.about)}</p>
     <div class="hero-cta">
@@ -206,8 +318,8 @@ function hero() {
     <div class="hero-meta">
       <span>${icon('location')}${esc(SITE.location)}</span>
       <span>${icon('clock')}IST · UTC+5:30</span>
-      <span>${icon('bolt')}Sub-second first paint</span>
-      <span>${icon('trophy')}4 GitHub achievements</span>
+      <span>${icon('bolt')}One HTML file per page</span>
+      <span>${icon('trophy')}${ACHIEVEMENTS_UNLOCKED.length} GitHub achievements</span>
     </div>
   </div>
   <div class="orbit" aria-hidden="true">
@@ -239,24 +351,51 @@ function telemetry() {
   ${cells.map(([id, v, label, sfx]) => `<div class="tel"><span class="src" id="telSrc">SNAPSHOT</span>
     <b id="tel-${id}" data-count="${v}" data-suffix="${sfx}">0</b><small>${label}</small></div>`).join('')}
 </div>
-<p class="mono" style="margin-top:12px;font-size:11px;color:var(--fg3)">Live telemetry refreshes from the GitHub REST API on your device and falls back to the build snapshot if the API is rate-limited.</p>
+<p class="mono" style="margin-top:12px;font-size:11px;color:var(--fg3)">Numbers come from the GitHub API, with the build snapshot as fallback.</p>
 </div>`;
 }
 
+/* Live / Pages / Source, in that order, only when the URL actually exists. */
+function repoActions(r, small = true) {
+  const cls = small ? 'org-lnks' : 'repo-links';
+  const a = (href, label) =>
+    `<a href="${attr(href)}" target="_blank" rel="noopener">${label}</a>`;
+  const live = r.live ? a(r.live, 'Live') : '';
+  const pages = r.pages && r.pages !== r.live ? a(r.pages, 'Pages') : '';
+  return `<span class="${cls}">${live}${pages}${a(repoUrl(r), 'Source')}</span>`;
+}
+
 function projectCards() {
-  return PROJECTS.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
+  const ordered = [...PROJECTS].sort((a, b) => Number(!!b.pin) - Number(!!a.pin));
+  return ordered.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
   <span class="halo"></span>
   <div class="card-top">
-    <div><div class="kick">${esc(p.kicker)}</div><h3>${esc(p.name)}</h3></div>
-    <span class="badge ${p.status === 'live' ? 'ok' : 'src'}">${p.status === 'live' ? '● Live' : 'Source'}</span>
+    <div><div class="kick">${p.pin ? `<span class="pinned">${icon('pin')}Pinned</span> ` : ''}${esc(p.kicker)}</div><h3><a href="/projects/${p.id}">${esc(p.name)}</a></h3></div>
+    <span class="badge ${p.status === 'live' ? 'ok' : p.status === 'closed' ? 'closed' : 'src'}">${p.status === 'live' ? '● Live' : p.status === 'closed' ? 'Closed' : 'Source'}</span>
   </div>
   <p class="tag">${esc(p.tagline)}</p>
   <div class="tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>
   <div class="metrics">${p.metrics.map((m) => `<div><b>${esc(m.v)}</b><small>${esc(m.k)}</small></div>`).join('')}</div>
   <div class="card-acts">
-    ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}Live</a>` : ''}
-    <a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>
+    ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}${p.status === 'closed' ? 'Site' : 'Live'}</a>` : ''}
+    ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages</a>` : ''}
+    ${p.repo ? `<a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>` : ''}
   </div>
+</article>`).join('');
+}
+
+function orgs() {
+  return ORGS.map((o, i) => `<article class="org rv rv-d${(i % 4) + 1}" style="--ac:${o.accent}">
+  <div class="org-top">
+    <div><span class="org-handle">${esc(o.handle)}</span><h3><a href="/orgs/${o.id}">${esc(o.display)}</a></h3></div>
+    <span class="badge ok">${esc(o.role)}</span>
+  </div>
+  <p class="tag">${esc(o.tagline)}</p>
+  <p class="org-body">${esc(o.body)}</p>
+  <ul class="org-repos">${repoLinksFor(o.handle).map((r) => `<li>
+    <div><b>${esc(r.repo)}</b><small>${esc(r.what)}</small></div>
+    ${repoActions(r)}
+  </li>`).join('')}</ul>
 </article>`).join('');
 }
 
@@ -266,7 +405,7 @@ function achievements() {
     const pct = a.next ? Math.min(100, Math.round((a.progress / a.next) * 100)) : 100;
     return `<article class="ach tilt rv">
   <span class="shine"></span>
-  <div class="ach-medal">${medal(a.id, a.tierRank)}</div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy" decoding="async" onerror="this.remove()"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${esc(a.tier)}</span>
     <h4>${esc(a.name)}</h4>
@@ -282,7 +421,7 @@ function achievements() {
   const locked = ACHIEVEMENTS_CATALOG.filter((a) => !unlockedIds.has(a.id)).map((a) => {
     const t = a.tiers.map((x) => (x.need ? `${x.name} · ${x.need}` : x.name)).join('  ·  ');
     return `<article class="ach ach-locked tilt rv">
-  <div class="ach-medal">${medal(a.id, 0)}</div>
+  <div class="ach-medal"><img src="/medals/${a.id}.svg" alt="" width="60" height="60" loading="lazy" decoding="async" onerror="this.remove()"/></div>
   <div style="min-width:0;flex:1">
     <span class="tier">${icon('lock')} Locked</span>
     <h4>${esc(a.name)}</h4>
@@ -295,14 +434,14 @@ function achievements() {
   return `<section id="achievements">
 <div class="wrap">
   <div class="sec-head rv">
-    <span class="eyebrow">Trophy vault</span>
-    <h2>Every achievement GitHub has <span class="grad">ever shipped</span>.</h2>
-    <p class="lede">Four unlocked so far, each one verified against the live profile on ${new Date().getUTCFullYear()}. The rest are the roadmap — nothing here is decorative, every threshold is real.</p>
+    <span class="eyebrow">Badges</span>
+    <h2>The badges I have, <span class="grad">and the ones I don't</span>.</h2>
+    <p class="lede">${ACHIEVEMENTS_UNLOCKED.length} unlocked, checked against my profile. The rest are GitHub's own thresholds and I haven't reached them yet.</p>
   </div>
   <div class="ach-grid">${unlocked}</div>
   <div class="sec-head rv" style="margin-top:56px">
-    <span class="eyebrow">Roadmap</span>
-    <h3 style="font-size:clamp(20px,2.6vw,26px)">Still locked. All of them, publicly.</h3>
+    <span class="eyebrow">Not yet</span>
+    <h3 style="font-size:clamp(20px,2.6vw,26px)">Still locked.</h3>
   </div>
   <div class="ach-grid">${locked}</div>
 </div>
@@ -322,8 +461,9 @@ function timeline() {
 function stack() {
   return `<section id="stack">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Arsenal</span><h2>The stack I actually <span class="grad">ship with</span>.</h2></div>
-  <div class="stack-grid">${STACK.map((s, i) => `<div class="stack-col rv rv-d${(i % 4) + 1}">
+  <div class="sec-head rv"><span class="eyebrow">Tools</span><h2>What I <span class="grad">work with</span>.</h2>
+  <p class="lede">Things I've used enough to have an opinion about.</p></div>
+  <div class="stack-list">${STACK.map((s, i) => `<div class="stack-row rv rv-d${(i % 4) + 1}">
     <h4>${esc(s.group)}</h4><ul>${s.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
 </div>
 </section>`;
@@ -332,8 +472,8 @@ function stack() {
 function contact() {
   return `<section id="contact">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Open a channel</span><h2>Every link I own, <span class="grad">in one place</span>.</h2>
-  <p class="lede">Pick whichever you like. They all reach the same human.</p></div>
+  <div class="sec-head rv"><span class="eyebrow">Contact</span><h2>Ways to <span class="grad">reach me</span>.</h2>
+  <p class="lede">Same person on all of them.</p></div>
   <div class="contact">
     <div class="social-grid rv">${SOCIALS.map((s) => `<a class="soc" style="--sc:${s.color}" href="${attr(s.url)}" target="_blank" rel="noopener" aria-label="${attr(s.label)}">
       <span class="si">${icon(s.id)}</span>
@@ -344,14 +484,15 @@ function contact() {
       <p>Freelance, full-time, collaboration, or just a good problem — I read everything.</p>
       <div class="copyrow">
         <input id="mailInput" value="${attr(SITE.email)}" readonly aria-label="Email address"/>
-        <button class="btn btn-p" id="copyBtn" data-v="${attr(SITE.email)}">${icon('copy')}<span id="copyLbl">Copy</span></button>
+        <button class="btn btn-p" data-copy data-v="${attr(SITE.email)}">${icon('copy')}<span>Copy</span></button>
       </div>
       <ul class="facts">
-        <li>${icon('check')}<span>Usually replies within 24 hours</span></li>
-        <li>${icon('location')}<span>${esc(SITE.location)} · remote-friendly</span></li>
-        <li>${icon('clock')}<span>Available for internships and full-time roles</span></li>
-        <li>${icon('mail')}<span>Also reachable at ${esc(SITE.emailAlt)}</span></li>
+        <li><span>Usually replies within 24 hours</span></li>
+        <li><span>${esc(SITE.location)} · remote-friendly</span></li>
+        <li><span>Available for internships and full-time roles</span></li>
+        <li><span>Also reachable at ${esc(SITE.emailAlt)}</span></li>
       </ul>
+      <p class="sponsor-line">Everything here is free and stays free. If it saved you time, you can <a href="/sponsor">sponsor the work</a>.</p>
     </div>
   </div>
 </div>
@@ -362,9 +503,9 @@ function work() {
   return `<section id="work">
 <div class="wrap">
   <div class="sec-head rv">
-    <span class="eyebrow">Selected work</span>
-    <h2>Things I built that <span class="grad">actually run</span>.</h2>
-    <p class="lede">Twelve public projects — three of them businesses or products with real users. Every card links straight to the live deployment and the source.</p>
+    <span class="eyebrow">Work</span>
+    <h2>Things I built, <span class="grad">still online</span>.</h2>
+    <p class="lede">${PROJECTS.length} projects. Some are live, one is closed, a few are tools I needed once. Each has its own page, plus the deployment, the Pages build and the source.</p>
   </div>
   <div class="pj-bar rv">
     <div class="filters" role="group" aria-label="Filter projects">
@@ -379,10 +520,15 @@ function work() {
   <div class="pj-grid" id="pjGrid">${projectCards()}</div>
   <div class="constel" id="constel" style="display:none" aria-label="Project constellation">
     ${constellation(PROJECTS)}
-    <div id="conPanel" style="position:absolute;left:20px;bottom:20px;max-width:min(340px,80%);padding:18px;border:1px solid var(--line2);border-radius:16px;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px)"></div>
+    <div id="conPanel" class="con-panel" style="position:absolute;left:20px;bottom:20px;max-width:min(340px,80%);padding:18px;border:1px solid var(--line2);border-radius:16px;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px)"></div>
   </div>
 </div>
 </section>`;
+}
+
+function conData_() {
+  const rows = PROJECTS.map((p) => [p.kicker, p.name, p.tagline, p.live || '', p.repo || '', p.live ? 'Live' : '']);
+  return `<script id="conData" type="application/json">${JSON.stringify(rows).replace(/</g, '\\u003c')}</script>`;
 }
 
 function buildIndex_() {
@@ -402,36 +548,86 @@ function palette() {
 </div>`;
 }
 
-function jsonld() {
-  const d = {
-    '@context': 'https://schema.org',
+function personNode() {
+  return {
     '@type': 'Person',
-    name: SITE.name,
-    alternateName: SITE.handle,
+    '@id': `${BASE}/#person`,
+    name: SITE.fullName,
+    alternateName: SITE.aliases,
+    givenName: 'Prakash',
+    familyName: 'Gothwal',
     jobTitle: SITE.title,
+    description: 'Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026). Founder of EkGuru and Print$Buddy.',
     email: `mailto:${SITE.email}`,
     url: BASE,
     image: `${BASE}/og.svg`,
+    mainEntityOfPage: BASE,
     sameAs: SOCIALS.filter((s) => !s.url.startsWith('mailto:')).map((s) => s.url),
     address: { '@type': 'PostalAddress', addressLocality: 'Jaipur', addressRegion: 'Rajasthan', addressCountry: 'IN' },
-    alumniOf: { '@type': 'CollegeOrUniversity', name: 'Malaviya National Institute of Technology Jaipur' },
-    knowsAbout: STACK.flatMap((s) => s.items),
-    worksFor: { '@type': 'Organization', name: 'EkGuru', url: 'https://ekguru.shop' },
+    homeLocation: { '@type': 'Place', name: SITE.hometown, address: { '@type': 'PostalAddress', addressLocality: 'Kolwa', addressRegion: 'Rajasthan', addressCountry: 'IN' } },
+    alumniOf: {
+      '@type': 'CollegeOrUniversity',
+      name: 'Malaviya National Institute of Technology Jaipur',
+      alternateName: 'MNIT Jaipur',
+      url: 'https://mnit.ac.in',
+    },
+    knowsLanguage: ['en', 'hi'],
+    knowsAbout: [...new Set([...STACK.flatMap((s) => s.items), 'Computer Science', 'Web Development'])],
+    worksFor: [
+      { '@type': 'Organization', name: 'EkGuru', url: 'https://ekguru.shop' },
+      { '@type': 'Organization', name: 'Print$Buddy', url: 'https://printsbuddy.vercel.app' },
+    ],
   };
-  return `<script type="application/ld+json">${JSON.stringify(d).replace(/</g, '\\u003c')}</script>`;
+}
+
+function jsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'WebSite',
+        '@id': `${BASE}/#website`,
+        name: SITE.fullName,
+        url: BASE,
+        inLanguage: 'en',
+        publisher: { '@id': `${BASE}/#person` },
+      },
+      {
+        '@type': 'WebPage',
+        '@id': `${BASE}/#page`,
+        url: BASE,
+        name: `${SITE.fullName} — ${SITE.title}`,
+        isPartOf: { '@id': `${BASE}/#website` },
+        about: { '@id': `${BASE}/#person` },
+        dateModified: BUILD_DATE,
+        inLanguage: 'en-IN',
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
 }
 
 function homePage() {
-  const body = `${nav()}
-<main>
+  const body = `${nav(true)}
+<main id="main">
 ${hero()}
 ${marquee()}
 ${telemetry()}
+${recent()}
 ${work()}
+<section id="orgs">
+<div class="wrap">
+  <div class="sec-head rv"><span class="eyebrow">Organisations</span><h2>The two orgs <span class="grad">I run</span>.</h2>
+  <p class="lede">Both are mine. Every Pages link here was checked against the GitHub API, not guessed.</p></div>
+  <div class="org-grid">${orgs()}</div>
+</div>
+</section>
 ${achievements()}
 <section id="about">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Trajectory</span><h2>From a hostel room to a <span class="grad">platform</span>.</h2></div>
+  <div class="sec-head rv"><span class="eyebrow">About</span><h2>A short <span class="grad">timeline</span>.</h2>
+  <p class="lede">I'm Prakash Gothwal, from Kolwa in Dausa district, Rajasthan. I finished school in 2020 and 2022, then studied CSE at MNIT Jaipur from 2022 to 2026. This is what I've been doing since.</p></div>
   <div class="tl">${timeline()}</div>
 </div>
 </section>
@@ -441,10 +637,11 @@ ${contact()}
 ${footer()}
 ${palette()}
 ${buildIndex_()}
-<script>${minJS(JS)}</script>`;
+${conData_()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
-    title: `${SITE.name} — Founder & CEO @ EkGuru · Full-Stack & AI Engineer`,
-    description: `${SITE.about}`,
+    title: `${SITE.fullName} — MNIT Jaipur CSE · Founder @ EkGuru`,
+    description: `Prakash Gothwal (Prakash) — B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy. Projects, résumé and contact.`,
     body, path: '/', jsonld: jsonld(),
   });
 }
@@ -452,9 +649,9 @@ ${buildIndex_()}
 /* ── résumé ──────────────────────────────────────────────────────────────── */
 function resumePage() {
   const skills = STACK.map((s) => `<div class="rs-skill"><h4>${esc(s.group)}</h4><p>${esc(s.items.join(' · '))}</p></div>`).join('');
-  const liveProjects = PROJECTS.filter((p) => p.live);
+  const liveProjects = PROJECTS.filter((p) => p.status === 'live' && p.live);
   const body = `${nav()}
-<main>
+<main id="main">
 <section style="padding-top:120px">
 <div class="wrap">
   <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px">
@@ -463,16 +660,21 @@ function resumePage() {
   </div>
   <article class="rs">
     <header class="rs-head">
-      <div>
-        <h1>${esc(SITE.fullName)}</h1>
-        <p class="rs-title">${esc(SITE.title)}</p>
-        <p class="rs-sub">${icon('location')}${esc(SITE.location)} · ${icon('mail')}<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a> · ${icon('github')}<a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">github.com/itsThePrakash</a></p>
+      <div class="rs-id">
+        ${SITE.photo
+          ? `<img class="rs-photo" src="${attr(SITE.photo)}" alt="${attr(SITE.name)}" width="84" height="84"/>`
+          : `<div class="rs-photo rs-mono" aria-hidden="true">P</div>`}
+        <div>
+          <h1>${esc(SITE.fullName)} <span class="rs-hi" lang="hi">प्रकाश</span></h1>
+          <p class="rs-title">${esc(SITE.title)}</p>
+          <p class="rs-sub">${icon('location')}${esc(SITE.location)} · ${icon('mail')}<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a> · ${icon('github')}<a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">github.com/itsThePrakash</a> · ${icon('link')}<a href="${attr(BASE)}" target="_blank" rel="noopener">itstheprakash.vercel.app</a></p>
+        </div>
       </div>
-      <div class="rs-badge"><div class="rs-badge-in"><b>4</b><small>Achievements unlocked</small></div></div>
+      <div class="rs-badge"><div class="rs-badge-in"><b>${ACHIEVEMENTS_UNLOCKED.length}</b><small>Achievements unlocked</small></div></div>
     </header>
     <section class="rs-sec">
       <h2>Profile</h2>
-      <p>${esc(SITE.about)} Founder of two products that solve problems I personally hit: EkGuru, a Hindi-first language bridge with 2,600+ pages across 7 interface locales, and Print$Buddy, a late-night hostel print-delivery service at MNIT Jaipur. I work end to end — architecture, implementation, performance budget, deployment and the unglamorous parts nobody posts about.</p>
+      <p>B.Tech in Computer Science &amp; Engineering at MNIT Jaipur (2022–2026), from Kolwa in Dausa district, Rajasthan. I started EkGuru, a Hindi learning site with 2,754 static pages, 11 locale directories and 31 language-bridge sections, and Print$Buddy, a late-night print delivery service for my hostel. I work end to end: the pages, the backend, the deploy and the parts nobody writes about.</p>
     </section>
     <section class="rs-sec">
       <h2>Experience</h2>
@@ -492,7 +694,7 @@ function resumePage() {
     <section class="rs-sec">
       <h2>Selected projects</h2>
       ${PROJECTS.filter((p) => p.featured).map((p) => `<div class="rs-item">
-        <div class="rs-item-h"><h3>${esc(p.name)}${p.live ? ` · <a href="${attr(p.live)}" target="_blank" rel="noopener">live</a>` : ''}</h3><span>${esc(p.kicker)}</span></div>
+        <div class="rs-item-h"><h3>${esc(p.name)}${p.live ? ` · <a href="${attr(p.live)}" target="_blank" rel="noopener">live</a>` : ''}${pagesHref(p) ? ` · <a href="${attr(pagesHref(p))}" target="_blank" rel="noopener">pages</a>` : ''}</h3><span>${esc(p.kicker)}</span></div>
         <p>${esc(p.description)}</p>
         <p class="rs-stack">${esc(p.stack.join(' · '))}</p>
       </div>`).join('')}
@@ -502,10 +704,9 @@ function resumePage() {
       <div class="rs-skills">${skills}</div>
     </section>
     <section class="rs-sec">
-      <h2>Achievements &amp; certifications</h2>
+      <h2>Achievements</h2>
       <ul class="rs-ach">
         ${ACHIEVEMENTS_UNLOCKED.map((a) => `<li><b>${esc(a.name)}</b> — ${esc(a.flavor)} <span class="rs-when">unlocked ${esc(a.unlocked)}</span></li>`).join('')}
-        <li><b>GitHub Pro</b> — active subscription</li>
         <li><b>${liveProjects.length} live production deployments</b> — ${liveProjects.map((p) => p.name).join(', ')}</li>
       </ul>
     </section>
@@ -518,11 +719,11 @@ function resumePage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
-    title: `Résumé — ${SITE.fullName} · ${SITE.title}`,
-    description: `Résumé of ${SITE.fullName} — Founder & CEO at EkGuru, full-stack and AI engineer, MNIT Jaipur CSE. Print-ready.`,
-    body, path: '/resume',
+    title: `Résumé — ${SITE.fullName} · MNIT Jaipur CSE`,
+    description: `Résumé of Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026), founder of EkGuru and Print$Buddy. Print-ready.`,
+    body, path: '/resume', jsonld: jsonld(), og: 'og-resume.svg',
     extraHead: `<style>${minCSS(RESUME_CSS)}</style>`,
   });
 }
@@ -530,6 +731,10 @@ ${footer()}
 const RESUME_CSS = `
 .rs{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);padding:clamp(24px,4vw,48px)}
 .rs-head{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;padding-bottom:22px;border-bottom:2px solid var(--line2);margin-bottom:8px}
+.rs-id{display:flex;gap:18px;align-items:center;min-width:0}
+.rs-photo{width:84px;height:84px;border-radius:18px;object-fit:cover;border:1px solid var(--line2);flex:0 0 auto}
+.rs-mono{display:grid;place-items:center;font-family:var(--mono);font-size:34px;font-weight:700;background:linear-gradient(140deg,var(--v),var(--c));color:#fff;box-shadow:var(--glow)}
+.rs-hi{font-size:.46em;color:var(--fg3);font-weight:500;letter-spacing:0}
 .rs-head h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.04em}
 .rs-title{font-size:clamp(14px,1.8vw,18px);color:var(--c);font-family:var(--mono);margin-top:6px}
 .rs-sub{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--fg3);margin-top:12px;font-family:var(--mono)}
@@ -565,13 +770,672 @@ const RESUME_CSS = `
 .rs-links a:hover{border-color:var(--line2)}
 .rs-links b{display:block;font-size:13px}
 .rs-links small{font-family:var(--mono);font-size:10.5px;color:var(--fg3)}
-@media (max-width:640px){.rs-head{flex-direction:column}.rs-item-h{flex-direction:column;gap:2px}.rs-item-h span{white-space:normal}}
+@media (max-width:640px){.rs-head{flex-direction:column}.rs-id{align-items:flex-start}.rs-item-h{flex-direction:column;gap:2px}.rs-item-h span{white-space:normal}}
 `;
+
+
+const ABOUT_CSS = `
+.about-wrap{max-width:800px}
+.about-prose{display:grid;gap:14px;margin-top:24px;font-size:15.5px;line-height:1.7;color:var(--fg2)}
+.about-prose a{color:var(--c);text-decoration:underline;text-underline-offset:3px}
+.faq{display:grid;gap:8px;margin-top:14px}
+.faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
+.faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
+.faq p{margin-top:8px;font-size:13.5px;color:var(--fg2)}
+.hi-name{border-left:2px solid var(--c);padding-left:13px;color:var(--fg2)}
+
+`;
+
+/* ── about (name search + a plain-language bio) ──────────────────────────── */
+const ABOUT_FAQ = [
+  {
+    q: 'Who is Prakash Gothwal?',
+    a: 'Prakash Gothwal is a Computer Science & Engineering graduate from MNIT Jaipur (2022–2026) and the founder of EkGuru, a Hindi learning site, and Print$Buddy, a hostel print delivery service at MNIT.',
+  },
+  {
+    q: 'Where is Prakash Gothwal from?',
+    a: 'Kolwa, a village in Dausa district, Rajasthan. He studied in Jaipur.',
+  },
+  {
+    q: 'What did Prakash study at MNIT Jaipur?',
+    a: 'B.Tech in Computer Science & Engineering (CSE), 2022 to 2026. School finished in 2020 (Class X) and 2022 (Class XII).',
+  },
+  {
+    q: 'Is Prakash MNIT the same person as Prakash Gothwal?',
+    a: 'Yes. Prakash, Prakash MNIT, Prakash CSE, Prakash Kolwa, Prakash Dausa and Prakash Gothwal all point to the same person.',
+  },
+  {
+    q: 'How do I contact Prakash?',
+    a: `Email ${SITE.email}. He also answers on LinkedIn and GitHub.`,
+  },
+];
+
+function aboutJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'FAQPage',
+        '@id': `${BASE}/about#faq`,
+        mainEntity: ABOUT_FAQ.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function aboutPage() {
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap about-wrap">
+  <p class="eyebrow">About</p>
+  <h1 style="font-size:clamp(36px,6vw,64px)">${esc(SITE.fullName)}</h1>
+  <p class="lede">${esc(SITE.tagline)} I'm from Kolwa, Dausa, and I studied CSE at MNIT Jaipur.</p>
+  <div class="about-prose">
+    <p>Most people know me as Prakash. My full name is Prakash Gothwal. I grew up in Kolwa, a village in Dausa district in Rajasthan, and moved to Jaipur for college.</p>
+    <p>I finished Class X in 2020 and Class XII in 2022, then joined <a href="https://mnit.ac.in" target="_blank" rel="noopener">MNIT Jaipur</a> for a B.Tech in Computer Science &amp; Engineering. I graduated in 2026.</p>
+    <p>In college I started <a href="https://ekguru.shop" target="_blank" rel="noopener">EkGuru</a>, a Hindi learning site built from plain HTML, and <a href="https://printsbuddy.vercel.app" target="_blank" rel="noopener">Print$Buddy</a>, a print delivery service for hostel rooms. I also built <a href="/#work">smaller tools</a> when something annoyed me enough.</p>
+    <p>People search for me under a few different names: Prakash MNIT, Prakash CSE, Prakash Kolwa, Prakash Dausa. They all land on the same person. This site has everything in one place: the <a href="/#work">projects</a>, the <a href="/resume">résumé</a> and the <a href="/#contact">contact links</a>.</p>
+    <p lang="hi" class="hi-name">हिंदी में: नाम प्रकाश गोथवाल है, गाँव कोलवा, ज़िला दौसा (राजस्थान) से। एमएनआईटी जयपुर में कंप्यूटर साइंस इंजीनियरिंग, 2022 से 2026 तक।</p>
+    <p>I write the pages myself and keep the build small. One HTML file per page, no framework, nothing that needs a server to render.</p>
+  </div>
+  <div class="faq">
+    <h2 style="font-size:clamp(22px,3vw,30px);margin-top:34px">Quick answers</h2>
+    ${ABOUT_FAQ.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}
+  </div>
+  <div class="hero-cta" style="margin-top:30px">
+    <a class="btn btn-p" href="/resume">${icon('print')}Résumé</a>
+    <a class="btn btn-g" href="mailto:${esc(SITE.email)}">${icon('mail')}Email</a>
+    <a class="btn btn-g" href="https://github.com/itsThePrakash" target="_blank" rel="noopener">${icon('github')}GitHub</a>
+    <a class="btn btn-g" href="/sponsor">${icon('coffee')}Sponsor the work</a>
+  </div>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: `About Prakash Gothwal — Kolwa, Dausa · MNIT Jaipur CSE`,
+    description: `Prakash Gothwal (Prakash) is from Kolwa, Dausa district, Rajasthan. B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy.`,
+    body, path: '/about', jsonld: aboutJsonld(),
+    extraHead: `<style>${minCSS(ABOUT_CSS)}</style>`, og: 'og-about.svg',
+  });
+}
+
+
+
+/* ── sponsor wall, kept in the repo as well as on the site ───────────────── */
+function sponsorWall() {
+  if (process.env.VERCEL) return; // only the local build touches repo files
+  const wall = SPONSOR.wall || [];
+  const inline = wall.length
+    ? wall.map((w) => (w.url ? `[${w.name}](${w.url})` : w.name)).join(' · ')
+    : '_Nobody yet. The first name goes here._';
+  const md = `# Sponsors
+
+Everything on this site is free: no ads, no trackers, no paywall. Sponsorship
+pays for domains, hosting, API credits and the hours behind the free tools.
+
+The same names appear on <https://itstheprakash.vercel.app/sponsor> and on
+[the sponsor wall in the README](README.md#sponsor). Names are never invented
+and private sponsors stay off the list.
+
+## Wall
+
+${inline}
+`;
+  const target = join(ROOT, 'SPONSORS.md');
+  if (!existsSync(target) || readFileSync(target, 'utf8') !== md) writeFileSync(target, md);
+
+  const readmePath = join(ROOT, 'README.md');
+  const readme = readFileSync(readmePath, 'utf8');
+  const block = `<!-- SPONSORS:START -->\n${inline}\n<!-- SPONSORS:END -->`;
+  const next = readme.replace(/<!-- SPONSORS:START -->[\s\S]*?<!-- SPONSORS:END -->/, block);
+  if (next !== readme) writeFileSync(readmePath, next);
+}
+
+/* ── SEO surfaces: projects, organisations, repositories ─────────────────── */
+const SEO_CSS = `
+.seo-wrap{max-width:860px}
+.crumbs{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--fg3);margin-bottom:20px}
+.crumbs a{color:var(--fg3)}
+.crumbs a:hover{color:var(--c)}
+.seo-lede{font-size:16.5px;color:var(--fg2);margin-top:14px;line-height:1.65;max-width:64ch}
+.seo-body{margin-top:14px;font-size:15px;line-height:1.72;color:var(--fg2);max-width:68ch}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:26px}
+.spec div{background:var(--bg2);padding:13px 15px}
+.spec small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);margin-bottom:4px}
+.spec b{font-size:13.5px;font-weight:600}
+.lnk-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.plist{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px}
+.plist li{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 16px;display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.plist a.t{font-size:15px;font-weight:600;color:var(--fg)}
+.plist a.t:hover{color:var(--c)}
+.plist small{display:block;font-size:12.5px;color:var(--fg3);margin-top:4px;max-width:58ch;line-height:1.5}
+.tagrow{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.repo-table{width:100%;border-collapse:collapse;margin-top:22px;font-size:13.5px}
+.repo-table th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500}
+.repo-table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--fg2)}
+.repo-table td:first-child{white-space:nowrap}
+.repo-table a{color:var(--fg)}
+.repo-table a:hover{color:var(--c)}
+@media(max-width:560px){.repo-table .hide-s{display:none}}
+.faq{display:grid;gap:8px;margin-top:14px}
+.faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
+.faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
+.faq p{margin-top:8px;font-size:13.5px;color:var(--fg2);line-height:1.6}
+.repo-links{display:inline-flex;gap:4px;flex-wrap:wrap}
+.repo-links a{font-family:var(--mono);font-size:9.5px;padding:3px 7px;border-radius:6px;border:1px solid var(--line2);color:var(--fg2);transition:color .2s,border-color .2s,background .2s}
+.repo-links a:hover{color:var(--c);border-color:rgba(0,229,255,.45);background:var(--surface2)}
+`;
+
+const statusLabel = (p) => (p.status === 'live' ? 'Live' : p.status === 'closed' ? 'Closed' : 'Source only');
+
+function crumbs(items) {
+  return `<div class="crumbs">${items
+    .map((it) => (it.href ? `<a href="${attr(it.href)}">${esc(it.label)}</a>` : `<span>${esc(it.label)}</span>`))
+    .join('<span>/</span>')}</div>`;
+}
+
+function linksFor(p) {
+  return `${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}${p.status === 'closed' ? 'Site' : 'Live site'}</a>` : ''}
+    ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages build</a>` : ''}
+    ${p.repo ? `<a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>` : ''}`;
+}
+
+function projectsPage() {
+  const list = PROJECTS.map(
+    (p) => `<li><div><a class="t" href="/projects/${p.id}">${esc(p.name)}</a><small>${esc(p.tagline)}</small></div>
+      <span class="tagrow">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</span></li>`
+  ).join('');
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Projects' }])}
+  <p class="eyebrow">Projects</p>
+  <h1 style="font-size:clamp(34px,5.6vw,60px)">Everything I have built.</h1>
+  <p class="seo-lede">${PROJECTS.length} projects, each with its own page: what it does, what it runs on, and where to find it. Some are live. One is closed. A few are tools I built because something annoyed me.</p>
+  <ul class="plist">${list}</ul>
+  <h2 style="font-size:clamp(22px,3vw,30px);margin-top:40px">Organisations</h2>
+  <ul class="plist">${ORGS.map(
+    (o) => `<li><div><a class="t" href="/orgs/${o.id}">${esc(o.display)}</a><small>${esc(o.tagline)}</small></div>
+      <span class="tagrow"><span class="tag">${esc(o.handle)}</span></span></li>`
+  ).join('')}</ul>
+  <p class="seo-body" style="margin-top:26px">Every repository is listed by name on the <a href="/repos">repositories page</a>. There is a <a href="/resume">résumé</a> and an <a href="/about">about page</a> too.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: `Projects by Prakash Gothwal — EkGuru, Bhasha Bridge, Saransh`,
+    description: `${PROJECTS.length} projects built by Prakash Gothwal (MNIT Jaipur CSE): EkGuru, Bhasha Bridge, Print$Buddy, Saransh, TANIK, PDF Forensics and more. Live links and source.`,
+    body,
+    path: '/projects',
+    keywords: ['Prakash Gothwal projects', 'Prakash MNIT projects', ...PROJECTS.map((p) => p.name)],
+    jsonld: itemListJsonld('Projects by Prakash Gothwal', '/projects', PROJECTS.map((p) => ({ name: p.name, url: `${BASE}/projects/${p.id}` }))),
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+function itemListJsonld(name, path, items) {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'ItemList',
+        '@id': `${BASE}${path}#list`,
+        name,
+        numberOfItems: items.length,
+        itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: it.url })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+          { '@type': 'ListItem', position: 2, name, item: `${BASE}${path}` },
+        ],
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function projectJsonld(p) {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${BASE}/projects/${p.id}#app`,
+        name: p.name,
+        alternateName: p.kicker,
+        applicationCategory: p.tags.includes('AI') ? 'BusinessApplication' : 'WebApplication',
+        operatingSystem: 'Web',
+        description: p.description,
+        url: p.live || `${BASE}/projects/${p.id}`,
+        codeRepository: p.repo || undefined,
+        sameAs: [p.live, pagesHref(p)].filter(Boolean),
+        author: { '@id': `${BASE}/#person` },
+        keywords: p.stack.join(', '),
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${BASE}/projects/${p.id}#faq`,
+        mainEntity: projectFaq(p).map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+          { '@type': 'ListItem', position: 2, name: 'Projects', item: `${BASE}/projects` },
+          { '@type': 'ListItem', position: 3, name: p.name, item: `${BASE}/projects/${p.id}` },
+        ],
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function projectFaq(p) {
+  const qa = [
+    {
+      q: `What is ${p.name}?`,
+      a: `${p.tagline} ${p.description}`,
+    },
+    {
+      q: `What is ${p.name} built with?`,
+      a: `${p.name} is built with ${p.stack.join(', ')}. ${p.repo ? 'The source is public on GitHub.' : 'The source is not public.'}`,
+    },
+    {
+      q: `Where can I use ${p.name}?`,
+      a: p.live
+        ? `It runs at ${p.live.replace(/^https?:\/\//, '')}, in any modern browser. ${p.status === 'closed' ? 'The service itself is closed; the site stays online as a record.' : ''}`.trim()
+        : `It is a source-only project. The code is at ${p.repo || 'github.com/itsThePrakash'}.`,
+    },
+  ];
+  return qa;
+}
+
+function projectPage(p) {
+  const related = PROJECTS.filter((x) => x.id !== p.id && x.tags.some((t) => p.tags.includes(t))).slice(0, 3);
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Projects', href: '/projects' }, { label: p.name }])}
+  <p class="eyebrow">${esc(p.kicker)}</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">${esc(p.name)}</h1>
+  <p class="seo-lede">${esc(p.tagline)}</p>
+  <div class="seo-body"><p>${esc(p.description)}</p></div>
+  <div class="spec">
+    <div><small>Status</small><b>${statusLabel(p)}</b></div>
+    <div><small>Built with</small><b>${esc(p.stack.join(' · '))}</b></div>
+    <div><small>Made by</small><b>${esc(SITE.fullName)}</b></div>
+  </div>
+  <div class="lnk-row">${linksFor(p)}
+    <a class="btn btn-g" href="/projects">${icon('arrow')}All projects</a>
+  </div>
+  ${related.length ? `<h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Related projects</h2>
+  <ul class="plist">${related.map((r) => `<li><div><a class="t" href="/projects/${r.id}">${esc(r.name)}</a><small>${esc(r.tagline)}</small></div></li>`).join('')}</ul>` : ''}
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Questions</h2>
+  <div class="faq">${projectFaq(p).map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>
+  <p class="seo-body" style="margin-top:30px">More about me on the <a href="/about">about page</a>, or the <a href="/resume">résumé</a>. If one of these saved you time, you can <a href="/sponsor">sponsor the work</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: `${p.name} — ${p.kicker} · Prakash Gothwal`,
+    description: `${p.name}: ${p.tagline} A ${p.kicker.toLowerCase()} by Prakash Gothwal${p.stack.length ? `, built with ${p.stack.slice(0, 3).join(', ')}` : ''}. ${p.live ? 'Live now.' : ''}`.trim(),
+    body,
+    path: `/projects/${p.id}`,
+    jsonld: projectJsonld(p),
+    keywords: [...new Set([p.name, p.kicker, ...p.stack, 'Prakash Gothwal', 'Prakash MNIT', 'MNIT Jaipur'])],
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: `og/${p.id}.svg`,
+  });
+}
+
+function orgPage(o) {
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Organisations', href: '/projects' }, { label: o.display }])}
+  <p class="eyebrow">Organisation · ${esc(o.handle)}</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">${esc(o.display)}</h1>
+  <p class="seo-lede">${esc(o.tagline)}</p>
+  <div class="seo-body"><p>${esc(o.body)}</p><p>Founded and run by <a href="/about">Prakash Gothwal</a> (${esc(SITE.fullName)}), ${esc(o.role.toLowerCase())}.</p></div>
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:34px">Public repositories</h2>
+  <ul class="plist">${repoLinksFor(o.handle).map((r) => `<li>
+    <div><a class="t" href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a><small>${esc(r.what)}</small></div>
+    ${repoActions(r, false)}
+  </li>`).join('')}</ul>
+  <p class="seo-body" style="margin-top:26px">All projects are listed on the <a href="/projects">projects page</a>, and every repository name is on the <a href="/repos">repositories page</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: `${o.display} (${o.handle}) — organisation by Prakash Gothwal`,
+    description: `${o.display} — ${o.tagline} The ${o.handle} organisation on GitHub, founded by Prakash Gothwal (MNIT Jaipur CSE).`,
+    body,
+    path: `/orgs/${o.id}`,
+    keywords: [o.display, o.handle, `${o.display} GitHub`, 'Prakash Gothwal', 'MNIT Jaipur'],
+    jsonld: `<script type="application/ld+json">${JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        personNode(),
+        {
+          '@type': 'Organization',
+          '@id': `${BASE}/orgs/${o.id}#org`,
+          name: o.display,
+          alternateName: o.handle,
+          description: o.body,
+          url: `${BASE}/orgs/${o.id}`,
+          sameAs: [`https://github.com/${o.handle}`],
+          founder: { '@id': `${BASE}/#person` },
+          owns: repoLinksFor(o.handle).map((r) => ({
+            '@type': 'SoftwareSourceCode',
+            name: r.repo,
+            description: r.what,
+            codeRepository: repoUrl(r),
+            url: r.live || r.pages || repoUrl(r),
+          })),
+        },
+      ],
+    }).replace(/</g, '\\u003c')}</script>`,
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+function repoJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'ItemList',
+        '@id': `${BASE}/repos#list`,
+        name: 'Public repositories by Prakash Gothwal',
+        numberOfItems: PUBLIC_REPOS.length,
+        itemListElement: PUBLIC_REPOS.map((r, i) => {
+          const reg = REPO_LINKS.find((x) => x.repo === r.name);
+          return {
+            '@type': 'ListItem',
+            position: i + 1,
+            item: {
+              '@type': 'SoftwareSourceCode',
+              name: r.name,
+              description: r.desc || (reg ? reg.what : 'Public repository'),
+              codeRepository: r.url,
+              programmingLanguage: r.lang || undefined,
+              dateModified: r.pushed,
+              author: { '@id': `${BASE}/#person` },
+              ...(reg && reg.live ? { url: reg.live } : {}),
+            },
+          };
+        }),
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function reposPage() {
+  const rows = PUBLIC_REPOS.map((r) => {
+    const project = PROJECTS.find((p) => p.repo && p.repo.toLowerCase().endsWith(`/${r.name.toLowerCase()}`));
+    const what = r.desc || (project ? project.tagline : 'Public repository');
+    const reg = REPO_LINKS.find((x) => x.repo === r.name);
+    const links = reg
+      ? repoActions(reg, false)
+      : `<span class="repo-links"><a href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>`;
+    return `<tr>
+      <td><a href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>${r.fork ? '<br/><small style="color:var(--fg3);font-size:11px">fork</small>' : ''}</td>
+      <td>${esc(what)}${project ? ` · <a href="/projects/${project.id}">project page</a>` : ''}</td>
+      <td class="hide-s">${esc(r.lang || '—')}</td>
+      <td>${links}</td>
+    </tr>`;
+  }).join('');
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Repositories' }])}
+  <p class="eyebrow">GitHub</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">Repositories</h1>
+  <p class="seo-lede">All ${PUBLIC_REPOS.length} public repositories on <a href="${attr(SITE.github)}" target="_blank" rel="noopener">github.com/itsThePrakash</a>, by name. Every one is mine; nothing here is forked unless it says so.</p>
+  <table class="repo-table">
+    <thead><tr><th>Repository</th><th>What it is</th><th class="hide-s">Language</th><th>Links</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Organisation repositories</h2>
+  <p class="seo-lede" style="font-size:14.5px">Public repos that live under EkGuruLearning and Print-Buddy. Same person, different owner.</p>
+  <ul class="plist">${REPO_LINKS.filter((r) => ORGS.some((o) => o.handle === r.owner)).map((r) => `<li>
+    <div><a class="t" href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a><small>${esc(r.what)} · ${esc(r.owner)}</small></div>
+    ${repoActions(r, false)}
+  </li>`).join('')}</ul>
+  <p class="seo-body" style="margin-top:26px">Projects with their own pages are on <a href="/projects">/projects</a>. The organisations behind EkGuru and Print$Buddy are on <a href="/orgs/ekguru">/orgs/ekguru</a> and <a href="/orgs/printsbuddy">/orgs/printsbuddy</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: 'Repositories — Prakash Gothwal (@itsThePrakash)',
+    description: `All ${PUBLIC_REPOS.length} public repositories from Prakash Gothwal (@itsThePrakash), including EkGuru, PDF-Forensics-, id-maker, saransh and TANIK-News-India-.`,
+    body,
+    path: '/repos',
+    keywords: ['itsThePrakash repositories', 'Prakash Gothwal GitHub', ...PUBLIC_REPOS.slice(0, 12).map((r) => r.name)],
+    jsonld: repoJsonld(),
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+/* ── sponsor ─────────────────────────────────────────────────────────────── */
+const SPONSOR_FAQ = [
+  {
+    q: 'Where does the money actually go?',
+    a: 'Domains, hosting and API credits for these projects, plus the hours I spend on tools that do not make money. Nothing else.',
+  },
+  {
+    q: 'Does sponsoring unlock anything?',
+    a: 'Only your name on the sponsor wall, and only if you want it there. No paywall, no locked posts, no control over what I write.',
+  },
+  {
+    q: 'Can I sponsor from India?',
+    a: 'Yes. GitHub Sponsors works for Indian bank accounts and the payout reaches me in rupees. If your card gets declined, email me and we will find another way.',
+  },
+  {
+    q: 'Can I stay anonymous?',
+    a: 'Yes. Tick the private option while sponsoring on GitHub and your name never appears on the wall.',
+  },
+  {
+    q: 'Do I get a receipt?',
+    a: 'GitHub emails a receipt for every payment. Keep it — that is the document you need for your own books.',
+  },
+  {
+    q: 'Will any of this become paid?',
+    a: 'No. Everything on this site and on the linked projects stays free, now and later.',
+  },
+];
+
+const SPONSOR_CSS = `
+.sp-card{border:1px solid var(--line2);border-radius:var(--r2);background:var(--surface);padding:26px;display:grid;gap:13px;margin-top:26px;position:relative;overflow:hidden}
+.sp-card::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;top:-140px;right:-120px;background:radial-gradient(circle,var(--v),transparent 65%);opacity:.18;filter:blur(26px);pointer-events:none}
+.sp-card h2{font-size:20px}
+.sp-card .badge{width:max-content}
+.sp-note{font-size:13px;color:var(--fg3);line-height:1.6;max-width:58ch}
+.sp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.sp-box{border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--bg2)}
+.sp-box b{display:block;font-size:13.5px;margin-bottom:4px}
+.sp-box span{font-size:12.5px;color:var(--fg2);line-height:1.55}
+.sp-hi{font-size:14px;color:var(--fg2);border-left:2px solid var(--c);padding-left:13px;margin-top:18px;line-height:1.7}
+.sp-wall{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.sp-wall li{border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:13px;background:var(--surface);color:var(--fg2)}
+.sp-wall a{color:var(--fg2)}
+.sp-empty{margin-top:12px;font-size:13.5px;color:var(--fg3)}
+.sponsor-line{margin-top:18px;font-size:13px;color:var(--fg3);line-height:1.6}
+.sponsor-line a{color:var(--c);text-decoration:underline;text-underline-offset:3px}
+`;
+
+function sponsorJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'WebPage',
+        '@id': `${BASE}/sponsor#page`,
+        url: `${BASE}/sponsor`,
+        name: 'Sponsor Prakash Gothwal',
+        isPartOf: { '@id': `${BASE}/#website` },
+        potentialAction: {
+          '@type': 'DonateAction',
+          name: 'Sponsor on GitHub Sponsors',
+          target: SPONSOR.github,
+          recipient: { '@id': `${BASE}/#person` },
+        },
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function sponsorPage() {
+  const live = SPONSOR.githubLive;
+  const href = live ? SPONSOR.github : `mailto:${SITE.email}?subject=Sponsor%20the%20work`;
+  const label = live ? 'Sponsor on GitHub' : 'Email to sponsor';
+  const note = live
+    ? 'Pick any amount, one-time or monthly. GitHub charges in USD and pays out to an Indian bank account in INR; my profile is set up for that.'
+    : 'My GitHub Sponsors profile is in review. Until it goes live, email me and I will send a UPI ID or a plain invoice, whichever suits you.';
+
+  const upi = SPONSOR.upi
+    ? `<div class="sp-card">
+  <h2>UPI</h2>
+  <p class="sp-note">Fastest option inside India. Any amount, no account needed.</p>
+  <div class="sp-row">
+    <code id="upiId" style="font-family:var(--mono);font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)">${esc(SPONSOR.upi)}</code>
+    <button class="btn btn-g btn-s" data-copy data-v="${attr(SPONSOR.upi)}">${icon('copy')}<span>Copy UPI ID</span></button>
+  </div>
+</div>`
+    : '';
+
+  const razorpay = SPONSOR.razorpay
+    ? `<div class="sp-card">
+  <h2>Card, netbanking, wallet</h2>
+  <p class="sp-note">Razorpay handles Indian cards, UPI and netbanking on one page.</p>
+  <div class="sp-row"><a class="btn btn-p" href="${attr(SPONSOR.razorpay)}" target="_blank" rel="noopener">${icon('arrow')}Open payment page</a></div>
+</div>`
+    : '';
+
+  const bmc = SPONSOR.buymeacoffee
+    ? `<div class="sp-card">
+  <h2>Buy me a coffee</h2>
+  <p class="sp-note">Card or wallet, any amount, no account needed.</p>
+  <div class="sp-row"><a class="btn btn-g" href="${attr(SPONSOR.buymeacoffee)}" target="_blank" rel="noopener">${icon('coffee')}Open the page</a></div>
+</div>`
+    : '';
+
+  const wall = SPONSOR.wall.length
+    ? `<ul class="sp-wall">${SPONSOR.wall
+        .map((w) =>
+          w.url
+            ? `<li><a href="${attr(w.url)}" target="_blank" rel="noopener">${esc(w.name)}</a></li>`
+            : `<li>${esc(w.name)}</li>`
+        )
+        .join('')}</ul>`
+    : `<p class="sp-empty">Nobody here yet. The first name on this wall can be yours.</p>`;
+
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap about-wrap">
+  <p class="eyebrow">Sponsor</p>
+  <h1 style="font-size:clamp(36px,6vw,64px)">Keep the small stuff free.</h1>
+  <p class="lede">Every project on this site is free, has no ads, and sends nothing to an analytics dashboard. If something here saved you an afternoon, you can put something back.</p>
+  <p class="sp-hi" lang="hi">हिंदी में: यहाँ सब कुछ मुफ़्त है और मुफ़्त रहेगा। कुछ काम आया हो तो GitHub से सपोर्ट कर सकते हैं — कोई भी रकम, कोई ज़बरदस्ती नहीं।</p>
+
+  <div class="sp-card">
+    <span class="badge ${live ? 'ok' : 'src'}">${live ? 'Live now' : 'Profile in review'}</span>
+    <h2>GitHub Sponsors</h2>
+    <p class="sp-note">${note}</p>
+    <div class="sp-row">
+      <a class="btn btn-p" href="${attr(href)}">${icon('coffee')}${label}</a>
+      <a class="btn btn-g" href="${attr(SITE.github)}" target="_blank" rel="noopener">${icon('github')}GitHub profile</a>
+    </div>
+  </div>
+
+  ${upi}
+  ${bmc}
+  ${razorpay}
+
+  <div class="sp-card">
+    <h2>What it pays for</h2>
+    <div class="sp-grid">
+      <div class="sp-box"><b>Domains and hosting</b><span>Keeping ekguru.shop and the side projects online.</span></div>
+      <div class="sp-box"><b>API credits</b><span>The AI parts of EkGuru and the PDF tools run on paid calls.</span></div>
+      <div class="sp-box"><b>Time</b><span>The hours behind tools that never had a business model.</span></div>
+    </div>
+    <p class="sp-note">No ads, no trackers, no affiliate links. Sponsorship is the only thing this page asks for.</p>
+  </div>
+
+  <div class="sp-card">
+    <h2>People who sponsored</h2>
+    ${wall}
+    <p class="sp-note">Want your name here? Mention it while sponsoring, or email me after. Private sponsors stay private.</p>
+  </div>
+
+  <div class="faq">
+    <h2 style="font-size:clamp(22px,3vw,30px);margin-top:34px">Questions</h2>
+    ${SPONSOR_FAQ.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}
+  </div>
+
+  <div class="hero-cta" style="margin-top:30px">
+    <a class="btn btn-p" href="${attr(href)}">${icon('coffee')}${label}</a>
+    <a class="btn btn-g" href="mailto:${esc(SITE.email)}">${icon('mail')}Email me</a>
+  </div>
+</div>
+</section>
+</main>
+${footer()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
+  return page({
+    title: 'Sponsor Prakash Gothwal — keep the small tools free',
+    description:
+      'Sponsor Prakash Gothwal on GitHub Sponsors. Any amount, one-time or monthly. Everything on this site stays free — no ads, no paywall.',
+    body,
+    path: '/sponsor',
+    jsonld: sponsorJsonld(),
+    extraHead: `<style>${minCSS(ABOUT_CSS + SPONSOR_CSS)}</style>`,
+    og: 'og-sponsor.svg',
+  });
+}
 
 /* ── 404 ─────────────────────────────────────────────────────────────────── */
 function notFound() {
   const body = `${nav()}
-<main><section style="padding-top:150px;min-height:70vh;display:flex;align-items:center">
+<main id="main"><section style="padding-top:150px;min-height:70vh;display:flex;align-items:center">
 <div class="wrap" style="text-align:center">
   <p class="eyebrow" style="justify-content:center">Error 404</p>
   <h1 style="font-size:clamp(48px,10vw,110px);letter-spacing:-.05em" class="grad">Signal lost.</h1>
@@ -580,10 +1444,11 @@ function notFound() {
     <a class="btn btn-p" href="/">${icon('arrow')}Home</a>
     <a class="btn btn-g" href="/resume">Résumé</a>
     <a class="btn btn-g" href="https://github.com/itsThePrakash" target="_blank" rel="noopener">${icon('github')}GitHub</a>
+    <a class="btn btn-g" href="/sponsor">${icon('coffee')}Sponsor the work</a>
   </div>
 </div></section></main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({ title: '404 — Signal lost', description: 'Page not found.', body, path: '/404' });
 }
 
@@ -595,24 +1460,67 @@ Allow: /
 
 Sitemap: ${BASE}/sitemap.xml
 `;
+  const pageSuffix = (p) => {
+  if (!BASE_PATH) return p;
+  if (/^\/(projects|orgs)\/[a-z0-9-]+$/.test(p)) return p + '.html';
+  if (/^\/(projects|orgs|repos|about|resume|sponsor)$/.test(p)) return p + '.html';
+  return p;
+};
+  const pageUrl = (p) => `${BASE}${pageSuffix(p)}`;
+  const lastmod = new Date().toISOString().slice(0, 10);
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${BASE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>${BASE}/resume</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${pageUrl('/')}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>${pageUrl('/resume')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${pageUrl('/about')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>${pageUrl('/sponsor')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>${pageUrl('/projects')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>${pageUrl('/repos')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+${PROJECTS.map((p) => `  <url><loc>${pageUrl('/projects/${p.id}')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
+${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
+`;
+  const feedDate = new Date().toISOString();
+  const items = [
+    ...PROJECTS.map((p) => ({
+      title: `${p.name} — ${p.tagline}`,
+      link: `${BASE}${pageSuffix(`/projects/${p.id}`)}`,
+      date: feedDate,
+      desc: p.description,
+    })),
+    { title: 'Résumé — Prakash Gothwal', link: `${BASE}${pageSuffix('/resume')}`, date: feedDate, desc: 'Print-ready résumé: education, projects, stack.' },
+    { title: 'About Prakash Gothwal', link: `${BASE}${pageSuffix('/about')}`, date: feedDate, desc: 'Kolwa, Dausa to MNIT Jaipur. Long bio and quick answers.' },
+  ];
+  const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Prakash Gothwal — projects and notes</title>
+  <link>${BASE}</link>
+  <description>Everything Prakash Gothwal builds, with a page per project.</description>
+  <language>en-in</language>
+  <atom:link href="${BASE}/feed.xml" rel="self" type="application/rss+xml"/>
+${items.map((i) => `  <item>
+    <title>${i.title.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</title>
+    <link>${i.link}</link>
+    <guid isPermaLink="true">${i.link}</guid>
+    <pubDate>${new Date(i.date).toUTCString()}</pubDate>
+    <description>${i.desc.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</description>
+  </item>`).join('\n')}
+</channel>
+</rss>
 `;
   const manifest = {
     name: `${SITE.name} — ${SITE.title}`,
     short_name: SITE.name,
-    description: SITE.about,
-    start_url: '/',
+    description: 'Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026). Founder of EkGuru and Print$Buddy.',
+    start_url: `${BASE_PATH}/`,
     display: 'standalone',
     background_color: '#05060b',
     theme_color: '#05060b',
-    icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
+    icons: [{ src: `${BASE_PATH}/icon.svg`, sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
   };
   const ghJson = JSON.stringify(SNAP, null, 2);
-  return { robots, sitemap, manifest, ghJson };
+  return { robots, sitemap, feed, manifest, ghJson };
 }
 
 /* ── run ─────────────────────────────────────────────────────────────────── */
@@ -621,25 +1529,61 @@ function main() {
   mkdirSync(join(DIST, 'medals'), { recursive: true });
   mkdirSync(join(DIST, 'data'), { recursive: true });
 
+  const seoPages = [
+    ['projects.html', projectsPage()],
+    ['repos.html', reposPage()],
+    ...PROJECTS.map((p) => [`projects/${p.id}.html`, projectPage(p)]),
+    ...ORGS.map((o) => [`orgs/${o.id}.html`, orgPage(o)]),
+  ];
   const pages = [
     ['index.html', homePage()],
     ['resume.html', resumePage()],
+    ['about.html', aboutPage()],
+    ['sponsor.html', sponsorPage()],
     ['404.html', notFound()],
+    ...seoPages,
   ];
-  for (const [f, html] of pages) writeFileSync(join(DIST, f), minHTML(html));
+  for (const dir of ['projects', 'orgs']) mkdirSync(join(DIST, dir), { recursive: true });
+  for (const [f, html] of pages) writeFileSync(join(DIST, f), rebase(minHTML(html)));
 
   const s = sidecars();
-  writeFileSync(join(DIST, 'robots.txt'), s.robots);
+  writeFileSync(join(DIST, 'robots.txt'), s.robots.replace(new RegExp(`Sitemap: ${BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), `Sitemap: ${BASE}`));
   writeFileSync(join(DIST, 'sitemap.xml'), s.sitemap);
+  writeFileSync(join(DIST, 'feed.xml'), s.feed);
   writeFileSync(join(DIST, 'manifest.webmanifest'), JSON.stringify(s.manifest, null, 2));
   writeFileSync(join(DIST, 'data', 'github.json'), s.ghJson);
+  writeFileSync(join(DIST, 'style.css'), minCSS(CSS));
+  writeFileSync(join(DIST, 'app.js'), minJS(JS));
   writeFileSync(join(DIST, 'icon.svg'), favicon());
   writeFileSync(join(DIST, 'og.svg'), ogCard());
+  writeFileSync(join(DIST, 'og-about.svg'), ogCard({ sub: 'About · Kolwa, Dausa · MNIT Jaipur CSE', tag: 'ABOUT' }));
+  writeFileSync(join(DIST, 'og-resume.svg'), ogCard({ sub: 'Résumé · B.Tech CSE, MNIT Jaipur 2022–2026', tag: 'RÉSUMÉ' }));
+  writeFileSync(join(DIST, 'og-sponsor.svg'), ogCard({ sub: 'Sponsor the work · any amount', tag: 'SPONSOR' }));
+  writeFileSync(join(DIST, 'og-projects.svg'), ogCard({ sub: 'Projects · EkGuru · Bhasha Bridge · Saransh', tag: 'PROJECTS' }));
+  mkdirSync(join(DIST, 'og'), { recursive: true });
+  for (const p of PROJECTS) {
+    writeFileSync(join(DIST, 'og', `${p.id}.svg`), ogCard({ sub: p.tagline, tag: p.name.toUpperCase() }));
+  }
   writeFileSync(join(DIST, 'banner.svg'), banner());
+
+  // static passthrough: anything in public/ is copied verbatim (résumé photo, etc.)
+  if (existsSync(join(ROOT, 'public'))) cpSync(join(ROOT, 'public'), DIST, { recursive: true });
 
   for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
     writeFileSync(join(DIST, 'medals', `${a.id}.svg`), medal(a.id, 0));
   }
+
+  /* README assets live in the repo so the profile page never hotlinks a
+     service that can go down. Same art the site uses, committed once. */
+  mkdirSync(join(ROOT, 'assets', 'medals'), { recursive: true });
+  writeFileSync(join(ROOT, 'assets', 'banner.svg'), banner());
+  writeFileSync(join(ROOT, 'assets', 'og.svg'), ogCard());
+  writeFileSync(join(ROOT, 'assets', 'stats.svg'), statsCard(SNAP, ACHIEVEMENTS_UNLOCKED.length));
+  for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
+    writeFileSync(join(ROOT, 'assets', 'medals', `${a.id}.svg`), medal(a.id, 0));
+  }
+
+  sponsorWall();
 
   // report
   const sizes = pages.map(([f]) => [f, statSync(join(DIST, f)).size]);

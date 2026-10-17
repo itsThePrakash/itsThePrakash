@@ -8,7 +8,9 @@
 
 export const SITE = {
   name: 'Prakash',
-  fullName: 'PRAKASH',
+  fullName: 'Prakash Gothwal',
+  fullNameHi: 'प्रकाश गोथवाल',
+  displayName: 'PRAKASH',
   handle: 'itsThePrakash',
   title: 'Founder & CEO @ EkGuru · Full-Stack & AI Engineer',
   roles: [
@@ -18,20 +20,64 @@ export const SITE = {
     'MNIT Jaipur · CSE',
     'Open Source Contributor',
   ],
-  tagline: 'I build things that ship at scale — and that people actually use.',
+  tagline: 'I build small things that people use.',
   about:
-    'Final-year Computer Science student at MNIT Jaipur. I founded EkGuru, a Hindi-first language bridge used by learners across 40+ countries, and Print$Buddy, a campus print-delivery service born out of a real hostel problem at 1 a.m. I like hard problems, tiny bundles, and systems that stay up.',
+    "I'm Prakash Gothwal, usually just Prakash. I'm from Kolwa, a village in Dausa district, Rajasthan, and I studied Computer Science & Engineering (CSE) at MNIT Jaipur from 2022 to 2026. I started EkGuru, a Hindi-first learning site, and Print$Buddy, a print delivery service for my hostel. I like small pages, plain HTML and fixing things myself.",
+  /* Name variants people actually search for. Used in metadata and structured data. */
+  aliases: [
+    'Prakash Gothwal',
+    'Prakash',
+    'Prakash MNIT',
+    'Prakash MNIT Jaipur',
+    'Prakash CSE',
+    'Prakash Kolwa',
+    'Prakash Dausa',
+    'Prakash Gothwal MNIT',
+    'Prakash Gothwal Dausa',
+    'itsThePrakash',
+    'प्रकाश गोथवाल',
+  ],
+  keywords: [
+    'Prakash Gothwal',
+    'Prakash MNIT',
+    'Prakash CSE',
+    'Prakash Kolwa',
+    'Prakash Dausa',
+    'MNIT Jaipur CSE',
+    'itsThePrakash',
+    'EkGuru',
+  ],
+
+  hometown: 'Kolwa, Dausa, Rajasthan',
   location: 'Jaipur, Rajasthan, India',
   timezone: 'Asia/Kolkata',
-  email: 'itsprakashwork@gmail.com',
-  emailAlt: 'EkGuruLearning@gmail.com',
+  email: 'itsThePrakash@gmail.com',
+  emailAlt: 'itsprakashwork@gmail.com',
+  photo: null, // e.g. '/me.jpg' — drop the file in public/ to show it on the résumé
   phone: null,
   available: true,
-  status: '🎯 Focusing',
   hireable: true,
   yearsCoding: 4,
   resumeUrl: '/resume',
   github: 'https://github.com/itsThePrakash',
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  SPONSORSHIP — one block controls every sponsor surface on the site.
+ *  Turn a rail on by filling its field. Nothing else needs editing.
+ *  · github   → works once github.com/sponsors/itsThePrakash is live
+ *  · upi      → set the VPA (e.g. 'prakash@okhdfcbank') and the UPI card appears
+ *  · razorpay → set a payment-page URL and that card appears
+ *  · buymeacoffee → set the page URL and a coffee card appears
+ *  · wall     → names of people who actually sponsored; empty = honest empty state
+ * ───────────────────────────────────────────────────────────────────────────── */
+export const SPONSOR = {
+  github: 'https://github.com/sponsors/itsThePrakash',
+  githubLive: false,
+  upi: null,
+  razorpay: null,
+  buymeacoffee: null, // e.g. 'https://buymeacoffee.com/itsThePrakash'
+  wall: [],
 };
 
 /* ── Social graph. Every link the profile owns, in one place. ─────────────── */
@@ -73,6 +119,24 @@ export const SOCIALS = [
     desc: 'Behind the keyboard',
   },
   {
+    id: 'youtube',
+    label: 'YouTube',
+    handle: '@itstheprakash',
+    url: 'https://youtube.com/@itstheprakash',
+    color: '#ff0033',
+    primary: true,
+    desc: 'Builds, demos and walkthroughs',
+  },
+  {
+    id: 'geeksforgeeks',
+    label: 'GeeksforGeeks',
+    handle: 'istheprakash',
+    url: 'https://www.geeksforgeeks.org/profile/istheprakash',
+    color: '#2f8d46',
+    primary: false,
+    desc: 'DSA practice and problem solving',
+  },
+  {
     id: 'telegram',
     label: 'Telegram',
     handle: '@Prakash_gothwal',
@@ -102,8 +166,8 @@ export const SOCIALS = [
   {
     id: 'email',
     label: 'Email',
-    handle: 'itsprakashwork@gmail.com',
-    url: 'mailto:itsprakashwork@gmail.com',
+    handle: 'itsThePrakash@gmail.com',
+    url: 'mailto:itsThePrakash@gmail.com',
     color: '#7c5cff',
     primary: true,
     desc: 'Serious inquiries only',
@@ -117,6 +181,178 @@ export const SOCIALS = [
     primary: false,
     desc: 'Fuel the next build',
   },
+];
+
+
+/* ── Every public repository, once ──────────────────────────────────────────
+ * Verified against the GitHub API on 2026-10-17:
+ *   live  → the deployed app
+ *   pages → a real /repos/{owner}/{repo}/pages build (never guessed)
+ *   repo  → source
+ * /repos, /orgs/* and the home org cards all render from this list, so a repo
+ * can never appear in one place with a link missing in another.
+ * ──────────────────────────────────────────────────────────────────────────── */
+export const REPO_LINKS = [
+  { repo: 'EkGuru', owner: 'EkGuruLearning', what: 'Hindi-first learning site, 2,754 static pages', live: 'https://ekguru.shop', pages: 'https://ekguru.shop/', project: 'ekguru', pushed: '2026-10-17' },
+  { repo: 'Questions-', owner: 'EkGuruLearning', what: 'Exam engine — CBT, results, Supabase backend', live: 'https://ekguru-questions.vercel.app', pages: 'https://ekgurulearning.github.io/Questions-/', project: 'ekguru-questions', pushed: '2026-10-17' },
+  { repo: 'PrintsBuddy', owner: 'Print-Buddy', what: 'Hostel print delivery — closed, site archived', live: 'https://printsbuddy.vercel.app', pages: 'https://print-buddy.github.io/PrintsBuddy/', project: 'printsbuddy', pushed: '2026-07-31' },
+  { repo: 'PDF-Forensics-', owner: 'itsThePrakash', what: 'PDF metadata forensics and anomaly reports', live: null, pages: 'https://itstheprakash.github.io/PDF-Forensics-/', project: 'pdf-forensics', pushed: '2026-04-26' },
+  { repo: 'id-maker', owner: 'itsThePrakash', what: 'ID-card generator that runs in the browser', live: null, pages: 'https://itstheprakash.github.io/id-maker/', project: 'id-maker', pushed: '2025-08-23' },
+  { repo: 'how-to-download-View-only-pdf', owner: 'itsThePrakash', what: 'Browser snippet for view-only PDFs', live: null, pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/', project: 'view-only-pdf', pushed: '2026-10-17' },
+  { repo: 'saransh', owner: 'itsThePrakash', what: 'Document summariser — key points, tone, reading time', live: 'https://saranshne.vercel.app', pages: null, project: 'saransh', pushed: '2025-12-04' },
+  { repo: 'TANIK-News-India-', owner: 'itsThePrakash', what: 'Indian news, rewritten into short briefs', live: 'https://tanik-news-india.vercel.app', pages: null, project: 'tanik', pushed: '2025-12-05' },
+  { repo: 'Resume-Parsing-System', owner: 'itsThePrakash', what: 'CVs in, normalised and deduplicated records out', live: null, pages: null, project: 'resume-parsing', pushed: '2025-12-03' },
+  { repo: 'ClassX-Pdf-download', owner: 'itsThePrakash', what: 'Pulls view-restricted course PDFs for offline study', live: null, pages: null, project: 'classx', pushed: '2026-06-17' },
+  { repo: 'C-PLUS-PLUS', owner: 'itsThePrakash', what: 'Every data structure and algorithm I have written', live: null, pages: null, project: 'cpp', pushed: '2023-10-08' },
+  { repo: 'astro-supabase-starter', owner: 'itsThePrakash', what: 'Astro + Supabase starter, MIT licensed', live: 'https://astro-supabase-starter.netlify.app/', pages: null, project: 'astro-supabase', pushed: '2025-05-10' },
+  { repo: 'astro-platform-starter', owner: 'itsThePrakash', what: 'Static-first Astro starter with content collections', live: null, pages: null, project: null, pushed: '2025-05-10' },
+  { repo: 'triyal', owner: 'itsThePrakash', what: 'Early Print$Buddy build', live: null, pages: 'https://itstheprakash.github.io/triyal/', project: null, pushed: '2025-07-30' },
+  { repo: 'awesome-piracy-', owner: 'itsThePrakash', what: 'A fork kept for reference', live: null, pages: 'https://itstheprakash.github.io/awesome-piracy-/', project: null, pushed: '2023-06-18' },
+];
+
+export const repoUrl = (r) => `https://github.com/${r.owner}/${r.repo}`;
+export const repoLinksFor = (owner) => REPO_LINKS.filter((r) => r.owner === owner);
+
+/* ── Public repositories ────────────────────────────────────────────────────
+ * Pulled from the GitHub API on 2026-10-17. Used by /repos so each repository
+ * name has a real page to rank for. Re-run the query in docs/SETUP.md to update.
+ * ──────────────────────────────────────────────────────────────────────────── */
+export const PUBLIC_REPOS = [
+  {
+    "name": "itsThePrakash",
+    "desc": "Config files for my GitHub profile.",
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/itsThePrakash",
+    "pushed": "2026-10-17",
+    "fork": false
+  },
+  {
+    "name": "how-to-download-View-only-pdf",
+    "desc": null,
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/how-to-download-View-only-pdf",
+    "pushed": "2026-10-17",
+    "fork": false
+  },
+  {
+    "name": "PDF-Forensics",
+    "desc": "Minor/Major Project",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/PDF-Forensics",
+    "pushed": "2026-10-17",
+    "fork": true
+  },
+  {
+    "name": "ClassX-Pdf-download",
+    "desc": "ClassX resticted pdf download avalible ",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/ClassX-Pdf-download",
+    "pushed": "2026-06-17",
+    "fork": false
+  },
+  {
+    "name": "PDF-Forensics-",
+    "desc": "Minor/Major Project ",
+    "lang": "Python",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/PDF-Forensics-",
+    "pushed": "2026-04-26",
+    "fork": false
+  },
+  {
+    "name": "TANIK-News-India-",
+    "desc": null,
+    "lang": "TypeScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/TANIK-News-India-",
+    "pushed": "2025-12-05",
+    "fork": false
+  },
+  {
+    "name": "saransh",
+    "desc": null,
+    "lang": "TypeScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/saransh",
+    "pushed": "2025-12-04",
+    "fork": false
+  },
+  {
+    "name": "Resume-Parsing-System",
+    "desc": null,
+    "lang": "Python",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/Resume-Parsing-System",
+    "pushed": "2025-12-03",
+    "fork": false
+  },
+  {
+    "name": "id-maker",
+    "desc": null,
+    "lang": "HTML",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/id-maker",
+    "pushed": "2025-08-23",
+    "fork": false
+  },
+  {
+    "name": "triyal",
+    "desc": null,
+    "lang": "HTML",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/triyal",
+    "pushed": "2025-07-30",
+    "fork": false
+  },
+  {
+    "name": "triyal2printsbuddy",
+    "desc": null,
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/triyal2printsbuddy",
+    "pushed": "2025-07-30",
+    "fork": false
+  },
+  {
+    "name": "astro-platform-starter",
+    "desc": null,
+    "lang": "Astro",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/astro-platform-starter",
+    "pushed": "2025-05-10",
+    "fork": false
+  },
+  {
+    "name": "astro-supabase-starter",
+    "desc": null,
+    "lang": "Astro",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/astro-supabase-starter",
+    "pushed": "2025-05-10",
+    "fork": false
+  },
+  {
+    "name": "C-PLUS-PLUS",
+    "desc": "all code",
+    "lang": "C++",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/C-PLUS-PLUS",
+    "pushed": "2023-10-08",
+    "fork": false
+  },
+  {
+    "name": "awesome-piracy-",
+    "desc": "A curated list of awesome warez and piracy links.how   ",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/awesome-piracy-",
+    "pushed": "2023-06-18",
+    "fork": true
+  }
 ];
 
 /* ── GitHub achievements — unlocked, verified against the live profile ────── */
@@ -302,22 +538,45 @@ export const ACHIEVEMENTS_CATALOG = [
 /* ── Projects. `live` is the deployed URL, `repo` the source. ─────────────── */
 export const PROJECTS = [
   {
+    id: 'bhasha-bridge',
+    name: 'Bhasha Bridge',
+    kicker: 'Language app',
+    tagline: 'Language learning, built as a web app.',
+    description:
+      'A Next.js web app for language learning with Google sign-in, Postgres behind the lessons and email for account flows. My newest build, and the one I am spending the most time on right now.',
+    tags: ['Next.js', 'EdTech', 'Postgres'],
+    stack: ['Next.js', 'Postgres', 'Google OAuth', 'Vercel'],
+    live: 'https://bhashabridge-iota.vercel.app',
+    repo: null,
+    featured: true,
+    status: 'live',
+    pin: true,
+    metrics: [
+      { k: 'Stack', v: 'Next.js' },
+      { k: 'Auth', v: 'Google' },
+      { k: 'Data', v: 'Postgres' },
+    ],
+    accent: '#ff4d8d',
+  },
+  {
     id: 'ekguru',
     name: 'EkGuru',
     kicker: 'Founder & CEO · Flagship',
-    tagline: 'A language bridge that turns Hindi into a door, not a wall.',
+    tagline: 'Learn Hindi without going through English first.',
     description:
-      'Hindi-first learning platform built from zero: 2,600+ hand-tuned static pages, 7 interface locales, 40+ "learn Hindi for <your language>" bridges, spaced repetition, voice practice, offline PWA and a zero-JS-first critical path. Runs on GitHub Pages with a Go/Python generator and no framework runtime.',
+      'A Hindi learning site I started in college. Someone who speaks Arabic, Japanese or Tamil can begin with Hindi directly, without English as a middle step. It is plain HTML and CSS generated by a Python script: 2,754 pages, 11 locale directories and 31 language-bridge sections. No React, no framework, nothing running on a server.',
     tags: ['EdTech', 'Platform', 'SEO', 'PWA', 'i18n'],
     stack: ['HTML', 'CSS', 'JavaScript', 'Python', 'Service Worker'],
     live: 'https://ekguru.shop',
+    pages: 'https://ekguru.shop/',
     repo: 'https://github.com/EkGuruLearning/EkGuru',
     featured: true,
+    pin: true,
     status: 'live',
     metrics: [
-      { k: 'Pages', v: '2634' },
-      { k: 'Locales', v: '7' },
-      { k: 'Language bridges', v: '40+' },
+      { k: 'Pages', v: '2,754' },
+      { k: 'Locales', v: '11' },
+      { k: 'Language bridges', v: '31' },
     ],
     accent: '#7c5cff',
   },
@@ -325,17 +584,19 @@ export const PROJECTS = [
     id: 'ekguru-questions',
     name: 'EkGuru Questions',
     kicker: 'Exam engine',
-    tagline: 'A computer-based test platform that survives a full campus at once.',
+    tagline: 'A test engine that can hold a whole batch at once.',
     description:
-      'All-subject CBT and results engine with a Supabase backend, server-rendered results, per-subject paper sets, theme support and a CI-gated content pipeline. Built to take an entire cohort sitting an exam simultaneously without breaking a sweat.',
+      'The exam side of EkGuru. A teacher picks a subject and a paper set, students write a timed CBT paper in the browser, and results come back server-rendered from Supabase. Per-subject papers, theme support and a CI check on new questions.',
     tags: ['EdTech', 'Realtime', 'Supabase', 'Node'],
     stack: ['Node.js', 'Supabase', 'PostgreSQL', 'CI/CD'],
     live: 'https://ekguru-questions.vercel.app',
+    pages: 'https://ekgurulearning.github.io/Questions-/',
     repo: 'https://github.com/EkGuruLearning/Questions-',
     featured: true,
+    pin: true,
     status: 'live',
     metrics: [
-      { k: 'Subjects', v: 'All' },
+      { k: 'Mode', v: 'CBT' },
       { k: 'Backend', v: 'Supabase' },
       { k: 'Deploy', v: 'Vercel' },
     ],
@@ -345,19 +606,21 @@ export const PROJECTS = [
     id: 'printsbuddy',
     name: 'Print$Buddy',
     kicker: 'Founder · Campus venture',
-    tagline: 'Born at 1 a.m. in a boys hostel — print delivered to your door.',
+    tagline: 'Printed pages delivered to your hostel room at 1 a.m.',
     description:
-      'A real business idea turned product at MNIT Jaipur. Late-night hostel print delivery: upload, pay, and get the pages at your room. Order tracking, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. Solved a problem I personally had, which is the only reason it worked.',
+      'Print$Buddy delivered printouts to hostel rooms at MNIT Jaipur. Upload a PDF, pay, and someone knocked on your door with the pages. It had order tracking, an admin console, a leaderboard and two games for study breaks. It ran through college and closed after graduation. The code and site are still online.',
     tags: ['Startup', 'Full-Stack', 'Payments', 'Logistics'],
     stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'],
     live: 'https://printsbuddy.vercel.app',
+    pages: 'https://print-buddy.github.io/PrintsBuddy/',
     repo: 'https://github.com/Print-Buddy/PrintsBuddy',
     featured: true,
-    status: 'live',
+    pin: true,
+    status: 'closed',
     metrics: [
       { k: 'Campus', v: 'MNIT' },
       { k: 'Delivery', v: 'Hostel door' },
-      { k: 'Uptime', v: '99.9%' },
+      { k: 'Status', v: 'Closed' },
     ],
     accent: '#ff4d8d',
   },
@@ -365,9 +628,9 @@ export const PROJECTS = [
     id: 'saransh',
     name: 'Saransh',
     kicker: 'AI summarizer',
-    tagline: 'Long documents in, clean summaries out.',
+    tagline: 'Long documents in, a short digest out.',
     description:
-      'A Gemini-powered summarization app. Paste a document, get a structured digest — key points, tone and reading time. Built on Google AI Studio and shipped as a static front end on Vercel.',
+      'Paste a long document and get back the key points, the tone and an estimated reading time. The model is Gemini; the front end is TypeScript on Vercel and stays static.',
     tags: ['AI', 'NLP', 'TypeScript'],
     stack: ['TypeScript', 'Gemini API', 'Vercel'],
     live: 'https://saranshne.vercel.app',
@@ -385,9 +648,9 @@ export const PROJECTS = [
     id: 'tanik',
     name: 'TANIK News India',
     kicker: 'AI newsroom',
-    tagline: 'India-focused news, curated and summarised by AI.',
+    tagline: 'Indian news, rewritten short.',
     description:
-      'An AI-curated news reader for India: aggregated headlines rewritten into short, scannable briefs with category filtering and a fast static shell.',
+      'A news reader that only covers India. Headlines are pulled in, cut down to short briefs and grouped by category. The shell is static, so the page opens fast on a phone.',
     tags: ['AI', 'News', 'TypeScript'],
     stack: ['TypeScript', 'Gemini API', 'Vercel'],
     live: 'https://tanik-news-india.vercel.app',
@@ -407,10 +670,11 @@ export const PROJECTS = [
     kicker: 'Major project',
     tagline: 'Read the metadata nobody thinks to check.',
     description:
-      'A forensic analysis toolchain for PDF documents — metadata extraction, anomaly detection, structure inspection and reporting. My major project, with a Python analysis core and a TypeScript reporting front end.',
+      'My major project. A Python tool that opens a PDF, reads its metadata and internal structure, flags anything that looks off and writes a report. A TypeScript front end puts the report together.',
     tags: ['Security', 'Python', 'Tooling'],
     stack: ['Python', 'TypeScript', 'ReportLab'],
     live: null,
+    pages: 'https://itstheprakash.github.io/PDF-Forensics-/',
     repo: 'https://github.com/itsThePrakash/PDF-Forensics-',
     featured: true,
     status: 'source',
@@ -425,9 +689,9 @@ export const PROJECTS = [
     id: 'resume-parsing',
     name: 'Resume Parsing System',
     kicker: 'ML pipeline',
-    tagline: 'Unstructured CVs in, structured records out.',
+    tagline: 'Messy CVs in, clean records out.',
     description:
-      'An ML pipeline that parses resumes into normalized fields — skills, education, experience — with scoring and dedupe. Python core, regex + model hybrid extraction.',
+      'A Python pipeline that reads resumes and pulls out skills, education and experience into one shape. It scores the matches and removes duplicates. Extraction is part rules, part model.',
     tags: ['ML', 'Python', 'NLP'],
     stack: ['Python', 'scikit-learn', 'spaCy'],
     live: null,
@@ -445,18 +709,19 @@ export const PROJECTS = [
     id: 'id-maker',
     name: 'ID Maker',
     kicker: 'Utility',
-    tagline: 'Generate printable ID cards in the browser.',
+    tagline: 'Printable ID cards, made in the browser.',
     description:
-      'A zero-dependency browser ID card generator — live preview, custom fields, print-ready output. Also the repo where I picked up my first Quickdraw and YOLO badges.',
+      'Type the details, watch the card fill in, print it. No libraries, no server. This is also the repo where I picked up my first Quickdraw and YOLO badges.',
     tags: ['Utility', 'Zero-dep'],
     stack: ['HTML', 'CSS', 'JavaScript'],
     live: null,
+    pages: 'https://itstheprakash.github.io/id-maker/',
     repo: 'https://github.com/itsThePrakash/id-maker',
     featured: false,
     status: 'source',
     metrics: [
       { k: 'Deps', v: '0' },
-      { k: 'Badges', v: '⚡🚀' },
+      { k: 'Badges', v: '2' },
       { k: 'Runs', v: 'Browser' },
     ],
     accent: '#22e07a',
@@ -465,9 +730,9 @@ export const PROJECTS = [
     id: 'classx',
     name: 'ClassX PDF Download',
     kicker: 'Tooling',
-    tagline: 'Restricted course PDFs, unlocked for offline study.',
+    tagline: 'Course PDFs saved for offline reading.',
     description:
-      'A tool that retrieves view-restricted course PDFs so they can actually be studied offline. Built after watching classmates screenshot slides at midnight.',
+      'A small tool I wrote for course PDFs that only opened inside a viewer. It fetches the file so the pages can be read later, without a connection.',
     tags: ['Tooling', 'Automation'],
     stack: ['JavaScript', 'Node.js'],
     live: null,
@@ -485,12 +750,13 @@ export const PROJECTS = [
     id: 'view-only-pdf',
     name: 'View-Only PDF Download',
     kicker: 'Tooling',
-    tagline: 'The follow-up nobody asked for and everybody used.',
+    tagline: 'The same trick for other locked viewers.',
     description:
-      'A companion tool for pulling down view-only PDFs from locked document viewers. Pure JavaScript, no server.',
+      'A companion tool for view-only PDFs in other document viewers. It runs as a browser snippet, so there is nothing to install and no server involved.',
     tags: ['Tooling', 'JavaScript'],
     stack: ['JavaScript'],
     live: null,
+    pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/',
     repo: 'https://github.com/itsThePrakash/how-to-download-View-only-pdf',
     featured: false,
     status: 'source',
@@ -505,9 +771,9 @@ export const PROJECTS = [
     id: 'cpp',
     name: 'C++ · DSA Vault',
     kicker: 'Fundamentals',
-    tagline: 'Every algorithm I ever implemented, kept honest.',
+    tagline: 'Data structures and algorithms, written by hand.',
     description:
-      'A running vault of data-structures and algorithms implementations in modern C++ — the foundation everything else is built on.',
+      'A folder of C++ implementations I wrote while learning data structures and algorithms. Not a library, just practice that stayed useful.',
     tags: ['DSA', 'C++', 'Fundamentals'],
     stack: ['C++', 'STL'],
     live: null,
@@ -525,9 +791,9 @@ export const PROJECTS = [
     id: 'astro-supabase',
     name: 'Astro × Supabase Starter',
     kicker: 'Open template',
-    tagline: 'Ship a full-stack Astro app with a database in one click.',
+    tagline: 'An Astro plus Supabase starter.',
     description:
-      'An open-source starter wiring Astro to Supabase with typed queries, auth scaffolding and a one-click deploy. MIT licensed.',
+      'A small starter that connects Astro to Supabase with typed queries and auth already wired. MIT licensed, and it runs on Netlify.',
     tags: ['Open Source', 'Astro', 'Template'],
     stack: ['Astro', 'Supabase', 'TypeScript'],
     live: 'https://astro-supabase-starter.netlify.app/',
@@ -543,6 +809,55 @@ export const PROJECTS = [
   },
 ];
 
+/* ── Organisations. Public repos only; `pages` is a verified GitHub Pages URL. ─ */
+export const ORGS = [
+  {
+    id: 'ekguru',
+    handle: 'EkGuruLearning',
+    display: 'EkGuru',
+    tagline: 'One Student. One Goal. One Guru.',
+    role: 'Founder & CEO',
+    body: 'The organisation behind EkGuru and its exam engine. Both projects live here.',
+    repos: [
+      {
+        name: 'EkGuru',
+        desc: 'Hindi-first language bridge — 2,754 static pages, 11 locales, 31 language bridges.',
+        url: 'https://github.com/EkGuruLearning/EkGuru',
+        live: 'https://ekguru.shop',
+        pages: 'https://ekguru.shop/',
+      },
+      {
+        name: 'EkGuru Questions',
+        desc: 'Questions- · CBT and results engine. Supabase backend, Vercel deploy.',
+        url: 'https://github.com/EkGuruLearning/Questions-',
+        live: 'https://ekguru-questions.vercel.app',
+        pages: 'https://ekgurulearning.github.io/Questions-/',
+      },
+    ],
+    live: 'https://ekguru.shop',
+    accent: '#7c5cff',
+  },
+  {
+    id: 'printsbuddy',
+    handle: 'Print-Buddy',
+    display: 'Print$Buddy',
+    tagline: 'Print delivered to your hostel door.',
+    role: 'Founder',
+    body: 'The print delivery venture I started at MNIT Jaipur. Closed now, code still up.',
+    repos: [
+      {
+        name: 'PrintsBuddy',
+        desc: 'Hostel print delivery: order tracking, admin console, leaderboard and study-break games.',
+        url: 'https://github.com/Print-Buddy/PrintsBuddy',
+        live: 'https://printsbuddy.vercel.app',
+        pages: 'https://print-buddy.github.io/PrintsBuddy/',
+      },
+    ],
+    live: 'https://printsbuddy.vercel.app',
+    accent: '#ff4d8d',
+  },
+];
+
 /* ── Timeline ─────────────────────────────────────────────────────────────── */
 export const TIMELINE = [
   {
@@ -550,7 +865,7 @@ export const TIMELINE = [
     title: 'Founder & CEO · EkGuru',
     org: 'EkGuruLearning',
     kind: 'work',
-    body: 'Building a Hindi-first language bridge. Own product, architecture, SEO, i18n and the whole static pipeline — 2,600+ pages, zero framework runtime, sub-second first paint on a phone.',
+    body: 'I started EkGuru while at MNIT. I write the pages, the generator, the translations and the SEO myself. It is static HTML on GitHub Pages, so it costs almost nothing to run.',
     links: [
       { label: 'ekguru.shop', url: 'https://ekguru.shop' },
       { label: 'GitHub', url: 'https://github.com/EkGuruLearning/EkGuru' },
@@ -561,7 +876,7 @@ export const TIMELINE = [
     title: 'Founder · Print$Buddy',
     org: 'MNIT Jaipur',
     kind: 'work',
-    body: 'Took a 1 a.m. hostel print problem and shipped a delivery product for it — ordering, payments, an admin console and door delivery across campus.',
+    body: 'A hostel problem I had at 1 a.m. turned into an order form, a payment step and a delivery run across campus. It closed after graduation; the site stays up.',
     links: [
       { label: 'printsbuddy.vercel.app', url: 'https://printsbuddy.vercel.app' },
       { label: 'GitHub', url: 'https://github.com/Print-Buddy/PrintsBuddy' },
@@ -569,18 +884,34 @@ export const TIMELINE = [
   },
   {
     period: '2022 — 2026',
-    title: 'B.Tech · Computer Science & Engineering',
+    title: 'B.Tech · Computer Science & Engineering (CSE)',
     org: 'MNIT Jaipur',
     kind: 'education',
-    body: 'Malaviya National Institute of Technology, Jaipur. Coursework in algorithms, systems, machine learning and databases, plus a lot of building outside the syllabus.',
+    body: 'Malaviya National Institute of Technology, Jaipur. Algorithms, systems, databases and machine learning, plus a lot of code outside the syllabus.',
     links: [{ label: 'mnit.ac.in', url: 'https://mnit.ac.in' }],
   },
   {
+    period: '2022',
+    title: 'Class XII · Senior Secondary',
+    org: 'Completed 2022',
+    kind: 'education',
+    body: 'Finished senior secondary in 2022 and joined MNIT Jaipur for B.Tech CSE.',
+    links: [],
+  },
+  {
+    period: '2020',
+    title: 'Class X · Secondary',
+    org: 'Completed 2020',
+    kind: 'education',
+    body: 'Finished secondary school in 2020.',
+    links: [],
+  },
+  {
     period: '2023 — now',
-    title: 'Open source & community',
+    title: 'Open source and side projects',
     org: 'GitHub · @itsThePrakash',
     kind: 'oss',
-    body: 'Public repos, merged PRs, co-authored work with AI agents, and four GitHub achievements unlocked so far. Still grinding toward Starstruck.',
+    body: 'Public repos, a few merged pull requests and four GitHub achievements. I still push most weeks.',
     links: [{ label: 'GitHub profile', url: 'https://github.com/itsThePrakash' }],
   },
 ];
@@ -620,17 +951,17 @@ export const GITHUB_FALLBACK = {
   following: 15,
   publicRepos: 15,
   publicGists: 0,
-  totalStars: 9,
+  totalStars: 15,
   achievements: 4,
   proMember: true,
   createdAt: '2023-09-05',
   topLanguages: [
-    { name: 'HTML', pct: 62 },
-    { name: 'Python', pct: 14 },
-    { name: 'TypeScript', pct: 11 },
-    { name: 'JavaScript', pct: 7 },
-    { name: 'C++', pct: 4 },
-    { name: 'Astro', pct: 2 },
+    { name: 'JavaScript', pct: 25 },
+    { name: 'Astro', pct: 17 },
+    { name: 'HTML', pct: 17 },
+    { name: 'Python', pct: 17 },
+    { name: 'TypeScript', pct: 17 },
+    { name: 'C++', pct: 8 },
   ],
   fetchedAt: null,
 };
@@ -642,17 +973,17 @@ export const GITHUB_SNAPSHOT = {
   publicRepos: 15,
   followers: 0,
   following: 15,
-  totalStars: 9,
+  totalStars: 15,
   achievements: 4,
   proMember: true,
   fetchedAt: '2026-10-17T00:00:00Z',
   topLanguages: [
-    { name: 'HTML', pct: 62 },
-    { name: 'Python', pct: 14 },
-    { name: 'TypeScript', pct: 11 },
-    { name: 'JavaScript', pct: 7 },
-    { name: 'C++', pct: 4 },
-    { name: 'Astro', pct: 2 },
+    { name: 'JavaScript', pct: 25 },
+    { name: 'Astro', pct: 17 },
+    { name: 'HTML', pct: 17 },
+    { name: 'Python', pct: 17 },
+    { name: 'TypeScript', pct: 17 },
+    { name: 'C++', pct: 8 },
   ],
 };
 
@@ -672,10 +1003,19 @@ export function buildIndex() {
     out.push({
       title: p.name,
       subtitle: p.tagline,
-      url: p.live || p.repo,
+      url: `/projects/${p.id}`,
       repo: p.repo,
       kind: 'Project',
       keywords: [...p.tags, ...p.stack].join(' '),
+    });
+  }
+  for (const o of ORGS) {
+    out.push({
+      title: o.display,
+      subtitle: `${o.role} · ${o.handle}`,
+      url: o.live || `https://github.com/${o.handle}`,
+      kind: 'Org',
+      keywords: o.tagline + ' ' + o.repos.map((r) => r.name).join(' '),
     });
   }
   for (const a of ACHIEVEMENTS_UNLOCKED) {
@@ -688,6 +1028,22 @@ export function buildIndex() {
     });
   }
   out.push({ title: 'Résumé', subtitle: 'Full CV, print-ready', url: '/resume', kind: 'Page', keywords: 'cv resume hire' });
+  out.push({
+    title: 'About Prakash Gothwal',
+    subtitle: 'Kolwa, Dausa · MNIT Jaipur CSE',
+    url: '/about',
+    kind: 'Page',
+    keywords: SITE.aliases.join(' '),
+  });
+  out.push({
+    title: 'Sponsor the work',
+    subtitle: 'GitHub Sponsors · any amount',
+    url: '/sponsor',
+    kind: 'Page',
+    keywords: 'support sponsor donate coffee fund',
+  });
+  out.push({ title: 'All projects', subtitle: 'Every project, one page each', url: '/projects', kind: 'Page', keywords: 'work portfolio apps' });
+  out.push({ title: 'Repositories', subtitle: 'All 15 public repos by name', url: '/repos', kind: 'Page', keywords: 'github code source repos' });
   out.push({ title: 'Email me', subtitle: SITE.email, url: `mailto:${SITE.email}`, kind: 'Contact', keywords: 'hire contact work' });
   out.push({ title: 'GitHub profile', subtitle: '@itsThePrakash', url: SITE.github, kind: 'Profile', keywords: 'code repos stars' });
   return out;

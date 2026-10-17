@@ -1,0 +1,6 @@
+# Shows the "Sponsor" button on every repo once the Sponsors profile is live.
+# Setup steps: docs/SPONSOR.md
+github: [itsThePrakash]
+
+# Uncomment a rail after filling it in. Keys are GitHub's own:
+# custom: ["https://itstheprakash.vercel.app/sponsor"]

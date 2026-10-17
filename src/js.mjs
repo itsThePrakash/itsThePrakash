@@ -127,7 +127,14 @@ function countUp(el,to,suffix,dur){
     function show(){
       nodes.forEach(function(x){x.classList.remove('on')});
       n.classList.add('on');
-      panel.innerHTML=n.getAttribute('data-panel')||'';
+      var i=+n.getAttribute('data-i'), rows=[];
+      try{rows=JSON.parse(d.getElementById('conData').textContent)}catch(e){}
+      var r=rows[i];
+      if(r){
+        panel.innerHTML='<div class="k">'+r[0]+'</div><h3>'+r[1]+'</h3><p class="tg">'+r[2]+'</p><div class="lnks">'+
+          (r[3]?'<a href="'+r[3]+'" target="_blank" rel="noopener">Live ↗</a>':'')+
+          (r[4]?'<a href="'+r[4]+'" target="_blank" rel="noopener">Source ↗</a>':'')+'</div>';
+      }
       var a=panel.querySelector('a'); if(a)a.focus();
     }
     n.addEventListener('mouseenter',show);
@@ -139,14 +146,15 @@ function countUp(el,to,suffix,dur){
   });
 })();
 
-/* ── copy email ────────────────────────────────────────────────────────── */
+/* ── copy (email, UPI, anything with data-copy) ────────────────────────── */
 (function(){
-  var b=$('#copyBtn'); if(!b)return;
-  b.addEventListener('click',function(){
-    var v=b.getAttribute('data-v')||'';
-    function done(){b.classList.add('copied');var l=$('#copyLbl');if(l)l.textContent='Copied';setTimeout(function(){b.classList.remove('copied');if(l)l.textContent='Copy'},1800)}
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(done,done)}
-    else{var i=$('#mailInput');if(i){i.select();try{d.execCommand('copy')}catch(e){}}done()}
+  [].forEach.call(document.querySelectorAll('[data-copy]'),function(b){
+    b.addEventListener('click',function(){
+      var v=b.getAttribute('data-v')||'',l=b.querySelector('span');
+      function done(){b.classList.add('copied');if(l)l.textContent='Copied';setTimeout(function(){b.classList.remove('copied');if(l)l.textContent='Copy'},1800)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(done,done)}
+      else{var i=$('#mailInput');if(i){i.select();try{d.execCommand('copy')}catch(e){}}done()}
+    });
   });
 })();
 
@@ -161,6 +169,32 @@ function countUp(el,to,suffix,dur){
     });
     el.addEventListener('pointerleave',function(){el.style.transform=''});
   });
+})();
+
+/* ── ambient world: pointer spotlight + scroll parallax ─────────────────── */
+(function(){
+  var spot=$('#spot'), world=$('.world');
+  if(!spot||REDUCE||window.matchMedia('(hover:none)').matches)return;
+  var tx=0,ty=0,cx=0,cy=0,alive=false;
+  d.addEventListener('pointermove',function(e){
+    tx=e.clientX;ty=e.clientY;
+    if(!alive){alive=true;requestAnimationFrame(loop)}
+  },{passive:true});
+  function loop(){
+    cx+=(tx-cx)*.12; cy+=(ty-cy)*.12;
+    spot.style.transform='translate3d('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px,0)';
+    if(Math.abs(tx-cx)>.5||Math.abs(ty-cy)>.5)requestAnimationFrame(loop);
+    else alive=false;
+  }
+  if(world){
+    var wa=null;
+    window.addEventListener('scroll',function(){
+      if(wa)return; wa=requestAnimationFrame(function(){
+        world.style.transform='translate3d(0,'+(window.scrollY*.05).toFixed(1)+'px,0)';
+        wa=null;
+      });
+    },{passive:true});
+  }
 })();
 
 /* ── command palette ───────────────────────────────────────────────────── */
@@ -261,6 +295,29 @@ function countUp(el,to,suffix,dur){
     });
   }
   if(els.repos)load();
+})();
+
+/* ── visitor counter ────────────────────────────────────────────────────
+   One increment per browser per day, then cached. Below 50 it says nothing
+   numeric — a fresh site should not advertise "3 visits".
+   ────────────────────────────────────────────────────────────────────── */
+(function(){
+  var el=$('#views'); if(!el)return;
+  var KEY='sc:views', TTL=864e5, FLOOR=50;
+  function paint(n){
+    if(typeof n!=='number'||!isFinite(n)||n<=0)return;
+    el.textContent = n<FLOOR ? 'counting visits' : n.toLocaleString('en-US')+' visits';
+    el.hidden=false;
+  }
+  try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&c.n&&Date.now()-c.t<TTL){paint(c.n);return}}catch(e){}
+  fetch('https://api.counterapi.dev/v1/itstheprakash/portfolio/up',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null})
+    .then(function(j){
+      var n=j&&(typeof j.count==='number'?j.count:(typeof j.value==='number'?j.value:null));
+      if(n===null)return;
+      paint(n);
+      try{localStorage.setItem(KEY,JSON.stringify({t:Date.now(),n:n}))}catch(e){}
+    })['catch'](function(){});
 })();
 
 /* ── footer clock (IST) ─────────────────────────────────────────────────── */
