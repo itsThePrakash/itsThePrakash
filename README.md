@@ -315,7 +315,9 @@ graph LR
     style API fill:#0d1117,stroke:#22e07a,color:#a8b2cf
 ```
 
+<div align="center">
 <sub>One data file in, a portfolio + a résumé + a profile README out. No framework, no runtime, no supply chain.</sub>
+</div>
 
 ---
 
@@ -332,7 +334,5 @@ If something here helped you, a star on any repo genuinely moves the number.
 
 <sub>Built with zero dependencies · served from the edge · every link has a fallback</sub><br/>
 <sub>Jaipur, India · <code>IST</code> · <a href="https://itstheprakash.vercel.app">itstheprakash.vercel.app</a></sub>
-
-</div>
 
 </div>
