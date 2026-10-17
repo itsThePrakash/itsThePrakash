@@ -2,15 +2,18 @@
   "name": "signal-core",
   "version": "1.0.0",
   "private": true,
-  "description": "SIGNAL CORE — Prakash's portfolio, résumé and GitHub profile engine. Zero dependencies, fully static, edge-cached.",
+  "description": "SIGNAL CORE \u2014 Prakash's portfolio, r\u00e9sum\u00e9 and GitHub profile engine. Zero dependencies, fully static, edge-cached.",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "node src/build.mjs",
     "dev": "node src/build.mjs && node src/serve.mjs",
     "start": "node src/build.mjs && node src/serve.mjs",
     "refresh": "node src/fetch-github.mjs",
-    "size": "node src/size.mjs"
+    "size": "node src/size.mjs",
+    "verify": "node src/build.mjs && node src/verify.mjs"
   },
   "keywords": [
     "portfolio",
@@ -21,6 +24,6 @@
     "vercel",
     "edge"
   ],
-  "author": "Prakash <itsprakashwork@gmail.com>",
+  "author": "Prakash <itsThePrakash@gmail.com>",
   "license": "MIT"
 }

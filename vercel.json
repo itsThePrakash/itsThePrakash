@@ -5,72 +5,155 @@
   "buildCommand": "node src/build.mjs",
   "outputDirectory": "dist",
   "installCommand": "npm install --no-audit --no-fund",
-  "github": { "silent": true },
-
+  "github": {
+    "silent": true
+  },
   "headers": [
     {
       "source": "/(.*)\\.(html|json|webmanifest|txt|xml)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=600, stale-while-revalidate=86400, must-revalidate" },
-        { "key": "CDN-Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=600, stale-while-revalidate=86400, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=600, stale-while-revalidate=86400"
+        }
       ]
     },
     {
       "source": "/(.*)\\.(svg|css|js|woff2|png|jpg|webp|ico)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/medals/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
       ]
     },
     {
       "source": "/og.svg",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
       ]
     },
     {
       "source": "/banner.svg",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
       ]
     },
     {
       "source": "/data/github.json",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=3600" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=3600"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "X-DNS-Prefetch-Control", "value": "on" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
       ]
     }
   ],
-
   "redirects": [
-    { "source": "/resume.pdf", "destination": "/resume", "permanent": false },
-    { "source": "/cv", "destination": "/resume", "permanent": true },
-    { "source": "/github", "destination": "https://github.com/itsThePrakash", "permanent": false },
-    { "source": "/linkedin", "destination": "https://www.linkedin.com/in/itsThePrakash", "permanent": false },
-    { "source": "/email", "destination": "mailto:itsprakashwork@gmail.com", "permanent": false }
+    {
+      "source": "/resume.pdf",
+      "destination": "/resume",
+      "permanent": false
+    },
+    {
+      "source": "/cv",
+      "destination": "/resume",
+      "permanent": true
+    },
+    {
+      "source": "/github",
+      "destination": "https://github.com/itsThePrakash",
+      "permanent": false
+    },
+    {
+      "source": "/linkedin",
+      "destination": "https://www.linkedin.com/in/itsThePrakash",
+      "permanent": false
+    },
+    {
+      "source": "/email",
+      "destination": "mailto:itsThePrakash@gmail.com",
+      "permanent": false
+    },
+    {
+      "source": "/youtube",
+      "destination": "https://youtube.com/@itstheprakash",
+      "permanent": false
+    },
+    {
+      "source": "/gfg",
+      "destination": "https://www.geeksforgeeks.org/profile/istheprakash",
+      "permanent": false
+    }
   ],
-
   "rewrites": [
-    { "source": "/api/live", "destination": "/api/live.js" }
+    {
+      "source": "/api/live",
+      "destination": "/api/live.js"
+    }
   ]
 }

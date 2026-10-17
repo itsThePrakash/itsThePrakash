@@ -10,6 +10,7 @@ import { dirname } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const PORT = Number(process.env.PORT || 4173);
+const HOST = process.env.HOST || '0.0.0.0';
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -54,8 +55,8 @@ createServer((req, res) => {
     'cache-control': 'no-store',
   });
   createReadStream(target).pipe(res);
-}).listen(PORT, () => {
-  console.log(`\n  ▸ SIGNAL CORE dev server → http://localhost:${PORT}\n`);
+}).listen(PORT, HOST, () => {
+  console.log(`\n  ▸ SIGNAL CORE dev server → http://${HOST}:${PORT}\n`);
 });
 
 function exists(f) {

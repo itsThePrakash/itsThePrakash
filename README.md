@@ -5,8 +5,8 @@
 <br/>
 
 <a href="https://itstheprakash.vercel.app"><img src="https://img.shields.io/badge/%E2%80%BA%20OPEN%20PORTFOLIO-itstheprakash.vercel.app-7c5cff?style=for-the-badge&labelColor=05060b" alt="Portfolio"/></a>
-<a href="mailto:itsprakashwork@gmail.com"><img src="https://img.shields.io/badge/%E2%80%BA%20HIRE%20ME-itsprakashwork%40gmail.com-00e5ff?style=for-the-badge&labelColor=05060b" alt="Hire me"/></a>
-<a href="/resume"><img src="https://img.shields.io/badge/%E2%80%BA%20R%C3%89SUM%C3%89-print%20ready-ff4d8d?style=for-the-badge&labelColor=05060b" alt="Résumé"/></a>
+<a href="mailto:itsThePrakash@gmail.com"><img src="https://img.shields.io/badge/%E2%80%BA%20HIRE%20ME-itsThePrakash%40gmail.com-00e5ff?style=for-the-badge&labelColor=05060b" alt="Hire me"/></a>
+<a href="https://itstheprakash.vercel.app/resume"><img src="https://img.shields.io/badge/%E2%80%BA%20R%C3%89SUM%C3%89-print%20ready-ff4d8d?style=for-the-badge&labelColor=05060b" alt="Résumé"/></a>
 
 <br/><br/>
 
@@ -16,6 +16,7 @@ $ whoami
   PRAKASH          ·  @itsThePrakash
   role             ·  Founder & CEO @ EkGuru · Full-Stack & AI Engineer
   alma mater       ·  MNIT Jaipur — B.Tech CSE, 2022–2026
+  schooling        ·  Class X 2022 · Class XII 2022
   location         ·  Jaipur, Rajasthan, India   (IST · UTC+5:30)
   status           ·  🎯 Focusing · open to work
 ────────────────────────────────────────────────────────────────────
@@ -31,9 +32,9 @@ $ whoami
 
 > *I don't do demos. I do deployments.*
 
-I build things that run at scale and that real people use on a Tuesday night. Two of them are products I founded — **EkGuru**, a Hindi-first language bridge serving learners across 40+ countries, and **Print$Buddy**, a late-night hostel print-delivery service born out of a problem I personally had at 1 a.m. in a boys hostel at MNIT.
+I build things that run at scale and that real people use on a Tuesday night. Two of them are products I founded — **EkGuru**, a Hindi-first language bridge built from 2,754 static pages and 31 language bridges, and **Print$Buddy**, a late-night hostel print-delivery service born out of a problem I personally had at 1 a.m. in a boys hostel at MNIT.
 
-My house style: **zero dependencies, zero framework runtimes, sub-second first paint, and a fallback for every link in the chain.** This profile README and my whole portfolio are generated from one data file by a dependency-free Node build — <kbd>node src/build.mjs</kbd>, nothing else.
+My house style: **zero dependencies, zero framework runtimes, sub-second first paint, and a fallback for every link in the chain.** My portfolio is generated from one data file by a dependency-free Node build — <kbd>node src/build.mjs</kbd>, nothing else. This README mirrors the same links.
 
 ---
 
@@ -45,19 +46,19 @@ My house style: **zero dependencies, zero framework runtimes, sub-second first p
 
 ### 🟣 [EkGuru](https://ekguru.shop) — *Founder &amp; CEO*
 **A language bridge that turns Hindi into a door, not a wall.**
-2,634 hand-tuned static pages · 7 interface locales · 40+ "learn Hindi for *your* language" bridges · spaced repetition · voice practice · offline PWA · **zero framework runtime.**
+2,754 hand-tuned static pages · 11 locale directories · 31 "learn Hindi for *your* language" bridges · spaced repetition · voice practice · offline PWA · **zero framework runtime.**
 <sub>HTML · CSS · JS · Python · Service Worker</sub>
 
 <br/>
 
-### 🔵 [EkGuru Questions](https://ekguru-questions.vercel.app) — *Exam engine*
+### 🔵 [EkGuru Questions](https://ekguru-questions.vercel.app) — *Exam engine* · [Pages](https://ekgurulearning.github.io/Questions-/)
 **A CBT platform that survives a whole campus sitting an exam at once.**
 All-subject computer-based tests, server-rendered results, Supabase backend, CI-gated content pipeline.
 <sub>Node.js · Supabase · PostgreSQL · CI/CD</sub>
 
 <br/>
 
-### 🩷 [Print$Buddy](https://printsbuddy.vercel.app) — *Founder*
+### 🩷 [Print$Buddy](https://printsbuddy.vercel.app) — *Founder* · [Pages](https://print-buddy.github.io/PrintsBuddy/)
 **Born at 1 a.m. in a boys hostel. Print delivered to your door.**
 Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. MNIT Jaipur campus.
 <sub>HTML · CSS · JavaScript · Vercel</sub>
@@ -77,7 +78,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 <br/>
 
-### 🟠 [PDF Forensics](https://github.com/itsThePrakash/PDF-Forensics-) — *Major project*
+### 🟠 [PDF Forensics](https://github.com/itsThePrakash/PDF-Forensics-) · [Pages](https://itstheprakash.github.io/PDF-Forensics-/) — *Major project*
 **Read the metadata nobody thinks to check.** Metadata extraction, anomaly detection, structure inspection, generated reporting.
 <sub>Python · TypeScript</sub>
 
@@ -91,14 +92,25 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 </tr>
 </table>
 
+<sub>**Verified GitHub Pages builds:** [EkGuru](https://ekguru.shop/) · [EkGuru Questions](https://ekgurulearning.github.io/Questions-/) · [Print$Buddy](https://print-buddy.github.io/PrintsBuddy/) · [PDF Forensics](https://itstheprakash.github.io/PDF-Forensics-/) · [ID Maker](https://itstheprakash.github.io/id-maker/) · [Triyal](https://itstheprakash.github.io/triyal/). Everything else is source-only; `astro-supabase-starter` is **not** on Pages — it runs on Netlify.</sub>
+
+---
+
+## 🏢 Organisations
+
+| Organisation | My role | Public repos |
+|---|---|---|
+| **[EkGuruLearning](https://github.com/EkGuruLearning)** | Founder &amp; CEO | [EkGuru](https://ekguru.shop) · [Questions-](https://ekguru-questions.vercel.app) |
+| **[Print-Buddy](https://github.com/Print-Buddy)** | Founder | [PrintsBuddy](https://printsbuddy.vercel.app) |
+
 <details>
-<summary><b>▸ The other 8 public repositories</b> <sub>(resume parsing, ID maker, PDF tools, DSA vault, starters)</sub></summary>
+<summary><b>▸ More public repositories</b> <sub>(resume parsing, ID maker, PDF tools, DSA vault, starters)</sub></summary>
 <br/>
 
 | Project | What it is | Stack | Source |
 |---|---|---|---|
 | **Resume Parsing System** | ML pipeline: unstructured CVs → normalized records, scored and deduped | Python · spaCy · scikit-learn | [repo](https://github.com/itsThePrakash/Resume-Parsing-System) |
-| **ID Maker** | Zero-dependency browser ID-card generator with live preview | HTML · CSS · JS | [repo](https://github.com/itsThePrakash/id-maker) |
+| **ID Maker** | Zero-dependency browser ID-card generator with live preview | HTML · CSS · JS | [repo](https://github.com/itsThePrakash/id-maker) · [pages](https://itstheprakash.github.io/id-maker/) |
 | **ClassX PDF Download** | Retrieves view-restricted course PDFs for offline study | JavaScript · Node.js | [repo](https://github.com/itsThePrakash/ClassX-Pdf-download) |
 | **View-Only PDF Download** | Companion tool for locked document viewers — no server | JavaScript | [repo](https://github.com/itsThePrakash/how-to-download-View-only-pdf) |
 | **C++ · DSA Vault** | Every data structure and algorithm I've implemented, kept honest | C++ · STL | [repo](https://github.com/itsThePrakash/C-PLUS-PLUS) |
@@ -169,7 +181,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 | 👥 **Pair Extraordinaire** | 1 co-authored PR | 10 | 24 | 48 | `1 / 10` → **Default** |
 | ⚡ **Quickdraw** | 1 | — | — | — | ✅ done |
 | 🚀 **YOLO** | 1 | — | — | — | ✅ done |
-| ⭐ **Starstruck** | 16 ★ | 128 | 512 | 4096 | `9 ★` → **7 to go** |
+| ⭐ **Starstruck** | 16 ★ | 128 | 512 | 4096 | `1 ★` on best repo → **15 to go** |
 | 🧠 **Galaxy Brain** | 2 accepted answers | 8 | 16 | 32 | `0` → locked |
 | 💖 **Public Sponsor** | 1 sponsorship | — | — | — | locked |
 | 🧙 **Open Sourcerer** | 1 external merge | 16 | 128 | — | locked |
@@ -258,20 +270,23 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 <table>
 <tr>
-<td align="center" width="12.5%"><a href="https://github.com/itsThePrakash"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/></a><br/><sub>@itsThePrakash</sub></td>
-<td align="center" width="12.5%"><a href="https://www.linkedin.com/in/itsThePrakash"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/></a><br/><sub>in/itsThePrakash</sub></td>
-<td align="center" width="12.5%"><a href="https://twitter.com/itsThePrakash"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white"/></a><br/><sub>@itsThePrakash</sub></td>
-<td align="center" width="12.5%"><a href="https://www.instagram.com/its.the.prakash"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white"/></a><br/><sub>@its.the.prakash</sub></td>
+<td align="center" width="25%"><a href="https://github.com/itsThePrakash"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/></a><br/><sub>@itsThePrakash</sub></td>
+<td align="center" width="25%"><a href="https://www.linkedin.com/in/itsThePrakash"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/></a><br/><sub>in/itsThePrakash</sub></td>
+<td align="center" width="25%"><a href="https://twitter.com/itsThePrakash"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white"/></a><br/><sub>@itsThePrakash</sub></td>
+<td align="center" width="25%"><a href="https://www.instagram.com/its.the.prakash"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white"/></a><br/><sub>@its.the.prakash</sub></td>
 </tr>
 <tr>
+<td align="center"><a href="https://youtube.com/@itstheprakash"><img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/></a><br/><sub>@itstheprakash</sub></td>
+<td align="center"><a href="https://www.geeksforgeeks.org/profile/istheprakash"><img src="https://img.shields.io/badge/GeeksforGeeks-2F8D46?style=for-the-badge&logo=geeksforgeeks&logoColor=white"/></a><br/><sub>istheprakash</sub></td>
 <td align="center"><a href="https://t.me/Prakash_gothwal"><img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"/></a><br/><sub>@Prakash_gothwal</sub></td>
 <td align="center"><a href="https://www.facebook.com/itsThePrakash1"><img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white"/></a><br/><sub>itsThePrakash1</sub></td>
+</tr>
+<tr>
 <td align="center"><a href="https://dev.to/itstheprakash"><img src="https://img.shields.io/badge/Dev.to-0A0A0A?style=for-the-badge&logo=dev.to&logoColor=white"/></a><br/><sub>@itstheprakash</sub></td>
-<td align="center"><a href="mailto:itsprakashwork@gmail.com"><img src="https://img.shields.io/badge/Email-7C5CFF?style=for-the-badge&logo=gmail&logoColor=white"/></a><br/><sub>itsprakashwork@gmail.com</sub></td>
+<td align="center"><a href="mailto:itsThePrakash@gmail.com"><img src="https://img.shields.io/badge/Email-7C5CFF?style=for-the-badge&logo=gmail&logoColor=white"/></a><br/><sub>itsThePrakash@gmail.com</sub></td>
+<td align="center"><a href="https://buymeacoffee.com/itsThePrakash"><img src="https://img.shields.io/badge/-Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black"/></a><br/><sub>buymeacoffee.com/itsThePrakash</sub></td>
 </tr>
 </table>
-
-<a href="https://buymeacoffee.com/itsThePrakash"><img src="https://img.shields.io/badge/-Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black"/></a>
 
 </div>
 
@@ -282,7 +297,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 ```mermaid
 graph LR
     subgraph SOURCE["src/ · one source of truth"]
-        D["data.mjs<br/><small>profile · projects · socials · achievements</small>"]
+        D["data.mjs<br/><small>profile · projects · orgs · socials · achievements</small>"]
         C["css.mjs · js.mjs · art.mjs"]
         B["build.mjs<br/><small>zero-dependency generator</small>"]
         D --> B
@@ -323,7 +338,7 @@ graph LR
 
 <div align="center">
 
-**Currently:** grinding toward <mark>⭐ Starstruck</mark> — 9 of 16 stars.
+**Currently:** grinding toward <mark>⭐ Starstruck</mark> — 1 star on my best repo, 15 to go.
 If something here helped you, a star on any repo genuinely moves the number.
 
 <br/>

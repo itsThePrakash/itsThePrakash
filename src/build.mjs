@@ -3,10 +3,10 @@
  * Zero dependencies. Node 18+. Outputs a fully static, edge-cacheable site
  * into ./dist. Run with `npm run build`.
  */
-import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, SOCIALS, PROJECTS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, buildIndex } from './data.mjs';
+import { SITE, SOCIALS, PROJECTS, ORGS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
 import { medal, logoMark, favicon, ogCard, banner, constellation } from './art.mjs';
@@ -103,6 +103,9 @@ const attr = (s) => esc(s);
 const num = (v) => Number(v).toLocaleString('en-US');
 
 const ALL_TAGS = [...new Set(PROJECTS.flatMap((p) => p.tags))];
+/** A Pages link only when it points somewhere the Live button does not. */
+const pagesHref = (p) =>
+  p.pages && p.pages.replace(/\/+$/, '') !== (p.live || '').replace(/\/+$/, '') ? p.pages : null;
 
 /** Emit only the <symbol>s this page actually references. */
 function pageSprite(body) {
@@ -156,8 +159,8 @@ ${body}
 
 /* ── shared chrome ───────────────────────────────────────────────────────── */
 const NAV_LINKS = [
-  ['#work', 'Work'], ['#achievements', 'Achievements'], ['#about', 'About'],
-  ['#stack', 'Stack'], ['#contact', 'Contact'],
+  ['#work', 'Work'], ['#orgs', 'Orgs'], ['#achievements', 'Achievements'],
+  ['#about', 'About'], ['#stack', 'Stack'], ['#contact', 'Contact'],
 ];
 
 function nav() {
@@ -244,10 +247,11 @@ function telemetry() {
 }
 
 function projectCards() {
-  return PROJECTS.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
+  const ordered = [...PROJECTS].sort((a, b) => Number(!!b.pin) - Number(!!a.pin));
+  return ordered.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
   <span class="halo"></span>
   <div class="card-top">
-    <div><div class="kick">${esc(p.kicker)}</div><h3>${esc(p.name)}</h3></div>
+    <div><div class="kick">${p.pin ? `<span class="pinned">${icon('pin')}Pinned</span> ` : ''}${esc(p.kicker)}</div><h3>${esc(p.name)}</h3></div>
     <span class="badge ${p.status === 'live' ? 'ok' : 'src'}">${p.status === 'live' ? '● Live' : 'Source'}</span>
   </div>
   <p class="tag">${esc(p.tagline)}</p>
@@ -255,8 +259,24 @@ function projectCards() {
   <div class="metrics">${p.metrics.map((m) => `<div><b>${esc(m.v)}</b><small>${esc(m.k)}</small></div>`).join('')}</div>
   <div class="card-acts">
     ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}Live</a>` : ''}
+    ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages</a>` : ''}
     <a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>
   </div>
+</article>`).join('');
+}
+
+function orgs() {
+  return ORGS.map((o, i) => `<article class="org rv rv-d${(i % 4) + 1}" style="--ac:${o.accent}">
+  <div class="org-top">
+    <div><span class="org-handle">${esc(o.handle)}</span><h3>${esc(o.display)}</h3></div>
+    <span class="badge ok">${esc(o.role)}</span>
+  </div>
+  <p class="tag">${esc(o.tagline)}</p>
+  <p class="org-body">${esc(o.body)}</p>
+  <ul class="org-repos">${o.repos.map((r) => `<li>
+    <div><b>${esc(r.name)}</b><small>${esc(r.desc)}</small></div>
+    <span class="org-lnks">${r.live ? `<a href="${attr(r.live)}" target="_blank" rel="noopener">Live</a>` : ''}${pagesHref(r) ? `<a href="${attr(pagesHref(r))}" target="_blank" rel="noopener">Pages</a>` : ''}<a href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>
+  </li>`).join('')}</ul>
 </article>`).join('');
 }
 
@@ -364,7 +384,7 @@ function work() {
   <div class="sec-head rv">
     <span class="eyebrow">Selected work</span>
     <h2>Things I built that <span class="grad">actually run</span>.</h2>
-    <p class="lede">Twelve public projects — three of them businesses or products with real users. Every card links straight to the live deployment and the source.</p>
+    <p class="lede">Twelve public projects — three of them running in production. Every card links straight to the live deployment, its GitHub Pages build and the source.</p>
   </div>
   <div class="pj-bar rv">
     <div class="filters" role="group" aria-label="Filter projects">
@@ -379,7 +399,7 @@ function work() {
   <div class="pj-grid" id="pjGrid">${projectCards()}</div>
   <div class="constel" id="constel" style="display:none" aria-label="Project constellation">
     ${constellation(PROJECTS)}
-    <div id="conPanel" style="position:absolute;left:20px;bottom:20px;max-width:min(340px,80%);padding:18px;border:1px solid var(--line2);border-radius:16px;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px)"></div>
+    <div id="conPanel" class="con-panel" style="position:absolute;left:20px;bottom:20px;max-width:min(340px,80%);padding:18px;border:1px solid var(--line2);border-radius:16px;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px)"></div>
   </div>
 </div>
 </section>`;
@@ -428,6 +448,13 @@ ${hero()}
 ${marquee()}
 ${telemetry()}
 ${work()}
+<section id="orgs">
+<div class="wrap">
+  <div class="sec-head rv"><span class="eyebrow">Organisations</span><h2>Teams I <span class="grad">founded</span>.</h2>
+  <p class="lede">Two orgs, three public repos, with every Pages URL checked against the GitHub API. Plain anchors all the way down.</p></div>
+  <div class="org-grid">${orgs()}</div>
+</div>
+</section>
 ${achievements()}
 <section id="about">
 <div class="wrap">
@@ -463,16 +490,21 @@ function resumePage() {
   </div>
   <article class="rs">
     <header class="rs-head">
-      <div>
-        <h1>${esc(SITE.fullName)}</h1>
-        <p class="rs-title">${esc(SITE.title)}</p>
-        <p class="rs-sub">${icon('location')}${esc(SITE.location)} · ${icon('mail')}<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a> · ${icon('github')}<a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">github.com/itsThePrakash</a></p>
+      <div class="rs-id">
+        ${SITE.photo
+          ? `<img class="rs-photo" src="${attr(SITE.photo)}" alt="${attr(SITE.name)}" width="84" height="84"/>`
+          : `<div class="rs-photo rs-mono" aria-hidden="true">P</div>`}
+        <div>
+          <h1>${esc(SITE.fullName)} <span class="rs-hi" lang="hi">प्रकाश</span></h1>
+          <p class="rs-title">${esc(SITE.title)}</p>
+          <p class="rs-sub">${icon('location')}${esc(SITE.location)} · ${icon('mail')}<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a> · ${icon('github')}<a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">github.com/itsThePrakash</a> · ${icon('link')}<a href="${attr(BASE)}" target="_blank" rel="noopener">itstheprakash.vercel.app</a></p>
+        </div>
       </div>
       <div class="rs-badge"><div class="rs-badge-in"><b>4</b><small>Achievements unlocked</small></div></div>
     </header>
     <section class="rs-sec">
       <h2>Profile</h2>
-      <p>${esc(SITE.about)} Founder of two products that solve problems I personally hit: EkGuru, a Hindi-first language bridge with 2,600+ pages across 7 interface locales, and Print$Buddy, a late-night hostel print-delivery service at MNIT Jaipur. I work end to end — architecture, implementation, performance budget, deployment and the unglamorous parts nobody posts about.</p>
+      <p>B.Tech in Computer Science &amp; Engineering at MNIT Jaipur (2022–2026). Founder of two products that solve problems I personally hit: EkGuru, a Hindi-first language bridge with 2,754 static pages, 11 locale directories and 31 language bridges; and Print$Buddy, a late-night hostel print-delivery service at MNIT Jaipur. I work end to end — architecture, implementation, performance budget, deployment and the unglamorous parts nobody posts about.</p>
     </section>
     <section class="rs-sec">
       <h2>Experience</h2>
@@ -492,7 +524,7 @@ function resumePage() {
     <section class="rs-sec">
       <h2>Selected projects</h2>
       ${PROJECTS.filter((p) => p.featured).map((p) => `<div class="rs-item">
-        <div class="rs-item-h"><h3>${esc(p.name)}${p.live ? ` · <a href="${attr(p.live)}" target="_blank" rel="noopener">live</a>` : ''}</h3><span>${esc(p.kicker)}</span></div>
+        <div class="rs-item-h"><h3>${esc(p.name)}${p.live ? ` · <a href="${attr(p.live)}" target="_blank" rel="noopener">live</a>` : ''}${pagesHref(p) ? ` · <a href="${attr(pagesHref(p))}" target="_blank" rel="noopener">pages</a>` : ''}</h3><span>${esc(p.kicker)}</span></div>
         <p>${esc(p.description)}</p>
         <p class="rs-stack">${esc(p.stack.join(' · '))}</p>
       </div>`).join('')}
@@ -530,6 +562,10 @@ ${footer()}
 const RESUME_CSS = `
 .rs{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);padding:clamp(24px,4vw,48px)}
 .rs-head{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;padding-bottom:22px;border-bottom:2px solid var(--line2);margin-bottom:8px}
+.rs-id{display:flex;gap:18px;align-items:center;min-width:0}
+.rs-photo{width:84px;height:84px;border-radius:18px;object-fit:cover;border:1px solid var(--line2);flex:0 0 auto}
+.rs-mono{display:grid;place-items:center;font-family:var(--mono);font-size:34px;font-weight:700;background:linear-gradient(140deg,var(--v),var(--c));color:#fff;box-shadow:var(--glow)}
+.rs-hi{font-size:.46em;color:var(--fg3);font-weight:500;letter-spacing:0}
 .rs-head h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.04em}
 .rs-title{font-size:clamp(14px,1.8vw,18px);color:var(--c);font-family:var(--mono);margin-top:6px}
 .rs-sub{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--fg3);margin-top:12px;font-family:var(--mono)}
@@ -565,7 +601,7 @@ const RESUME_CSS = `
 .rs-links a:hover{border-color:var(--line2)}
 .rs-links b{display:block;font-size:13px}
 .rs-links small{font-family:var(--mono);font-size:10.5px;color:var(--fg3)}
-@media (max-width:640px){.rs-head{flex-direction:column}.rs-item-h{flex-direction:column;gap:2px}.rs-item-h span{white-space:normal}}
+@media (max-width:640px){.rs-head{flex-direction:column}.rs-id{align-items:flex-start}.rs-item-h{flex-direction:column;gap:2px}.rs-item-h span{white-space:normal}}
 `;
 
 /* ── 404 ─────────────────────────────────────────────────────────────────── */
@@ -636,6 +672,9 @@ function main() {
   writeFileSync(join(DIST, 'icon.svg'), favicon());
   writeFileSync(join(DIST, 'og.svg'), ogCard());
   writeFileSync(join(DIST, 'banner.svg'), banner());
+
+  // static passthrough: anything in public/ is copied verbatim (résumé photo, etc.)
+  if (existsSync(join(ROOT, 'public'))) cpSync(join(ROOT, 'public'), DIST, { recursive: true });
 
   for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
     writeFileSync(join(DIST, 'medals', `${a.id}.svg`), medal(a.id, 0));

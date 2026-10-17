@@ -20,11 +20,12 @@ export const SITE = {
   ],
   tagline: 'I build things that ship at scale — and that people actually use.',
   about:
-    'Final-year Computer Science student at MNIT Jaipur. I founded EkGuru, a Hindi-first language bridge used by learners across 40+ countries, and Print$Buddy, a campus print-delivery service born out of a real hostel problem at 1 a.m. I like hard problems, tiny bundles, and systems that stay up.',
+    'B.Tech in Computer Science & Engineering at MNIT Jaipur (2022–2026). I founded EkGuru, a Hindi-first language bridge, and Print$Buddy, a campus print-delivery service born out of a real hostel problem at 1 a.m. I like hard problems, tiny bundles, and systems that stay up.',
   location: 'Jaipur, Rajasthan, India',
   timezone: 'Asia/Kolkata',
-  email: 'itsprakashwork@gmail.com',
-  emailAlt: 'EkGuruLearning@gmail.com',
+  email: 'itsThePrakash@gmail.com',
+  emailAlt: 'itsprakashwork@gmail.com',
+  photo: null, // e.g. '/me.jpg' — drop the file in public/ to show it on the résumé
   phone: null,
   available: true,
   status: '🎯 Focusing',
@@ -73,6 +74,24 @@ export const SOCIALS = [
     desc: 'Behind the keyboard',
   },
   {
+    id: 'youtube',
+    label: 'YouTube',
+    handle: '@itstheprakash',
+    url: 'https://youtube.com/@itstheprakash',
+    color: '#ff0033',
+    primary: true,
+    desc: 'Builds, demos and walkthroughs',
+  },
+  {
+    id: 'geeksforgeeks',
+    label: 'GeeksforGeeks',
+    handle: 'istheprakash',
+    url: 'https://www.geeksforgeeks.org/profile/istheprakash',
+    color: '#2f8d46',
+    primary: false,
+    desc: 'DSA practice and problem solving',
+  },
+  {
     id: 'telegram',
     label: 'Telegram',
     handle: '@Prakash_gothwal',
@@ -102,8 +121,8 @@ export const SOCIALS = [
   {
     id: 'email',
     label: 'Email',
-    handle: 'itsprakashwork@gmail.com',
-    url: 'mailto:itsprakashwork@gmail.com',
+    handle: 'itsThePrakash@gmail.com',
+    url: 'mailto:itsThePrakash@gmail.com',
     color: '#7c5cff',
     primary: true,
     desc: 'Serious inquiries only',
@@ -307,17 +326,19 @@ export const PROJECTS = [
     kicker: 'Founder & CEO · Flagship',
     tagline: 'A language bridge that turns Hindi into a door, not a wall.',
     description:
-      'Hindi-first learning platform built from zero: 2,600+ hand-tuned static pages, 7 interface locales, 40+ "learn Hindi for <your language>" bridges, spaced repetition, voice practice, offline PWA and a zero-JS-first critical path. Runs on GitHub Pages with a Go/Python generator and no framework runtime.',
+      'Hindi-first learning platform built from zero: 2,754 hand-tuned static pages, 11 locale directories, 31 "learn Hindi for <your language>" bridges, spaced repetition, voice practice, offline PWA and a zero-JS-first critical path. Runs on GitHub Pages with a Go/Python generator and no framework runtime.',
     tags: ['EdTech', 'Platform', 'SEO', 'PWA', 'i18n'],
     stack: ['HTML', 'CSS', 'JavaScript', 'Python', 'Service Worker'],
     live: 'https://ekguru.shop',
+    pages: 'https://ekguru.shop/',
     repo: 'https://github.com/EkGuruLearning/EkGuru',
     featured: true,
+    pin: true,
     status: 'live',
     metrics: [
-      { k: 'Pages', v: '2634' },
-      { k: 'Locales', v: '7' },
-      { k: 'Language bridges', v: '40+' },
+      { k: 'Pages', v: '2,754' },
+      { k: 'Locales', v: '11' },
+      { k: 'Language bridges', v: '31' },
     ],
     accent: '#7c5cff',
   },
@@ -331,11 +352,13 @@ export const PROJECTS = [
     tags: ['EdTech', 'Realtime', 'Supabase', 'Node'],
     stack: ['Node.js', 'Supabase', 'PostgreSQL', 'CI/CD'],
     live: 'https://ekguru-questions.vercel.app',
+    pages: 'https://ekgurulearning.github.io/Questions-/',
     repo: 'https://github.com/EkGuruLearning/Questions-',
     featured: true,
+    pin: true,
     status: 'live',
     metrics: [
-      { k: 'Subjects', v: 'All' },
+      { k: 'Mode', v: 'CBT' },
       { k: 'Backend', v: 'Supabase' },
       { k: 'Deploy', v: 'Vercel' },
     ],
@@ -351,13 +374,15 @@ export const PROJECTS = [
     tags: ['Startup', 'Full-Stack', 'Payments', 'Logistics'],
     stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'],
     live: 'https://printsbuddy.vercel.app',
+    pages: 'https://print-buddy.github.io/PrintsBuddy/',
     repo: 'https://github.com/Print-Buddy/PrintsBuddy',
     featured: true,
+    pin: true,
     status: 'live',
     metrics: [
       { k: 'Campus', v: 'MNIT' },
       { k: 'Delivery', v: 'Hostel door' },
-      { k: 'Uptime', v: '99.9%' },
+      { k: 'Stack', v: 'JS' },
     ],
     accent: '#ff4d8d',
   },
@@ -411,6 +436,7 @@ export const PROJECTS = [
     tags: ['Security', 'Python', 'Tooling'],
     stack: ['Python', 'TypeScript', 'ReportLab'],
     live: null,
+    pages: 'https://itstheprakash.github.io/PDF-Forensics-/',
     repo: 'https://github.com/itsThePrakash/PDF-Forensics-',
     featured: true,
     status: 'source',
@@ -451,6 +477,7 @@ export const PROJECTS = [
     tags: ['Utility', 'Zero-dep'],
     stack: ['HTML', 'CSS', 'JavaScript'],
     live: null,
+    pages: 'https://itstheprakash.github.io/id-maker/',
     repo: 'https://github.com/itsThePrakash/id-maker',
     featured: false,
     status: 'source',
@@ -543,6 +570,55 @@ export const PROJECTS = [
   },
 ];
 
+/* ── Organisations. Public repos only; `pages` is a verified GitHub Pages URL. ─ */
+export const ORGS = [
+  {
+    id: 'ekguru',
+    handle: 'EkGuruLearning',
+    display: 'EkGuru',
+    tagline: 'One Student. One Goal. One Guru.',
+    role: 'Founder & CEO',
+    body: 'The org behind EkGuru — a Hindi-first learning platform and the CBT exam engine that runs alongside it. Both projects ship from here.',
+    repos: [
+      {
+        name: 'EkGuru',
+        desc: 'Hindi-first language bridge — 2,754 static pages, 11 locales, 31 language bridges.',
+        url: 'https://github.com/EkGuruLearning/EkGuru',
+        live: 'https://ekguru.shop',
+        pages: 'https://ekguru.shop/',
+      },
+      {
+        name: 'Questions-',
+        desc: 'Computer-based test and results engine. Supabase backend, Vercel deploy.',
+        url: 'https://github.com/EkGuruLearning/Questions-',
+        live: 'https://ekguru-questions.vercel.app',
+        pages: 'https://ekgurulearning.github.io/Questions-/',
+      },
+    ],
+    live: 'https://ekguru.shop',
+    accent: '#7c5cff',
+  },
+  {
+    id: 'printsbuddy',
+    handle: 'Print-Buddy',
+    display: 'Print$Buddy',
+    tagline: 'Print delivered to your hostel door.',
+    role: 'Founder',
+    body: 'The campus print-delivery venture I started at MNIT Jaipur — ordering, payments, an admin console and late-night delivery across campus.',
+    repos: [
+      {
+        name: 'PrintsBuddy',
+        desc: 'Hostel print delivery: order tracking, admin console, leaderboard and study-break games.',
+        url: 'https://github.com/Print-Buddy/PrintsBuddy',
+        live: 'https://printsbuddy.vercel.app',
+        pages: 'https://print-buddy.github.io/PrintsBuddy/',
+      },
+    ],
+    live: 'https://printsbuddy.vercel.app',
+    accent: '#ff4d8d',
+  },
+];
+
 /* ── Timeline ─────────────────────────────────────────────────────────────── */
 export const TIMELINE = [
   {
@@ -569,11 +645,27 @@ export const TIMELINE = [
   },
   {
     period: '2022 — 2026',
-    title: 'B.Tech · Computer Science & Engineering',
+    title: 'B.Tech · Computer Science & Engineering (CSE)',
     org: 'MNIT Jaipur',
     kind: 'education',
     body: 'Malaviya National Institute of Technology, Jaipur. Coursework in algorithms, systems, machine learning and databases, plus a lot of building outside the syllabus.',
     links: [{ label: 'mnit.ac.in', url: 'https://mnit.ac.in' }],
+  },
+  {
+    period: '2022',
+    title: 'Class XII · Senior Secondary',
+    org: 'Completed 2022',
+    kind: 'education',
+    body: 'Finished senior secondary school in 2022 and joined MNIT Jaipur for B.Tech in Computer Science & Engineering.',
+    links: [],
+  },
+  {
+    period: '2022',
+    title: 'Class X · Secondary',
+    org: 'Completed 2022',
+    kind: 'education',
+    body: 'Completed secondary school in 2022.',
+    links: [],
   },
   {
     period: '2023 — now',
@@ -620,17 +712,17 @@ export const GITHUB_FALLBACK = {
   following: 15,
   publicRepos: 15,
   publicGists: 0,
-  totalStars: 9,
+  totalStars: 15,
   achievements: 4,
   proMember: true,
   createdAt: '2023-09-05',
   topLanguages: [
-    { name: 'HTML', pct: 62 },
-    { name: 'Python', pct: 14 },
-    { name: 'TypeScript', pct: 11 },
-    { name: 'JavaScript', pct: 7 },
-    { name: 'C++', pct: 4 },
-    { name: 'Astro', pct: 2 },
+    { name: 'JavaScript', pct: 25 },
+    { name: 'Astro', pct: 17 },
+    { name: 'HTML', pct: 17 },
+    { name: 'Python', pct: 17 },
+    { name: 'TypeScript', pct: 17 },
+    { name: 'C++', pct: 8 },
   ],
   fetchedAt: null,
 };
@@ -642,17 +734,17 @@ export const GITHUB_SNAPSHOT = {
   publicRepos: 15,
   followers: 0,
   following: 15,
-  totalStars: 9,
+  totalStars: 15,
   achievements: 4,
   proMember: true,
   fetchedAt: '2026-10-17T00:00:00Z',
   topLanguages: [
-    { name: 'HTML', pct: 62 },
-    { name: 'Python', pct: 14 },
-    { name: 'TypeScript', pct: 11 },
-    { name: 'JavaScript', pct: 7 },
-    { name: 'C++', pct: 4 },
-    { name: 'Astro', pct: 2 },
+    { name: 'JavaScript', pct: 25 },
+    { name: 'Astro', pct: 17 },
+    { name: 'HTML', pct: 17 },
+    { name: 'Python', pct: 17 },
+    { name: 'TypeScript', pct: 17 },
+    { name: 'C++', pct: 8 },
   ],
 };
 
@@ -676,6 +768,15 @@ export function buildIndex() {
       repo: p.repo,
       kind: 'Project',
       keywords: [...p.tags, ...p.stack].join(' '),
+    });
+  }
+  for (const o of ORGS) {
+    out.push({
+      title: o.display,
+      subtitle: `${o.role} · ${o.handle}`,
+      url: o.live || `https://github.com/${o.handle}`,
+      kind: 'Org',
+      keywords: o.tagline + ' ' + o.repos.map((r) => r.name).join(' '),
     });
   }
   for (const a of ACHIEVEMENTS_UNLOCKED) {
