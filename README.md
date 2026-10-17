@@ -92,7 +92,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 </tr>
 </table>
 
-<sub>**Verified GitHub Pages builds:** [EkGuru](https://ekguru.shop/) · [EkGuru Questions](https://ekgurulearning.github.io/Questions-/) · [Print$Buddy](https://print-buddy.github.io/PrintsBuddy/) · [PDF Forensics](https://itstheprakash.github.io/PDF-Forensics-/) · [ID Maker](https://itstheprakash.github.io/id-maker/) · [Triyal](https://itstheprakash.github.io/triyal/). Everything else is source-only; `astro-supabase-starter` is **not** on Pages — it runs on Netlify.</sub>
+<sub>**Verified GitHub Pages builds:** [EkGuru](https://ekguru.shop/) · [EkGuru Questions](https://ekgurulearning.github.io/Questions-/) · [Print$Buddy](https://print-buddy.github.io/PrintsBuddy/) · [PDF Forensics](https://itstheprakash.github.io/PDF-Forensics-/) · [ID Maker](https://itstheprakash.github.io/id-maker/) · [Triyal](https://itstheprakash.github.io/triyal/). These are the only repos with a GitHub Pages build; `astro-supabase-starter` is **not** on Pages — it runs on Netlify.</sub>
 
 ---
 
