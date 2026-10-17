@@ -588,8 +588,8 @@ export const ORGS = [
         pages: 'https://ekguru.shop/',
       },
       {
-        name: 'Questions-',
-        desc: 'Computer-based test and results engine. Supabase backend, Vercel deploy.',
+        name: 'EkGuru Questions',
+        desc: 'Questions- · CBT and results engine. Supabase backend, Vercel deploy.',
         url: 'https://github.com/EkGuruLearning/Questions-',
         live: 'https://ekguru-questions.vercel.app',
         pages: 'https://ekgurulearning.github.io/Questions-/',
