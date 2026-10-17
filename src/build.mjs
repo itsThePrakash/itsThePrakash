@@ -995,7 +995,7 @@ function reposPage() {
     const project = PROJECTS.find((p) => p.repo && p.repo.toLowerCase().endsWith(`/${r.name.toLowerCase()}`));
     const what = r.desc || (project ? project.tagline : 'Public repository');
     return `<tr>
-      <td><a href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a></td>
+      <td><a href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>${r.fork ? '<br/><small style="color:var(--fg3);font-size:11px">fork</small>' : ''}</td>
       <td>${esc(what)}${project ? ` · <a href="/projects/${project.id}">project page</a>` : ''}</td>
       <td class="hide-s">${esc(r.lang || '—')}</td>
       <td class="hide-s">${esc(r.pushed)}</td>
