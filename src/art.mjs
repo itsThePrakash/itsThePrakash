@@ -74,9 +74,9 @@ export function ogCard() {
 <g transform="translate(88 96)">
   <rect x="-14" y="-34" width="300" height="34" rx="17" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/>
   <circle cx="6" cy="-17" r="5" fill="#22e07a"/><text x="22" y="-12" fill="#a8b2cf" font-size="14" letter-spacing="3">SIGNAL CORE · ONLINE</text>
-  <text y="42" fill="#e9edf9" font-size="96" font-weight="700" letter-spacing="-4" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH</text>
-  <text y="104" fill="url(#acc)" font-size="34" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru</text>
-  <text y="160" fill="#6b7594" font-size="20">Full-Stack · AI/ML · MNIT Jaipur · Jaipur, India</text>
+  <text y="42" fill="#e9edf9" font-size="76" font-weight="700" letter-spacing="-3" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
+  <text y="104" fill="url(#acc)" font-size="32" letter-spacing="-1" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru</text>
+  <text y="160" fill="#6b7594" font-size="20">B.Tech CSE, MNIT Jaipur · Kolwa, Dausa · Jaipur, India</text>
 </g>
 <g transform="translate(88 430)" font-size="17" fill="#a8b2cf">
   <text y="0">$ whoami</text>
@@ -129,9 +129,9 @@ export function banner() {
   <rect x="-10" y="-30" width="278" height="30" rx="15" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".13"/>
   <circle cx="8" cy="-15" r="4.5" fill="#22e07a"/>
   <text x="24" y="-10" fill="#a8b2cf" font-size="12.5" letter-spacing="3.5">SIGNAL CORE // ACTIVE</text>
-  <text y="58" fill="#e9edf9" font-size="86" font-weight="700" letter-spacing="-3.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH</text>
-  <text y="104" fill="url(#bacc)" font-size="27" letter-spacing="-.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru · Full-Stack &amp; AI Engineer</text>
-  <text y="152" fill="#6b7594" font-size="16">MNIT Jaipur · CSE 2022–2026 · Jaipur, India</text>
+  <text y="58" fill="#e9edf9" font-size="66" font-weight="700" letter-spacing="-2.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">PRAKASH GOTHWAL</text>
+  <text y="104" fill="url(#bacc)" font-size="26" letter-spacing="-.5" font-family="ui-sans-serif,-apple-system,Inter,sans-serif">Founder &amp; CEO @ EkGuru · Full-Stack &amp; AI Engineer</text>
+  <text y="152" fill="#6b7594" font-size="16">B.Tech CSE, MNIT Jaipur (2022–2026) · Kolwa, Dausa · Jaipur, India</text>
 </g>
 <g transform="translate(80 356)" font-size="14.5">
   <text y="0" fill="#22e07a">▸</text><text x="22" y="0" fill="#a8b2cf">ekguru.shop</text>

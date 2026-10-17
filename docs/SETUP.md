@@ -17,6 +17,7 @@ npm run refresh    # pull fresh GitHub numbers into src/snapshot.json
 |---|---|
 | `dist/index.html` | the portfolio — hero, telemetry, projects, achievements, timeline, stack, contact |
 | `dist/resume.html` | print-ready résumé (`/resume`, `/cv`, `/resume.pdf` all land here) |
+| `dist/about.html` | the bio page, aimed at name searches (`/about`) |
 | `dist/404.html` | themed 404 |
 | `dist/medals/*.svg` | hand-drawn achievement medals, referenced by this README |
 | `dist/banner.svg`, `dist/og.svg` | the profile banner and the social card |
@@ -66,6 +67,27 @@ means Pages is not enabled and the field is omitted.
 
 `kind` is `work`, `education` or `oss`. The résumé renders all `work` and
 `education` entries; the homepage renders every entry.
+
+## Name search and metadata
+
+`SITE.fullName`, `SITE.aliases`, `SITE.keywords` and `SITE.hometown` in
+`src/data.mjs` drive every piece of name metadata:
+
+* `<title>`, `<meta name="description">`, `<meta name="author">` and
+  `<meta name="keywords">` on every page
+* JSON-LD `Person` on `/` and `/resume` (`name`, `alternateName`, `givenName`,
+  `familyName`, `homeLocation`, `alumniOf`, `sameAs`)
+* JSON-LD `FAQPage` on `/about`, with the same questions shown on the page
+* `<link rel="me">` and `<link rel="author">`
+
+`/about` is a real page, not a keyword dump: it says where Prakash is from,
+what he studied and which name variants point to the same person. Add new
+aliases in `SITE.aliases` and they flow into the metadata and the FAQ answer
+without touching `build.mjs`.
+
+Search rankings are decided by Google and Bing, not by the build. After a
+deploy, submit `${BASE}/sitemap.xml` in Google Search Console and Bing Webmaster
+Tools so the pages are crawled sooner.
 
 ## Performance model
 

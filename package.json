@@ -2,7 +2,7 @@
   "name": "signal-core",
   "version": "1.0.0",
   "private": true,
-  "description": "SIGNAL CORE \u2014 Prakash's portfolio, r\u00e9sum\u00e9 and GitHub profile engine. Zero dependencies, fully static, edge-cached.",
+  "description": "Prakash Gothwal's portfolio, r\u00e9sum\u00e9 and profile engine. Zero dependencies, static, edge-cached.",
   "type": "module",
   "engines": {
     "node": ">=18"

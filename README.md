@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://itstheprakash.vercel.app/banner.svg" alt="Prakash — Founder &amp; CEO @ EkGuru" width="100%"/>
+<img src="https://itstheprakash.vercel.app/banner.svg" alt="Prakash Gothwal — Founder &amp; CEO @ EkGuru" width="100%"/>
 
 <br/>
 
@@ -13,32 +13,34 @@
 ```
 $ whoami
 ────────────────────────────────────────────────────────────────────
-  PRAKASH          ·  @itsThePrakash
+  name             ·  Prakash Gothwal   (@itsThePrakash)
   role             ·  Founder & CEO @ EkGuru · Full-Stack & AI Engineer
   alma mater       ·  MNIT Jaipur — B.Tech CSE, 2022–2026
-  schooling        ·  Class X 2022 · Class XII 2022
+  schooling        ·  Class X 2020 · Class XII 2022
+  home             ·  Kolwa, Dausa, Rajasthan
   location         ·  Jaipur, Rajasthan, India   (IST · UTC+5:30)
-  status           ·  🎯 Focusing · open to work
 ────────────────────────────────────────────────────────────────────
   ▸ ekguru.shop                 ▸ printsbuddy.vercel.app
-  ▸ saranshne.vercel.app        ▸ github.com/itsThePrakash
+  ▸ saranshne.vercel.app        ▸ itstheprakash.vercel.app/about
 ```
 
 </div>
 
 ---
 
-## ⬡ SIGNAL CORE
+## About me
 
-> *I don't do demos. I do deployments.*
+> *Small sites, plain HTML, and things that stay up.*
 
-I build things that run at scale and that real people use on a Tuesday night. Two of them are products I founded — **EkGuru**, a Hindi-first language bridge built from 2,754 static pages and 31 language bridges, and **Print$Buddy**, a late-night hostel print-delivery service born out of a problem I personally had at 1 a.m. in a boys hostel at MNIT.
+I'm **Prakash Gothwal**, usually just Prakash. I'm from Kolwa, a village in Dausa district, Rajasthan, and I studied CSE at MNIT Jaipur from 2022 to 2026. I started **EkGuru**, a Hindi learning site with 2,754 static pages and 31 language bridges, and **Print$Buddy**, a print delivery service for hostel rooms that I ran through college.
+
+You'll also find me as **Prakash MNIT**, **Prakash CSE**, **Prakash Kolwa** or **Prakash Dausa**. Same person. There is a longer bio at [itstheprakash.vercel.app/about](https://itstheprakash.vercel.app/about).
 
 My house style: **zero dependencies, zero framework runtimes, sub-second first paint, and a fallback for every link in the chain.** My portfolio is generated from one data file by a dependency-free Node build — <kbd>node src/build.mjs</kbd>, nothing else. This README mirrors the same links.
 
 ---
 
-## 🛰 Deployments &amp; archives
+## Deployments and archives
 
 <table>
 <tr>
@@ -97,7 +99,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 🏢 Organisations
+## Organisations
 
 | Organisation | My role | Public repos |
 |---|---|---|
@@ -105,7 +107,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 | **[Print-Buddy](https://github.com/Print-Buddy)** | Founder | [PrintsBuddy](https://printsbuddy.vercel.app) |
 
 <details>
-<summary><b>▸ More public repositories</b> <sub>(resume parsing, ID maker, PDF tools, DSA vault, starters)</sub></summary>
+<summary><b>More public repositories</b> <sub>(resume parsing, ID maker, PDF tools, DSA vault, starters)</sub></summary>
 <br/>
 
 | Project | What it is | Stack | Source |
@@ -123,7 +125,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 🏆 Achievement vault — every badge GitHub has ever shipped
+## GitHub achievements
 
 **4 of 12 unlocked.** Each row below was verified against my live profile, with the real unlock timestamp and the exact event that triggered it.
 
@@ -173,7 +175,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 </table>
 
 <details open>
-<summary><b>▸ Tier ladder — where I actually am on each one</b></summary>
+<summary><b>Tier ladder — where I am on each one</b></summary>
 <br/>
 
 | Achievement | Default | 🥉 Bronze | 🥈 Silver | 🥇 Gold | My position |
@@ -190,7 +192,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 </details>
 
 <details>
-<summary><b>▸ Still locked — the full public roadmap</b> <sub>(nothing here is decorative; every threshold is GitHub's own)</sub></summary>
+<summary><b>Still locked</b> <sub>(thresholds are GitHub's own)</sub></summary>
 <br/>
 
 | | Badge | Unlock condition | Tiers |
@@ -208,7 +210,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 📊 GitHub telemetry
+## GitHub stats
 
 <div align="center">
 
@@ -226,7 +228,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 🧰 Stack
+## Stack
 
 <p>
 <img src="https://img.shields.io/badge/C++-00599C?style=flat-square&logo=c%2B%2B&logoColor=white"/>
@@ -265,7 +267,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 🌐 Every link I own
+## Links
 
 <div align="center">
 
@@ -293,7 +295,7 @@ Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two 
 
 ---
 
-## 🧭 How this whole thing is wired
+## How this is built
 
 ```mermaid
 graph LR

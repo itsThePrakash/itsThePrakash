@@ -129,10 +129,13 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <meta name="theme-color" content="#05060b"/>
 <title>${esc(title)}</title>
 <meta name="description" content="${attr(description)}"/>
-<meta name="author" content="${attr(SITE.name)}"/>
+<meta name="author" content="${attr(SITE.fullName)}"/>
+<meta name="keywords" content="${attr(SITE.keywords.join(', '))}"/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
 <link rel="canonical" href="${canonical}"/>
-<meta property="og:type" content="website"/>
+<link rel="me" href="https://github.com/itsThePrakash"/>
+<link rel="author" href="/about"/>
+<meta property="og:type" content="profile"/>
 <meta property="og:site_name" content="${attr(SITE.name)}"/>
 <meta property="og:title" content="${attr(title)}"/>
 <meta property="og:description" content="${attr(description)}"/>
@@ -163,14 +166,15 @@ const NAV_LINKS = [
   ['#about', 'About'], ['#stack', 'Stack'], ['#contact', 'Contact'],
 ];
 
-function nav() {
+function nav(home = false) {
+  const href = (hash) => (home ? hash : `/${hash}`);
   return `<nav class="nav" id="nav" aria-label="Primary">
 <div class="wrap nav-in">
-  <a class="brand" href="#home" aria-label="Home">
+  <a class="brand" href="${home ? '#home' : '/'}" aria-label="Home">
     <span class="mark">${logoMark()}</span>
     <span>${esc(SITE.name)}<b>/${esc(SITE.handle)}</b></span>
   </a>
-  <div class="nav-links">${NAV_LINKS.map(([h, l]) => `<a href="${h}">${l}</a>`).join('')}</div>
+  <div class="nav-links">${NAV_LINKS.map(([h, l]) => `<a href="${href(h)}">${l}</a>`).join('')}</div>
   <div class="nav-acts">
     <button class="palette-btn" data-palette aria-label="Open command palette">
       ${icon('search')}<span>Search</span><span class="kbd">⌘K</span>
@@ -184,9 +188,10 @@ function nav() {
 
 function footer() {
   return `<footer class="foot"><div class="wrap foot-in">
-  <span class="mono">© <span id="yr"></span> ${esc(SITE.name)} · built static, served at the edge</span>
+  <span class="mono">© <span id="yr"></span> ${esc(SITE.fullName)} · hand-written HTML, no framework</span>
   <span class="mono">Jaipur, IN · <span id="clk"></span></span>
-  <span><a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
+  <span><a href="/about">About</a> ·
+        <a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
         <a href="mailto:${esc(SITE.email)}">Email</a> ·
         <a href="/resume">Résumé</a></span>
 </div></footer>`;
@@ -197,8 +202,8 @@ function hero() {
   return `<section id="home" class="hero">
 <div class="wrap hero-grid">
   <div>
-    <span class="status"><span class="dot"></span>${esc(SITE.status)} · open to work</span>
-    <h1><span class="ln">Building the</span><span class="ln grad">improbable</span><span class="ln">at scale.</span></h1>
+    <a class="hero-name" href="/about">${esc(SITE.fullName)} · ${esc(SITE.hometown)} → Jaipur</a>
+    <h1><span class="ln">I build</span><span class="ln grad">small things</span><span class="ln">that work.</span></h1>
     <div class="typed" id="typed" data-words='${attr(JSON.stringify(SITE.roles))}' aria-live="polite"><span class="caret"></span></div>
     <p class="lede">${esc(SITE.about)}</p>
     <div class="hero-cta">
@@ -209,8 +214,8 @@ function hero() {
     <div class="hero-meta">
       <span>${icon('location')}${esc(SITE.location)}</span>
       <span>${icon('clock')}IST · UTC+5:30</span>
-      <span>${icon('bolt')}Sub-second first paint</span>
-      <span>${icon('trophy')}4 GitHub achievements</span>
+      <span>${icon('bolt')}One HTML file per page</span>
+      <span>${icon('trophy')}${ACHIEVEMENTS_UNLOCKED.length} GitHub achievements</span>
     </div>
   </div>
   <div class="orbit" aria-hidden="true">
@@ -242,7 +247,7 @@ function telemetry() {
   ${cells.map(([id, v, label, sfx]) => `<div class="tel"><span class="src" id="telSrc">SNAPSHOT</span>
     <b id="tel-${id}" data-count="${v}" data-suffix="${sfx}">0</b><small>${label}</small></div>`).join('')}
 </div>
-<p class="mono" style="margin-top:12px;font-size:11px;color:var(--fg3)">Live telemetry refreshes from the GitHub REST API on your device and falls back to the build snapshot if the API is rate-limited.</p>
+<p class="mono" style="margin-top:12px;font-size:11px;color:var(--fg3)">Numbers come from the GitHub API, with the build snapshot as fallback.</p>
 </div>`;
 }
 
@@ -315,14 +320,14 @@ function achievements() {
   return `<section id="achievements">
 <div class="wrap">
   <div class="sec-head rv">
-    <span class="eyebrow">Trophy vault</span>
-    <h2>Every achievement GitHub has <span class="grad">ever shipped</span>.</h2>
-    <p class="lede">Four unlocked so far, each one verified against the live profile on ${new Date().getUTCFullYear()}. The rest are the roadmap — nothing here is decorative, every threshold is real.</p>
+    <span class="eyebrow">Badges</span>
+    <h2>The badges I have, <span class="grad">and the ones I don't</span>.</h2>
+    <p class="lede">${ACHIEVEMENTS_UNLOCKED.length} unlocked, checked against my profile. The rest are GitHub's own thresholds and I haven't reached them yet.</p>
   </div>
   <div class="ach-grid">${unlocked}</div>
   <div class="sec-head rv" style="margin-top:56px">
-    <span class="eyebrow">Roadmap</span>
-    <h3 style="font-size:clamp(20px,2.6vw,26px)">Still locked. All of them, publicly.</h3>
+    <span class="eyebrow">Not yet</span>
+    <h3 style="font-size:clamp(20px,2.6vw,26px)">Still locked.</h3>
   </div>
   <div class="ach-grid">${locked}</div>
 </div>
@@ -342,7 +347,8 @@ function timeline() {
 function stack() {
   return `<section id="stack">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Arsenal</span><h2>The stack I actually <span class="grad">ship with</span>.</h2></div>
+  <div class="sec-head rv"><span class="eyebrow">Tools</span><h2>What I <span class="grad">work with</span>.</h2>
+  <p class="lede">Things I've used enough to have an opinion about.</p></div>
   <div class="stack-grid">${STACK.map((s, i) => `<div class="stack-col rv rv-d${(i % 4) + 1}">
     <h4>${esc(s.group)}</h4><ul>${s.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
 </div>
@@ -352,8 +358,8 @@ function stack() {
 function contact() {
   return `<section id="contact">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Open a channel</span><h2>Every link I own, <span class="grad">in one place</span>.</h2>
-  <p class="lede">Pick whichever you like. They all reach the same human.</p></div>
+  <div class="sec-head rv"><span class="eyebrow">Contact</span><h2>Ways to <span class="grad">reach me</span>.</h2>
+  <p class="lede">Same person on all of them.</p></div>
   <div class="contact">
     <div class="social-grid rv">${SOCIALS.map((s) => `<a class="soc" style="--sc:${s.color}" href="${attr(s.url)}" target="_blank" rel="noopener" aria-label="${attr(s.label)}">
       <span class="si">${icon(s.id)}</span>
@@ -382,9 +388,9 @@ function work() {
   return `<section id="work">
 <div class="wrap">
   <div class="sec-head rv">
-    <span class="eyebrow">Selected work</span>
-    <h2>Things I built that <span class="grad">actually run</span>.</h2>
-    <p class="lede">Twelve public projects — live products, a closed campus venture, and the tools in between. Every card links straight to the deployment, its GitHub Pages build and the source.</p>
+    <span class="eyebrow">Work</span>
+    <h2>Things I built, <span class="grad">still online</span>.</h2>
+    <p class="lede">Twelve public projects. Some are live, one is closed, a few are tools I needed once. Each card links to the deployment, the Pages build and the source.</p>
   </div>
   <div class="pj-bar rv">
     <div class="filters" role="group" aria-label="Filter projects">
@@ -422,27 +428,57 @@ function palette() {
 </div>`;
 }
 
-function jsonld() {
-  const d = {
-    '@context': 'https://schema.org',
+function personNode() {
+  return {
     '@type': 'Person',
-    name: SITE.name,
-    alternateName: SITE.handle,
+    '@id': `${BASE}/#person`,
+    name: SITE.fullName,
+    alternateName: SITE.aliases,
+    givenName: 'Prakash',
+    familyName: 'Gothwal',
     jobTitle: SITE.title,
+    description: 'Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026). Founder of EkGuru and Print$Buddy.',
     email: `mailto:${SITE.email}`,
     url: BASE,
     image: `${BASE}/og.svg`,
+    mainEntityOfPage: BASE,
     sameAs: SOCIALS.filter((s) => !s.url.startsWith('mailto:')).map((s) => s.url),
     address: { '@type': 'PostalAddress', addressLocality: 'Jaipur', addressRegion: 'Rajasthan', addressCountry: 'IN' },
-    alumniOf: { '@type': 'CollegeOrUniversity', name: 'Malaviya National Institute of Technology Jaipur' },
-    knowsAbout: STACK.flatMap((s) => s.items),
-    worksFor: { '@type': 'Organization', name: 'EkGuru', url: 'https://ekguru.shop' },
+    homeLocation: { '@type': 'Place', name: SITE.hometown, address: { '@type': 'PostalAddress', addressLocality: 'Kolwa', addressRegion: 'Rajasthan', addressCountry: 'IN' } },
+    alumniOf: {
+      '@type': 'CollegeOrUniversity',
+      name: 'Malaviya National Institute of Technology Jaipur',
+      alternateName: 'MNIT Jaipur',
+      url: 'https://mnit.ac.in',
+    },
+    knowsAbout: [...new Set([...STACK.flatMap((s) => s.items), 'Computer Science', 'Web Development'])],
+    worksFor: [
+      { '@type': 'Organization', name: 'EkGuru', url: 'https://ekguru.shop' },
+      { '@type': 'Organization', name: 'Print$Buddy', url: 'https://printsbuddy.vercel.app' },
+    ],
   };
-  return `<script type="application/ld+json">${JSON.stringify(d).replace(/</g, '\\u003c')}</script>`;
+}
+
+function jsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'WebSite',
+        '@id': `${BASE}/#website`,
+        name: SITE.fullName,
+        url: BASE,
+        inLanguage: 'en',
+        publisher: { '@id': `${BASE}/#person` },
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
 }
 
 function homePage() {
-  const body = `${nav()}
+  const body = `${nav(true)}
 <main>
 ${hero()}
 ${marquee()}
@@ -450,15 +486,16 @@ ${telemetry()}
 ${work()}
 <section id="orgs">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Organisations</span><h2>Teams I <span class="grad">founded</span>.</h2>
-  <p class="lede">Two orgs, three public repos, with every Pages URL checked against the GitHub API. Plain anchors all the way down.</p></div>
+  <div class="sec-head rv"><span class="eyebrow">Organisations</span><h2>The two orgs <span class="grad">I run</span>.</h2>
+  <p class="lede">Both are mine. Every Pages link here was checked against the GitHub API, not guessed.</p></div>
   <div class="org-grid">${orgs()}</div>
 </div>
 </section>
 ${achievements()}
 <section id="about">
 <div class="wrap">
-  <div class="sec-head rv"><span class="eyebrow">Trajectory</span><h2>From a hostel room to a <span class="grad">platform</span>.</h2></div>
+  <div class="sec-head rv"><span class="eyebrow">About</span><h2>A short <span class="grad">timeline</span>.</h2>
+  <p class="lede">I'm Prakash Gothwal, from Kolwa in Dausa district, Rajasthan. I finished school in 2020 and 2022, then studied CSE at MNIT Jaipur from 2022 to 2026. This is what I've been doing since.</p></div>
   <div class="tl">${timeline()}</div>
 </div>
 </section>
@@ -470,8 +507,8 @@ ${palette()}
 ${buildIndex_()}
 <script>${minJS(JS)}</script>`;
   return page({
-    title: `${SITE.name} — Founder & CEO @ EkGuru · Full-Stack & AI Engineer`,
-    description: `${SITE.about}`,
+    title: `${SITE.fullName} — MNIT Jaipur CSE · Founder @ EkGuru`,
+    description: `Prakash Gothwal (Prakash) — B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy. Projects, résumé and contact.`,
     body, path: '/', jsonld: jsonld(),
   });
 }
@@ -479,7 +516,7 @@ ${buildIndex_()}
 /* ── résumé ──────────────────────────────────────────────────────────────── */
 function resumePage() {
   const skills = STACK.map((s) => `<div class="rs-skill"><h4>${esc(s.group)}</h4><p>${esc(s.items.join(' · '))}</p></div>`).join('');
-  const liveProjects = PROJECTS.filter((p) => p.live);
+  const liveProjects = PROJECTS.filter((p) => p.status === 'live' && p.live);
   const body = `${nav()}
 <main>
 <section style="padding-top:120px">
@@ -500,11 +537,11 @@ function resumePage() {
           <p class="rs-sub">${icon('location')}${esc(SITE.location)} · ${icon('mail')}<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a> · ${icon('github')}<a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">github.com/itsThePrakash</a> · ${icon('link')}<a href="${attr(BASE)}" target="_blank" rel="noopener">itstheprakash.vercel.app</a></p>
         </div>
       </div>
-      <div class="rs-badge"><div class="rs-badge-in"><b>4</b><small>Achievements unlocked</small></div></div>
+      <div class="rs-badge"><div class="rs-badge-in"><b>${ACHIEVEMENTS_UNLOCKED.length}</b><small>Achievements unlocked</small></div></div>
     </header>
     <section class="rs-sec">
       <h2>Profile</h2>
-      <p>B.Tech in Computer Science &amp; Engineering at MNIT Jaipur (2022–2026). Founder of two products that solve problems I personally hit: EkGuru, a Hindi-first language bridge with 2,754 static pages, 11 locale directories and 31 language bridges; and Print$Buddy, a late-night hostel print-delivery service at MNIT Jaipur. I work end to end — architecture, implementation, performance budget, deployment and the unglamorous parts nobody posts about.</p>
+      <p>B.Tech in Computer Science &amp; Engineering at MNIT Jaipur (2022–2026), from Kolwa in Dausa district, Rajasthan. I started EkGuru, a Hindi learning site with 2,754 static pages, 11 locale directories and 31 language-bridge sections, and Print$Buddy, a late-night print delivery service for my hostel. I work end to end: the pages, the backend, the deploy and the parts nobody writes about.</p>
     </section>
     <section class="rs-sec">
       <h2>Experience</h2>
@@ -534,7 +571,7 @@ function resumePage() {
       <div class="rs-skills">${skills}</div>
     </section>
     <section class="rs-sec">
-      <h2>Achievements &amp; certifications</h2>
+      <h2>Achievements</h2>
       <ul class="rs-ach">
         ${ACHIEVEMENTS_UNLOCKED.map((a) => `<li><b>${esc(a.name)}</b> — ${esc(a.flavor)} <span class="rs-when">unlocked ${esc(a.unlocked)}</span></li>`).join('')}
         <li><b>${liveProjects.length} live production deployments</b> — ${liveProjects.map((p) => p.name).join(', ')}</li>
@@ -551,9 +588,9 @@ function resumePage() {
 ${footer()}
 <script>${minJS(JS)}</script>`;
   return page({
-    title: `Résumé — ${SITE.fullName} · ${SITE.title}`,
-    description: `Résumé of ${SITE.fullName} — Founder & CEO at EkGuru, full-stack and AI engineer, MNIT Jaipur CSE. Print-ready.`,
-    body, path: '/resume',
+    title: `Résumé — ${SITE.fullName} · MNIT Jaipur CSE`,
+    description: `Résumé of Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026), founder of EkGuru and Print$Buddy. Print-ready.`,
+    body, path: '/resume', jsonld: jsonld(),
     extraHead: `<style>${minCSS(RESUME_CSS)}</style>`,
   });
 }
@@ -603,6 +640,98 @@ const RESUME_CSS = `
 @media (max-width:640px){.rs-head{flex-direction:column}.rs-id{align-items:flex-start}.rs-item-h{flex-direction:column;gap:2px}.rs-item-h span{white-space:normal}}
 `;
 
+
+const ABOUT_CSS = `
+.about-wrap{max-width:800px}
+.about-prose{display:grid;gap:14px;margin-top:24px;font-size:15.5px;line-height:1.7;color:var(--fg2)}
+.about-prose a{color:var(--c);text-decoration:underline;text-underline-offset:3px}
+.faq{display:grid;gap:8px;margin-top:14px}
+.faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
+.faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
+.faq p{margin-top:8px;font-size:13.5px;color:var(--fg2)}
+
+`;
+
+/* ── about (name search + a plain-language bio) ──────────────────────────── */
+const ABOUT_FAQ = [
+  {
+    q: 'Who is Prakash Gothwal?',
+    a: 'Prakash Gothwal is a Computer Science & Engineering graduate from MNIT Jaipur (2022–2026) and the founder of EkGuru, a Hindi learning site, and Print$Buddy, a hostel print delivery service at MNIT.',
+  },
+  {
+    q: 'Where is Prakash Gothwal from?',
+    a: 'Kolwa, a village in Dausa district, Rajasthan. He studied in Jaipur.',
+  },
+  {
+    q: 'What did Prakash study at MNIT Jaipur?',
+    a: 'B.Tech in Computer Science & Engineering (CSE), 2022 to 2026. School finished in 2020 (Class X) and 2022 (Class XII).',
+  },
+  {
+    q: 'Is Prakash MNIT the same person as Prakash Gothwal?',
+    a: 'Yes. Prakash, Prakash MNIT, Prakash CSE, Prakash Kolwa, Prakash Dausa and Prakash Gothwal all point to the same person.',
+  },
+  {
+    q: 'How do I contact Prakash?',
+    a: `Email ${SITE.email}. He also answers on LinkedIn and GitHub.`,
+  },
+];
+
+function aboutJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'FAQPage',
+        '@id': `${BASE}/about#faq`,
+        mainEntity: ABOUT_FAQ.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function aboutPage() {
+  const body = `${nav()}
+<main>
+<section style="padding-top:128px">
+<div class="wrap about-wrap">
+  <p class="eyebrow">About</p>
+  <h1 style="font-size:clamp(36px,6vw,64px)">${esc(SITE.fullName)}</h1>
+  <p class="lede">${esc(SITE.tagline)} I'm from Kolwa, Dausa, and I studied CSE at MNIT Jaipur.</p>
+  <div class="about-prose">
+    <p>Most people know me as Prakash. My full name is Prakash Gothwal. I grew up in Kolwa, a village in Dausa district in Rajasthan, and moved to Jaipur for college.</p>
+    <p>I finished Class X in 2020 and Class XII in 2022, then joined <a href="https://mnit.ac.in" target="_blank" rel="noopener">MNIT Jaipur</a> for a B.Tech in Computer Science &amp; Engineering. I graduated in 2026.</p>
+    <p>In college I started <a href="https://ekguru.shop" target="_blank" rel="noopener">EkGuru</a>, a Hindi learning site built from plain HTML, and <a href="https://printsbuddy.vercel.app" target="_blank" rel="noopener">Print$Buddy</a>, a print delivery service for hostel rooms. I also built <a href="/#work">smaller tools</a> when something annoyed me enough.</p>
+    <p>People search for me under a few different names: Prakash MNIT, Prakash CSE, Prakash Kolwa, Prakash Dausa. They all land on the same person. This site has everything in one place: the <a href="/#work">projects</a>, the <a href="/resume">résumé</a> and the <a href="/#contact">contact links</a>.</p>
+    <p>I write the pages myself and keep the build small. One HTML file per page, no framework, nothing that needs a server to render.</p>
+  </div>
+  <div class="faq">
+    <h2 style="font-size:clamp(22px,3vw,30px);margin-top:34px">Quick answers</h2>
+    ${ABOUT_FAQ.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}
+  </div>
+  <div class="hero-cta" style="margin-top:30px">
+    <a class="btn btn-p" href="/resume">${icon('print')}Résumé</a>
+    <a class="btn btn-g" href="mailto:${esc(SITE.email)}">${icon('mail')}Email</a>
+    <a class="btn btn-g" href="https://github.com/itsThePrakash" target="_blank" rel="noopener">${icon('github')}GitHub</a>
+  </div>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: `About Prakash Gothwal — Kolwa, Dausa · MNIT Jaipur CSE`,
+    description: `Prakash Gothwal (Prakash) is from Kolwa, Dausa district, Rajasthan. B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy.`,
+    body, path: '/about', jsonld: aboutJsonld(),
+    extraHead: `<style>${minCSS(ABOUT_CSS)}</style>`,
+  });
+}
+
 /* ── 404 ─────────────────────────────────────────────────────────────────── */
 function notFound() {
   const body = `${nav()}
@@ -634,12 +763,13 @@ Sitemap: ${BASE}/sitemap.xml
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${BASE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>${BASE}/resume</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${BASE}/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
 `;
   const manifest = {
     name: `${SITE.name} — ${SITE.title}`,
     short_name: SITE.name,
-    description: SITE.about,
+    description: 'Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026). Founder of EkGuru and Print$Buddy.',
     start_url: '/',
     display: 'standalone',
     background_color: '#05060b',
@@ -659,6 +789,7 @@ function main() {
   const pages = [
     ['index.html', homePage()],
     ['resume.html', resumePage()],
+    ['about.html', aboutPage()],
     ['404.html', notFound()],
   ];
   for (const [f, html] of pages) writeFileSync(join(DIST, f), minHTML(html));
