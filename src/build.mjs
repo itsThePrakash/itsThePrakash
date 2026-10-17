@@ -537,7 +537,6 @@ function resumePage() {
       <h2>Achievements &amp; certifications</h2>
       <ul class="rs-ach">
         ${ACHIEVEMENTS_UNLOCKED.map((a) => `<li><b>${esc(a.name)}</b> — ${esc(a.flavor)} <span class="rs-when">unlocked ${esc(a.unlocked)}</span></li>`).join('')}
-        <li><b>GitHub Pro</b> — active subscription</li>
         <li><b>${liveProjects.length} live production deployments</b> — ${liveProjects.map((p) => p.name).join(', ')}</li>
       </ul>
     </section>
