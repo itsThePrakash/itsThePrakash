@@ -360,6 +360,17 @@ p{margin:0}
 }
 
 
+/* ── recent activity ─────────────────────────────────────────────────────── */
+.recent-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(22px,4vw,48px)}
+.recent-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg3);font-weight:500;margin-bottom:6px}
+.recent{border-top:1px solid var(--line)}
+.rrow{display:flex;gap:14px;align-items:baseline;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+.rrow b{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.rrow b a:hover{color:var(--c)}
+.rrow small{display:block;font-size:12px;color:var(--fg3);margin-top:3px;line-height:1.45}
+.rrow time{font-family:var(--mono);font-size:10.5px;color:var(--fg3);white-space:nowrap;flex:0 0 auto}
+@media (max-width:720px){.recent-grid{grid-template-columns:1fr;gap:26px}}
+
 /* ── ambient motion layer ───────────────────────────────────────────────── */
 .world{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .world i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.42;will-change:transform;

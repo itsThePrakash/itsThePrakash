@@ -176,13 +176,6 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function panelHTML(p) {
-  return `<div class="k">${esc(p.kicker)}</div><h3>${esc(p.name)}</h3>
-<p class="tg">${esc(p.tagline)}</p><div class="lnks">
-${p.live ? `<a href="${esc(p.live)}" target="_blank" rel="noopener">Live ↗</a>` : ''}
-<a href="${esc(p.repo)}" target="_blank" rel="noopener">Source ↗</a></div>`;
-}
-
 export function constellation(projects) {
   const W = 1000, H = 560, cx = W / 2, cy = H / 2;
   const rings = [165, 250, 335];
@@ -204,12 +197,12 @@ export function constellation(projects) {
   out += `<circle cx="${cx}" cy="${cy}" r="34" fill="#0b0e1c" stroke="#7c5cff" stroke-opacity=".55"/>`;
   out += `<text x="${cx}" y="${cy + 5}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" fill="#a8b2cf" letter-spacing="2">CORE</text>`;
   for (const n of nodes) {
+    const idx = projects.indexOf(n.p);
     const x = cx + Math.cos(n.a) * n.r, y = cy + Math.sin(n.a) * n.r;
     const rad = n.big ? 15 : 10;
     out += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${n.p.accent}" stroke-opacity=".2" stroke-width="1"/>`;
     out += `<g class="node" tabindex="0" role="button" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"
-      data-tags="${n.p.tags.join(',')}" data-url="${n.p.live || n.p.repo}"
-      data-panel="${esc(panelHTML(n.p))}">
+      data-tags="${n.p.tags.join(',')}" data-url="${n.p.live || n.p.repo || '/projects/' + n.p.id}" data-i="${idx}">
       <circle class="hit" r="${rad + 14}"/>
       <circle r="${rad + 8}" fill="${n.p.accent}" opacity=".12"/>
       <circle class="glowc" r="${rad}" fill="#0b0e1c" stroke="${n.p.accent}" stroke-width="2" color="${n.p.accent}"/>

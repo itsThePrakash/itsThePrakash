@@ -127,7 +127,14 @@ function countUp(el,to,suffix,dur){
     function show(){
       nodes.forEach(function(x){x.classList.remove('on')});
       n.classList.add('on');
-      panel.innerHTML=n.getAttribute('data-panel')||'';
+      var i=+n.getAttribute('data-i'), rows=[];
+      try{rows=JSON.parse(d.getElementById('conData').textContent)}catch(e){}
+      var r=rows[i];
+      if(r){
+        panel.innerHTML='<div class="k">'+r[0]+'</div><h3>'+r[1]+'</h3><p class="tg">'+r[2]+'</p><div class="lnks">'+
+          (r[3]?'<a href="'+r[3]+'" target="_blank" rel="noopener">Live ↗</a>':'')+
+          (r[4]?'<a href="'+r[4]+'" target="_blank" rel="noopener">Source ↗</a>':'')+'</div>';
+      }
       var a=panel.querySelector('a'); if(a)a.focus();
     }
     n.addEventListener('mouseenter',show);
@@ -288,6 +295,29 @@ function countUp(el,to,suffix,dur){
     });
   }
   if(els.repos)load();
+})();
+
+/* ── visitor counter ────────────────────────────────────────────────────
+   One increment per browser per day, then cached. Below 50 it says nothing
+   numeric — a fresh site should not advertise "3 visits".
+   ────────────────────────────────────────────────────────────────────── */
+(function(){
+  var el=$('#views'); if(!el)return;
+  var KEY='sc:views', TTL=864e5, FLOOR=50;
+  function paint(n){
+    if(typeof n!=='number'||!isFinite(n)||n<=0)return;
+    el.textContent = n<FLOOR ? 'counting visits' : n.toLocaleString('en-US')+' visits';
+    el.hidden=false;
+  }
+  try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&c.n&&Date.now()-c.t<TTL){paint(c.n);return}}catch(e){}
+  fetch('https://api.counterapi.dev/v1/itstheprakash/portfolio/up',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null})
+    .then(function(j){
+      var n=j&&(typeof j.count==='number'?j.count:(typeof j.value==='number'?j.value:null));
+      if(n===null)return;
+      paint(n);
+      try{localStorage.setItem(KEY,JSON.stringify({t:Date.now(),n:n}))}catch(e){}
+    })['catch'](function(){});
 })();
 
 /* ── footer clock (IST) ─────────────────────────────────────────────────── */

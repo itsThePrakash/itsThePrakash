@@ -193,21 +193,21 @@ export const SOCIALS = [
  * can never appear in one place with a link missing in another.
  * ──────────────────────────────────────────────────────────────────────────── */
 export const REPO_LINKS = [
-  { repo: 'EkGuru', owner: 'EkGuruLearning', what: 'Hindi-first learning site, 2,754 static pages', live: 'https://ekguru.shop', pages: 'https://ekguru.shop/', project: 'ekguru' },
-  { repo: 'Questions-', owner: 'EkGuruLearning', what: 'Exam engine — CBT, results, Supabase backend', live: 'https://ekguru-questions.vercel.app', pages: 'https://ekgurulearning.github.io/Questions-/', project: 'ekguru-questions' },
-  { repo: 'PrintsBuddy', owner: 'Print-Buddy', what: 'Hostel print delivery — closed, site archived', live: 'https://printsbuddy.vercel.app', pages: 'https://print-buddy.github.io/PrintsBuddy/', project: 'printsbuddy' },
-  { repo: 'PDF-Forensics-', owner: 'itsThePrakash', what: 'PDF metadata forensics and anomaly reports', live: null, pages: 'https://itstheprakash.github.io/PDF-Forensics-/', project: 'pdf-forensics' },
-  { repo: 'id-maker', owner: 'itsThePrakash', what: 'ID-card generator that runs in the browser', live: null, pages: 'https://itstheprakash.github.io/id-maker/', project: 'id-maker' },
-  { repo: 'how-to-download-View-only-pdf', owner: 'itsThePrakash', what: 'Browser snippet for view-only PDFs', live: null, pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/', project: 'view-only-pdf' },
-  { repo: 'saransh', owner: 'itsThePrakash', what: 'Document summariser — key points, tone, reading time', live: 'https://saranshne.vercel.app', pages: null, project: 'saransh' },
-  { repo: 'TANIK-News-India-', owner: 'itsThePrakash', what: 'Indian news, rewritten into short briefs', live: 'https://tanik-news-india.vercel.app', pages: null, project: 'tanik' },
-  { repo: 'Resume-Parsing-System', owner: 'itsThePrakash', what: 'CVs in, normalised and deduplicated records out', live: null, pages: null, project: 'resume-parsing' },
-  { repo: 'ClassX-Pdf-download', owner: 'itsThePrakash', what: 'Pulls view-restricted course PDFs for offline study', live: null, pages: null, project: 'classx' },
-  { repo: 'C-PLUS-PLUS', owner: 'itsThePrakash', what: 'Every data structure and algorithm I have written', live: null, pages: null, project: 'cpp' },
-  { repo: 'astro-supabase-starter', owner: 'itsThePrakash', what: 'Astro + Supabase starter, MIT licensed', live: 'https://astro-supabase-starter.netlify.app/', pages: null, project: 'astro-supabase' },
-  { repo: 'astro-platform-starter', owner: 'itsThePrakash', what: 'Static-first Astro starter with content collections', live: null, pages: null, project: null },
-  { repo: 'triyal', owner: 'itsThePrakash', what: 'Early Print$Buddy build', live: null, pages: 'https://itstheprakash.github.io/triyal/', project: null },
-  { repo: 'awesome-piracy-', owner: 'itsThePrakash', what: 'A fork kept for reference', live: null, pages: 'https://itstheprakash.github.io/awesome-piracy-/', project: null },
+  { repo: 'EkGuru', owner: 'EkGuruLearning', what: 'Hindi-first learning site, 2,754 static pages', live: 'https://ekguru.shop', pages: 'https://ekguru.shop/', project: 'ekguru', pushed: '2026-10-17' },
+  { repo: 'Questions-', owner: 'EkGuruLearning', what: 'Exam engine — CBT, results, Supabase backend', live: 'https://ekguru-questions.vercel.app', pages: 'https://ekgurulearning.github.io/Questions-/', project: 'ekguru-questions', pushed: '2026-10-17' },
+  { repo: 'PrintsBuddy', owner: 'Print-Buddy', what: 'Hostel print delivery — closed, site archived', live: 'https://printsbuddy.vercel.app', pages: 'https://print-buddy.github.io/PrintsBuddy/', project: 'printsbuddy', pushed: '2026-07-31' },
+  { repo: 'PDF-Forensics-', owner: 'itsThePrakash', what: 'PDF metadata forensics and anomaly reports', live: null, pages: 'https://itstheprakash.github.io/PDF-Forensics-/', project: 'pdf-forensics', pushed: '2026-04-26' },
+  { repo: 'id-maker', owner: 'itsThePrakash', what: 'ID-card generator that runs in the browser', live: null, pages: 'https://itstheprakash.github.io/id-maker/', project: 'id-maker', pushed: '2025-08-23' },
+  { repo: 'how-to-download-View-only-pdf', owner: 'itsThePrakash', what: 'Browser snippet for view-only PDFs', live: null, pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/', project: 'view-only-pdf', pushed: '2026-10-17' },
+  { repo: 'saransh', owner: 'itsThePrakash', what: 'Document summariser — key points, tone, reading time', live: 'https://saranshne.vercel.app', pages: null, project: 'saransh', pushed: '2025-12-04' },
+  { repo: 'TANIK-News-India-', owner: 'itsThePrakash', what: 'Indian news, rewritten into short briefs', live: 'https://tanik-news-india.vercel.app', pages: null, project: 'tanik', pushed: '2025-12-05' },
+  { repo: 'Resume-Parsing-System', owner: 'itsThePrakash', what: 'CVs in, normalised and deduplicated records out', live: null, pages: null, project: 'resume-parsing', pushed: '2025-12-03' },
+  { repo: 'ClassX-Pdf-download', owner: 'itsThePrakash', what: 'Pulls view-restricted course PDFs for offline study', live: null, pages: null, project: 'classx', pushed: '2026-06-17' },
+  { repo: 'C-PLUS-PLUS', owner: 'itsThePrakash', what: 'Every data structure and algorithm I have written', live: null, pages: null, project: 'cpp', pushed: '2023-10-08' },
+  { repo: 'astro-supabase-starter', owner: 'itsThePrakash', what: 'Astro + Supabase starter, MIT licensed', live: 'https://astro-supabase-starter.netlify.app/', pages: null, project: 'astro-supabase', pushed: '2025-05-10' },
+  { repo: 'astro-platform-starter', owner: 'itsThePrakash', what: 'Static-first Astro starter with content collections', live: null, pages: null, project: null, pushed: '2025-05-10' },
+  { repo: 'triyal', owner: 'itsThePrakash', what: 'Early Print$Buddy build', live: null, pages: 'https://itstheprakash.github.io/triyal/', project: null, pushed: '2025-07-30' },
+  { repo: 'awesome-piracy-', owner: 'itsThePrakash', what: 'A fork kept for reference', live: null, pages: 'https://itstheprakash.github.io/awesome-piracy-/', project: null, pushed: '2023-06-18' },
 ];
 
 export const repoUrl = (r) => `https://github.com/${r.owner}/${r.repo}`;

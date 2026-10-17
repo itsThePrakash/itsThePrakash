@@ -117,6 +117,16 @@ for (const f of htmlFiles) {
   checkScripts(rel, html);
 }
 
+/* ── 3b. shared assets parse ────────────────────────────────────────────── */
+for (const asset of ['app.js']) {
+  const f = join(DIST, asset);
+  try {
+    execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' });
+  } catch (err) {
+    problems.push(`${asset}: fails node --check\n${String(err.stderr || err.message).trim()}`);
+  }
+}
+
 /* ── 4. first-paint budget ──────────────────────────────────────────────── */
 const index = readFileSync(join(DIST, 'index.html'));
 const gz = gzipSync(index, { level: 9 }).length;

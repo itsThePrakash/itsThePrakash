@@ -231,3 +231,29 @@ carries `live`, `pages` and the source URL (derived from `owner` + `repo`).
   GitHub Pages URL — verify with `gh api /repos/{owner}/{repo}/pages`.
 - `/repos` also renders `PUBLIC_REPOS` for the full list of 15 public repos
   (language, last push), joined to `REPO_LINKS` by repo name.
+
+
+## Shared CSS and JS
+
+All 22 pages link two cached files instead of inlining their styles:
+
+| File | Contents |
+|---|---|
+| `dist/style.css` | the whole design system, minified |
+| `dist/app.js` | the runtime: theme, reveal, counters, palette, constellation, live GitHub numbers, visitor counter |
+
+Both are linked with `?v=<hash>` derived from their contents, so they can be
+served `immutable` (see `vercel.json`) and still update on the next deploy.
+Page-specific CSS (about, sponsor, project pages) stays inline because it is
+only a few hundred bytes.
+
+Index HTML is ~15.7 KB gzipped. An inline-theme snippet in `<head>` sets
+`data-theme` before first paint, so there is no flash of the wrong theme while
+`app.js` is deferred.
+
+## Visitor counter
+
+`#views` in the footer calls `api.counterapi.dev` once per browser per day and
+caches the result in `localStorage`. Below 50 visits it prints **counting
+visits** instead of a number, so a new site does not advertise "3 visits".
+If the request fails the span stays hidden — nothing breaks, nothing is faked.

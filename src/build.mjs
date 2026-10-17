@@ -4,6 +4,8 @@
  * into ./dist. Run with `npm run build`.
  */
 import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, REPO_LINKS, repoLinksFor, repoUrl, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
@@ -18,6 +20,9 @@ const BASE = (process.env.SITE_URL || 'https://itstheprakash.vercel.app').replac
 /* GitHub Pages serves this repo from /itsThePrakash/ and has no clean URLs.
    Setting SITE_BASE turns on sub-path links + .html suffixes for that build. */
 const BASE_PATH = (process.env.SITE_BASE || '').replace(/\/$/, '');
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+/* Cache-busting stamp for the shared CSS/JS, which Vercel serves as immutable. */
+const ASSET_V = createHash('sha1').update(CSS + JS).digest('hex').slice(0, 10);
 
 /** Make a page path work on a plain static host under a sub-path. */
 function hostPath(href) {
@@ -122,6 +127,62 @@ function minHTML(h) {
   return masked.replace(/\u0000(\d+)\u0000/g, (_, i) => keep[+i]);
 }
 
+/* ── recent activity ─────────────────────────────────────────────────────── */
+/** Last site commits, read from git at build time. Silent if git is absent. */
+function recentCommits(n = 4) {
+  try {
+    const out = execFileSync('git', ['log', '--no-merges', '--date=short', '--pretty=format:%ad|%s', '-n', '40'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return out
+      .split('\n')
+      .filter((l) => l.includes('|') && !/refresh github telemetry/i.test(l))
+      .slice(0, n)
+      .map((l) => {
+        const [date, ...rest] = l.split('|');
+        let msg = rest.join('|').replace(/^(feat|fix|docs|content|seo|refactor|chore):\s*/i, '');
+        msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        return { date, msg };
+      });
+  } catch {
+    return [];
+  }
+}
+
+function shortDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return String(d);
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function recent() {
+  const pushes = [...REPO_LINKS]
+    .sort((a, b) => String(b.pushed).localeCompare(String(a.pushed)))
+    .slice(0, 5);
+  const commits = recentCommits(5);
+  const repoRow = (r) => `<div class="rrow">
+    <div><b><a href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a></b><small>${esc(r.what)}${r.owner !== SITE.handle ? ` · ${esc(r.owner)}` : ''}</small></div>
+    <time datetime="${esc(r.pushed)}">${esc(shortDate(r.pushed))}</time>
+  </div>`;
+  const commitRow = (c) => `<div class="rrow">
+    <div><b>${esc(c.msg)}</b><small>this site</small></div>
+    <time datetime="${esc(c.date)}">${esc(shortDate(c.date))}</time>
+  </div>`;
+  return `<section id="recent">
+<div class="wrap">
+  <div class="sec-head rv"><span class="eyebrow">Recent</span><h2>What moved <span class="grad">lately</span>.</h2>
+  <p class="lede">Straight from the GitHub API and this repo's own commit log, not a hand-written feed.</p></div>
+  <div class="recent-grid">
+    <div class="rv"><h3 class="recent-h">Last pushes</h3><div class="recent">${pushes.map(repoRow).join('')}</div></div>
+    <div class="rv rv-d2"><h3 class="recent-h">On this site</h3><div class="recent">${commits.length ? commits.map(commitRow).join('') : '<div class="rrow"><div><b>Build and content pass</b><small>this site</small></div><time>today</time></div>'}</div></div>
+  </div>
+</div>
+</section>`;
+}
+
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -159,12 +220,18 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <meta name="keywords" content="${attr(keywords.join(', '))}"/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
 <link rel="canonical" href="${canonical}"/>
+<link rel="alternate" hreflang="en-in" href="${canonical}"/>
+<link rel="alternate" hreflang="x-default" href="${canonical}"/>
+<link rel="alternate" type="application/rss+xml" title="Prakash Gothwal — projects and notes" href="${BASE}/feed.xml"/>
 ${SOCIALS.filter((x) => !x.url.startsWith('mailto:')).map((x) => `<link rel="me" href="${attr(x.url)}"/>`).join('\n')}
 <link rel="author" href="/about"/>
 <meta property="profile:first_name" content="Prakash"/>
 <meta property="profile:last_name" content="Gothwal"/>
 <meta property="profile:username" content="itsThePrakash"/>
 <meta property="og:type" content="profile"/>
+<meta property="og:locale" content="en_IN"/>
+<meta name="twitter:site" content="@itsThePrakash"/>
+<meta name="twitter:creator" content="@itsThePrakash"/>
 <meta property="og:site_name" content="${attr(SITE.name)}"/>
 <meta property="og:title" content="${attr(title)}"/>
 <meta property="og:description" content="${attr(description)}"/>
@@ -178,7 +245,8 @@ ${SOCIALS.filter((x) => !x.url.startsWith('mailto:')).map((x) => `<link rel="me"
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="preconnect" href="https://api.github.com" crossorigin/>
-<style>${minCSS(CSS)}</style>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}"/>
+<script>try{var t=localStorage.getItem('sc:theme')||((window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 ${extraHead}${jsonld}
 </head>
 <body>
@@ -222,7 +290,7 @@ function nav(home = false) {
 function footer() {
   return `<footer class="foot"><div class="wrap foot-in">
   <span class="mono">© <span id="yr"></span> ${esc(SITE.fullName)} · hand-written HTML, no framework</span>
-  <span class="mono">Jaipur, IN · <span id="clk"></span></span>
+  <span class="mono">Jaipur, IN · <span id="clk"></span> · <span id="views" hidden></span></span>
   <span><a href="/about">About</a> ·
         <a href="/projects">Projects</a> ·
         <a href="/repos">Repos</a> ·
@@ -458,6 +526,11 @@ function work() {
 </section>`;
 }
 
+function conData_() {
+  const rows = PROJECTS.map((p) => [p.kicker, p.name, p.tagline, p.live || '', p.repo || '', p.live ? 'Live' : '']);
+  return `<script id="conData" type="application/json">${JSON.stringify(rows).replace(/</g, '\\u003c')}</script>`;
+}
+
 function buildIndex_() {
   return `<script id="palData" type="application/json">${JSON.stringify(buildIndex()).replace(/</g, '\\u003c')}</script>`;
 }
@@ -520,6 +593,16 @@ function jsonld() {
         inLanguage: 'en',
         publisher: { '@id': `${BASE}/#person` },
       },
+      {
+        '@type': 'WebPage',
+        '@id': `${BASE}/#page`,
+        url: BASE,
+        name: `${SITE.fullName} — ${SITE.title}`,
+        isPartOf: { '@id': `${BASE}/#website` },
+        about: { '@id': `${BASE}/#person` },
+        dateModified: BUILD_DATE,
+        inLanguage: 'en-IN',
+      },
     ],
   };
   return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
@@ -531,6 +614,7 @@ function homePage() {
 ${hero()}
 ${marquee()}
 ${telemetry()}
+${recent()}
 ${work()}
 <section id="orgs">
 <div class="wrap">
@@ -553,7 +637,8 @@ ${contact()}
 ${footer()}
 ${palette()}
 ${buildIndex_()}
-<script>${minJS(JS)}</script>`;
+${conData_()}
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `${SITE.fullName} — MNIT Jaipur CSE · Founder @ EkGuru`,
     description: `Prakash Gothwal (Prakash) — B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy. Projects, résumé and contact.`,
@@ -634,7 +719,7 @@ function resumePage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `Résumé — ${SITE.fullName} · MNIT Jaipur CSE`,
     description: `Résumé of Prakash Gothwal — B.Tech CSE at MNIT Jaipur (2022–2026), founder of EkGuru and Print$Buddy. Print-ready.`,
@@ -774,7 +859,7 @@ function aboutPage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `About Prakash Gothwal — Kolwa, Dausa · MNIT Jaipur CSE`,
     description: `Prakash Gothwal (Prakash) is from Kolwa, Dausa district, Rajasthan. B.Tech CSE at MNIT Jaipur, 2022–2026. Founder of EkGuru and Print$Buddy.`,
@@ -888,7 +973,7 @@ function projectsPage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `Projects by Prakash Gothwal — EkGuru, Bhasha Bridge, Saransh`,
     description: `${PROJECTS.length} projects built by Prakash Gothwal (MNIT Jaipur CSE): EkGuru, Bhasha Bridge, Print$Buddy, Saransh, TANIK, PDF Forensics and more. Live links and source.`,
@@ -1014,7 +1099,7 @@ function projectPage(p) {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `${p.name} — ${p.kicker} · Prakash Gothwal`,
     description: `${p.name}: ${p.tagline} A ${p.kicker.toLowerCase()} by Prakash Gothwal${p.stack.length ? `, built with ${p.stack.slice(0, 3).join(', ')}` : ''}. ${p.live ? 'Live now.' : ''}`.trim(),
@@ -1047,7 +1132,7 @@ function orgPage(o) {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: `${o.display} (${o.handle}) — organisation by Prakash Gothwal`,
     description: `${o.display} — ${o.tagline} The ${o.handle} organisation on GitHub, founded by Prakash Gothwal (MNIT Jaipur CSE).`,
@@ -1153,7 +1238,7 @@ function reposPage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: 'Repositories — Prakash Gothwal (@itsThePrakash)',
     description: `All ${PUBLIC_REPOS.length} public repositories from Prakash Gothwal (@itsThePrakash), including EkGuru, PDF-Forensics-, id-maker, saransh and TANIK-News-India-.`,
@@ -1334,7 +1419,7 @@ function sponsorPage() {
 </section>
 </main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({
     title: 'Sponsor Prakash Gothwal — keep the small tools free',
     description:
@@ -1363,7 +1448,7 @@ function notFound() {
   </div>
 </div></section></main>
 ${footer()}
-<script>${minJS(JS)}</script>`;
+<script src="/app.js?v=${ASSET_V}" defer></script>`;
   return page({ title: '404 — Signal lost', description: 'Page not found.', body, path: '/404' });
 }
 
@@ -1395,6 +1480,35 @@ ${PROJECTS.map((p) => `  <url><loc>${pageUrl('/projects/${p.id}')}</loc><lastmod
 ${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
 `;
+  const feedDate = new Date().toISOString();
+  const items = [
+    ...PROJECTS.map((p) => ({
+      title: `${p.name} — ${p.tagline}`,
+      link: `${BASE}${pageSuffix(`/projects/${p.id}`)}`,
+      date: feedDate,
+      desc: p.description,
+    })),
+    { title: 'Résumé — Prakash Gothwal', link: `${BASE}${pageSuffix('/resume')}`, date: feedDate, desc: 'Print-ready résumé: education, projects, stack.' },
+    { title: 'About Prakash Gothwal', link: `${BASE}${pageSuffix('/about')}`, date: feedDate, desc: 'Kolwa, Dausa to MNIT Jaipur. Long bio and quick answers.' },
+  ];
+  const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Prakash Gothwal — projects and notes</title>
+  <link>${BASE}</link>
+  <description>Everything Prakash Gothwal builds, with a page per project.</description>
+  <language>en-in</language>
+  <atom:link href="${BASE}/feed.xml" rel="self" type="application/rss+xml"/>
+${items.map((i) => `  <item>
+    <title>${i.title.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</title>
+    <link>${i.link}</link>
+    <guid isPermaLink="true">${i.link}</guid>
+    <pubDate>${new Date(i.date).toUTCString()}</pubDate>
+    <description>${i.desc.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</description>
+  </item>`).join('\n')}
+</channel>
+</rss>
+`;
   const manifest = {
     name: `${SITE.name} — ${SITE.title}`,
     short_name: SITE.name,
@@ -1406,7 +1520,7 @@ ${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><lastmod>${lastm
     icons: [{ src: `${BASE_PATH}/icon.svg`, sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
   };
   const ghJson = JSON.stringify(SNAP, null, 2);
-  return { robots, sitemap, manifest, ghJson };
+  return { robots, sitemap, feed, manifest, ghJson };
 }
 
 /* ── run ─────────────────────────────────────────────────────────────────── */
@@ -1435,8 +1549,11 @@ function main() {
   const s = sidecars();
   writeFileSync(join(DIST, 'robots.txt'), s.robots.replace(new RegExp(`Sitemap: ${BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), `Sitemap: ${BASE}`));
   writeFileSync(join(DIST, 'sitemap.xml'), s.sitemap);
+  writeFileSync(join(DIST, 'feed.xml'), s.feed);
   writeFileSync(join(DIST, 'manifest.webmanifest'), JSON.stringify(s.manifest, null, 2));
   writeFileSync(join(DIST, 'data', 'github.json'), s.ghJson);
+  writeFileSync(join(DIST, 'style.css'), minCSS(CSS));
+  writeFileSync(join(DIST, 'app.js'), minJS(JS));
   writeFileSync(join(DIST, 'icon.svg'), favicon());
   writeFileSync(join(DIST, 'og.svg'), ogCard());
   writeFileSync(join(DIST, 'og-about.svg'), ogCard({ sub: 'About · Kolwa, Dausa · MNIT Jaipur CSE', tag: 'ABOUT' }));
