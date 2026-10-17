@@ -252,13 +252,13 @@ function projectCards() {
   <span class="halo"></span>
   <div class="card-top">
     <div><div class="kick">${p.pin ? `<span class="pinned">${icon('pin')}Pinned</span> ` : ''}${esc(p.kicker)}</div><h3>${esc(p.name)}</h3></div>
-    <span class="badge ${p.status === 'live' ? 'ok' : 'src'}">${p.status === 'live' ? '● Live' : 'Source'}</span>
+    <span class="badge ${p.status === 'live' ? 'ok' : p.status === 'closed' ? 'closed' : 'src'}">${p.status === 'live' ? '● Live' : p.status === 'closed' ? 'Closed' : 'Source'}</span>
   </div>
   <p class="tag">${esc(p.tagline)}</p>
   <div class="tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>
   <div class="metrics">${p.metrics.map((m) => `<div><b>${esc(m.v)}</b><small>${esc(m.k)}</small></div>`).join('')}</div>
   <div class="card-acts">
-    ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}Live</a>` : ''}
+    ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}${p.status === 'closed' ? 'Site' : 'Live'}</a>` : ''}
     ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages</a>` : ''}
     <a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>
   </div>
@@ -384,7 +384,7 @@ function work() {
   <div class="sec-head rv">
     <span class="eyebrow">Selected work</span>
     <h2>Things I built that <span class="grad">actually run</span>.</h2>
-    <p class="lede">Twelve public projects — three of them running in production. Every card links straight to the live deployment, its GitHub Pages build and the source.</p>
+    <p class="lede">Twelve public projects — live products, a closed campus venture, and the tools in between. Every card links straight to the deployment, its GitHub Pages build and the source.</p>
   </div>
   <div class="pj-bar rv">
     <div class="filters" role="group" aria-label="Filter projects">

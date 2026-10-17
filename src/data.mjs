@@ -370,7 +370,7 @@ export const PROJECTS = [
     kicker: 'Founder · Campus venture',
     tagline: 'Born at 1 a.m. in a boys hostel — print delivered to your door.',
     description:
-      'A real business idea turned product at MNIT Jaipur. Late-night hostel print delivery: upload, pay, and get the pages at your room. Order tracking, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. Solved a problem I personally had, which is the only reason it worked.',
+      'A real business idea turned product at MNIT Jaipur. Late-night hostel print delivery: upload, pay, and get the pages at your room. Order tracking, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. Solved a problem I personally had, which is the only reason it worked. Ran through college and closed permanently after graduation — the site stays up as a record.',
     tags: ['Startup', 'Full-Stack', 'Payments', 'Logistics'],
     stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'],
     live: 'https://printsbuddy.vercel.app',
@@ -378,11 +378,11 @@ export const PROJECTS = [
     repo: 'https://github.com/Print-Buddy/PrintsBuddy',
     featured: true,
     pin: true,
-    status: 'live',
+    status: 'closed',
     metrics: [
       { k: 'Campus', v: 'MNIT' },
       { k: 'Delivery', v: 'Hostel door' },
-      { k: 'Stack', v: 'JS' },
+      { k: 'Status', v: 'Closed' },
     ],
     accent: '#ff4d8d',
   },
@@ -637,7 +637,7 @@ export const TIMELINE = [
     title: 'Founder · Print$Buddy',
     org: 'MNIT Jaipur',
     kind: 'work',
-    body: 'Took a 1 a.m. hostel print problem and shipped a delivery product for it — ordering, payments, an admin console and door delivery across campus.',
+    body: 'Took a 1 a.m. hostel print problem and shipped a delivery product for it — ordering, payments, an admin console and door delivery across campus. Closed permanently after graduation; the site stays up as a record.',
     links: [
       { label: 'printsbuddy.vercel.app', url: 'https://printsbuddy.vercel.app' },
       { label: 'GitHub', url: 'https://github.com/Print-Buddy/PrintsBuddy' },

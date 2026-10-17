@@ -196,6 +196,7 @@ p{margin:0}
   text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid var(--line2);color:var(--fg3);flex:0 0 auto}
 .badge.ok{color:var(--g);border-color:rgba(34,224,122,.35);background:rgba(34,224,122,.08)}
 .badge.src{color:var(--y);border-color:rgba(255,176,32,.32);background:rgba(255,176,32,.08)}
+.badge.closed{color:var(--p);border-color:rgba(255,77,141,.35);background:rgba(255,77,141,.08)}
 .card .tag{font-size:13.5px;color:var(--fg2);line-height:1.6}
 .metrics{display:flex;gap:18px;padding-block:12px;border-block:1px solid var(--line);margin-top:auto}
 .metrics div{display:flex;flex-direction:column}

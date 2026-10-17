@@ -38,7 +38,7 @@ My house style: **zero dependencies, zero framework runtimes, sub-second first p
 
 ---
 
-## 🛰 Live deployments
+## 🛰 Deployments &amp; archives
 
 <table>
 <tr>
@@ -60,6 +60,7 @@ All-subject computer-based tests, server-rendered results, Supabase backend, CI-
 
 ### 🩷 [Print$Buddy](https://printsbuddy.vercel.app) — *Founder* · [Pages](https://print-buddy.github.io/PrintsBuddy/)
 **Born at 1 a.m. in a boys hostel. Print delivered to your door.**
+**Archived — permanently closed after graduation; the site stays up as a record.**
 Order tracking, payments, an admin console, a wall-of-buddy leaderboard and two built-in study-break games. MNIT Jaipur campus.
 <sub>HTML · CSS · JavaScript · Vercel</sub>
 
