@@ -1,0 +1,49 @@
+name: refresh-telemetry
+
+# Keeps the build-time GitHub snapshot fresh so the site is never wrong even
+# when a visitor's browser cannot reach api.github.com.
+on:
+  schedule:
+    - cron: '17 */6 * * *'   # every 6 hours
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/data.mjs'
+      - 'src/fetch-github.mjs'
+
+concurrency:
+  group: refresh-telemetry
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch GitHub snapshot
+        run: node src/fetch-github.mjs
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- src/snapshot.json; then
+            echo "no change"
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/snapshot.json
+            git commit -m "chore: refresh github telemetry snapshot [skip ci]"
+            git push
+          fi
+
+      - name: Verify the build still passes
+        run: |
+          node src/build.mjs
+          test -f dist/index.html
