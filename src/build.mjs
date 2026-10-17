@@ -159,8 +159,11 @@ function page({ title, description, body, path = '/', jsonld = '', extraHead = '
 <meta name="keywords" content="${attr(keywords.join(', '))}"/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
 <link rel="canonical" href="${canonical}"/>
-<link rel="me" href="https://github.com/itsThePrakash"/>
+${SOCIALS.filter((x) => !x.url.startsWith('mailto:')).map((x) => `<link rel="me" href="${attr(x.url)}"/>`).join('\n')}
 <link rel="author" href="/about"/>
+<meta property="profile:first_name" content="Prakash"/>
+<meta property="profile:last_name" content="Gothwal"/>
+<meta property="profile:username" content="itsThePrakash"/>
 <meta property="og:type" content="profile"/>
 <meta property="og:site_name" content="${attr(SITE.name)}"/>
 <meta property="og:title" content="${attr(title)}"/>
@@ -1002,7 +1005,7 @@ ${footer()}
     jsonld: projectJsonld(p),
     keywords: [...new Set([p.name, p.kicker, ...p.stack, 'Prakash Gothwal', 'Prakash MNIT', 'MNIT Jaipur'])],
     extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
-    og: 'og-projects.svg',
+    og: `og/${p.id}.svg`,
   });
 }
 
@@ -1371,6 +1374,10 @@ function main() {
   writeFileSync(join(DIST, 'og-resume.svg'), ogCard({ sub: 'Résumé · B.Tech CSE, MNIT Jaipur 2022–2026', tag: 'RÉSUMÉ' }));
   writeFileSync(join(DIST, 'og-sponsor.svg'), ogCard({ sub: 'Sponsor the work · any amount', tag: 'SPONSOR' }));
   writeFileSync(join(DIST, 'og-projects.svg'), ogCard({ sub: 'Projects · EkGuru · Bhasha Bridge · Saransh', tag: 'PROJECTS' }));
+  mkdirSync(join(DIST, 'og'), { recursive: true });
+  for (const p of PROJECTS) {
+    writeFileSync(join(DIST, 'og', `${p.id}.svg`), ogCard({ sub: p.tagline, tag: p.name.toUpperCase() }));
+  }
   writeFileSync(join(DIST, 'banner.svg'), banner());
 
   // static passthrough: anything in public/ is copied verbatim (résumé photo, etc.)
