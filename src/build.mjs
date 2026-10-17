@@ -15,7 +15,6 @@ import { icon, ICONS } from './icons.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const BASE = process.env.SITE_URL || 'https://itstheprakash.vercel.app';
-
 /** Merge a build-time snapshot (from `npm run refresh`) over the baked default. */
 function loadSnapshot() {
   try {

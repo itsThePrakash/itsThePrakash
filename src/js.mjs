@@ -210,13 +210,14 @@ function countUp(el,to,suffix,dur){
   });
 })();
 
-/* ── live GitHub telemetry (3-tier fallback) ───────────────────────────── */
+/* -- live GitHub telemetry: 4-tier fallback ladder ----------------------- */
 (function(){
   var API='https://api.github.com';
   var U='itsThePrakash';
   var els={};['repos','stars','followers','ach'].forEach(function(k){els[k]=$('#tel-'+k)});
   var srcEl=$('#telSrc');
   var CACHE_KEY='sc:gh', TTL=600000;
+
   function paint(o,label){
     if(els.repos)els.repos.textContent=o.publicRepos;
     if(els.stars)els.stars.textContent=o.totalStars;
@@ -228,20 +229,34 @@ function countUp(el,to,suffix,dur){
     return null;
   }
   function writeCache(v){try{localStorage.setItem(CACHE_KEY,JSON.stringify({t:Date.now(),v:v}))}catch(e){}}
-  function load(){
-    var c=readCache(); if(c){paint(c,'CACHED');return}
-    Promise.all([
+  function shape(u,rs){
+    return {publicRepos:u.public_repos,followers:u.followers,
+      totalStars:rs.reduce(function(a,r){return a+(r.stargazers_count||0)},0)};
+  }
+  function done(v,label){writeCache(v);paint(v,label)}
+  function direct(){
+    return Promise.all([
       fetch(API+'/users/'+U,{headers:{Accept:'application/vnd.github+json'}}).then(function(r){if(!r.ok)throw 0;return r.json()}),
       fetch(API+'/users/'+U+'/repos?per_page=100',{headers:{Accept:'application/vnd.github+json'}}).then(function(r){if(!r.ok)throw 0;return r.json()})
-    ]).then(function(res){
-      var u=res[0], rs=res[1];
-      var v={
-        publicRepos:u.public_repos,
-        followers:u.followers,
-        totalStars:rs.reduce(function(a,r){return a+(r.stargazers_count||0)},0)
-      };
-      writeCache(v);paint(v,'LIVE');
-    })['catch'](function(){
+    ]).then(function(res){return shape(res[0],res[1])});
+  }
+
+  function load(){
+    var c=readCache(); if(c){paint(c,'CACHED');return}
+    /* tier 1 - same-origin edge function: one GitHub call per edge TTL, globally */
+    fetch('/api/live',{headers:{Accept:'application/json'}}).then(function(r){
+      if(!r.ok)throw 0; return r.json();
+    }).then(function(j){
+      if(j&&j.source==='live'){done(j,'LIVE');return}
+      if(j&&j.source==='snapshot'){paint(j,'SNAPSHOT');return direct().then(function(v){done(v,'LIVE')},function(){})}
+      throw 0;
+    })['catch'](function(){}).then(function(){
+      /* tier 2 - the visitor's own browser talks to GitHub directly */
+      if(srcEl&&srcEl.textContent==='LIVE')return;
+      return direct().then(function(v){done(v,'LIVE')},function(){});
+    }).then(function(){
+      /* tier 3 - the build-time snapshot already rendered into the HTML */
+      if(srcEl&&srcEl.textContent==='LIVE')return;
       if(srcEl){srcEl.textContent='SNAPSHOT';srcEl.parentNode.classList.remove('live')}
     });
   }
