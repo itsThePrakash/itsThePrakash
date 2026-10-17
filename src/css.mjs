@@ -52,7 +52,8 @@ h2{font-size:clamp(30px,4.6vw,52px);margin-bottom:14px}
 h3{font-size:clamp(19px,2.2vw,23px);letter-spacing:-.015em}
 p{margin:0}
 .lede{color:var(--fg2);font-size:clamp(15.5px,1.5vw,18px);max-width:62ch}
-.grad{background:linear-gradient(100deg,var(--v),var(--c) 45%,var(--p));-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad{background:linear-gradient(100deg,var(--v),var(--c) 40%,var(--p) 70%,var(--v));background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gflow 11s linear infinite}
+@keyframes gflow{to{background-position:-220% 0}}
 .sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:clamp(30px,4vw,52px);max-width:760px}
 
 /* ── nav ────────────────────────────────────────────────────────────────── */
@@ -358,6 +359,34 @@ p{margin:0}
   .caret{animation:none}
 }
 
+
+/* ── ambient motion layer ───────────────────────────────────────────────── */
+.world{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.world i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.42;will-change:transform;
+  animation:drift 30s ease-in-out infinite}
+.world i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:-8vmax;background:#7c5cff}
+.world i:nth-child(2){width:38vmax;height:38vmax;right:-12vmax;top:26vmax;background:#00e5ff;animation-delay:-10s}
+.world i:nth-child(3){width:34vmax;height:34vmax;left:34vmax;bottom:-16vmax;background:#ff4d8d;animation-delay:-20s;opacity:.3}
+@keyframes drift{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  33%{transform:translate3d(6vmax,-4vmax,0) scale(1.14)}
+  66%{transform:translate3d(-5vmax,5vmax,0) scale(.9)}
+}
+.progress{position:fixed;left:0;top:0;height:2px;width:0;z-index:130;
+  background:linear-gradient(90deg,var(--v),var(--c) 50%,var(--p));transition:width .1s linear}
+.spot{position:fixed;left:0;top:0;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;
+  z-index:0;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(circle,rgba(124,92,255,.16),rgba(0,229,255,.06) 42%,transparent 66%);
+  will-change:transform}
+body:hover .spot{opacity:1}
+[data-theme="light"] .world i{opacity:.22}
+[data-theme="light"] .spot{background:radial-gradient(circle,rgba(124,92,255,.1),transparent 62%)}
+main,nav,.foot{position:relative;z-index:1}
+@media (max-width:720px),(prefers-reduced-motion:reduce){
+  .world,.spot{display:none}
+  .grad{animation:none}
+}
+
 /* ── responsive ─────────────────────────────────────────────────────────── */
 @media (max-width:960px){
   .hero-grid{grid-template-columns:1fr;gap:38px}
@@ -388,6 +417,6 @@ p{margin:0}
   .wrap{max-width:100%;padding:0}
   *{box-shadow:none!important;text-shadow:none!important}
   a{color:#000}
-  .grad{-webkit-text-fill-color:#000;color:#000;background:none}
+  .grad{-webkit-text-fill-color:#000;color:#000;background:none;animation:none}
 }
 `;

@@ -220,3 +220,14 @@ which serves the repo root — and the repo root has no `index.html`.
 The README references them with relative paths, so GitHub serves them from the
 repo itself. No third-party stats service can break the profile page. The stats
 card is generated from `src/snapshot.json`.
+
+## Repository links
+
+`REPO_LINKS` in `src/data.mjs` is the only place a repo link lives. Each entry
+carries `live`, `pages` and the source URL (derived from `owner` + `repo`).
+
+- The home org cards, `/orgs/*` and `/repos` all render from it.
+- A link only appears when the field is filled, and `pages` must be a real
+  GitHub Pages URL — verify with `gh api /repos/{owner}/{repo}/pages`.
+- `/repos` also renders `PUBLIC_REPOS` for the full list of 15 public repos
+  (language, last push), joined to `REPO_LINKS` by repo name.

@@ -164,6 +164,32 @@ function countUp(el,to,suffix,dur){
   });
 })();
 
+/* ── ambient world: pointer spotlight + scroll parallax ─────────────────── */
+(function(){
+  var spot=$('#spot'), world=$('.world');
+  if(!spot||REDUCE||window.matchMedia('(hover:none)').matches)return;
+  var tx=0,ty=0,cx=0,cy=0,alive=false;
+  d.addEventListener('pointermove',function(e){
+    tx=e.clientX;ty=e.clientY;
+    if(!alive){alive=true;requestAnimationFrame(loop)}
+  },{passive:true});
+  function loop(){
+    cx+=(tx-cx)*.12; cy+=(ty-cy)*.12;
+    spot.style.transform='translate3d('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px,0)';
+    if(Math.abs(tx-cx)>.5||Math.abs(ty-cy)>.5)requestAnimationFrame(loop);
+    else alive=false;
+  }
+  if(world){
+    var wa=null;
+    window.addEventListener('scroll',function(){
+      if(wa)return; wa=requestAnimationFrame(function(){
+        world.style.transform='translate3d(0,'+(window.scrollY*.05).toFixed(1)+'px,0)';
+        wa=null;
+      });
+    },{passive:true});
+  }
+})();
+
 /* ── command palette ───────────────────────────────────────────────────── */
 (function(){
   var pal=$('#pal'), input=$('#palInput'), list=$('#palList');

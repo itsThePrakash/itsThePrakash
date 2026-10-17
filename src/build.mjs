@@ -6,7 +6,7 @@
 import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
+import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, REPO_LINKS, repoLinksFor, repoUrl, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
 import { medal, logoMark, favicon, ogCard, banner, constellation, statsCard } from './art.mjs';
@@ -182,6 +182,9 @@ ${SOCIALS.filter((x) => !x.url.startsWith('mailto:')).map((x) => `<link rel="me"
 ${extraHead}${jsonld}
 </head>
 <body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="world" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="spot" id="spot" aria-hidden="true"></div>
 <a class="skip" href="#main">Skip to content</a>
 ${pageSprite(body)}
 ${body}
@@ -222,6 +225,7 @@ function footer() {
   <span class="mono">Jaipur, IN · <span id="clk"></span></span>
   <span><a href="/about">About</a> ·
         <a href="/projects">Projects</a> ·
+        <a href="/repos">Repos</a> ·
         <a href="/sponsor">Sponsor</a> ·
         <a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
         <a href="mailto:${esc(SITE.email)}">Email</a> ·
@@ -283,6 +287,16 @@ function telemetry() {
 </div>`;
 }
 
+/* Live / Pages / Source, in that order, only when the URL actually exists. */
+function repoActions(r, small = true) {
+  const cls = small ? 'org-lnks' : 'repo-links';
+  const a = (href, label) =>
+    `<a href="${attr(href)}" target="_blank" rel="noopener">${label}</a>`;
+  const live = r.live ? a(r.live, 'Live') : '';
+  const pages = r.pages && r.pages !== r.live ? a(r.pages, 'Pages') : '';
+  return `<span class="${cls}">${live}${pages}${a(repoUrl(r), 'Source')}</span>`;
+}
+
 function projectCards() {
   const ordered = [...PROJECTS].sort((a, b) => Number(!!b.pin) - Number(!!a.pin));
   return ordered.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
@@ -310,9 +324,9 @@ function orgs() {
   </div>
   <p class="tag">${esc(o.tagline)}</p>
   <p class="org-body">${esc(o.body)}</p>
-  <ul class="org-repos">${o.repos.map((r) => `<li>
-    <div><b>${esc(r.name)}</b><small>${esc(r.desc)}</small></div>
-    <span class="org-lnks">${r.live ? `<a href="${attr(r.live)}" target="_blank" rel="noopener">Live</a>` : ''}${pagesHref(r) ? `<a href="${attr(pagesHref(r))}" target="_blank" rel="noopener">Pages</a>` : ''}<a href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>
+  <ul class="org-repos">${repoLinksFor(o.handle).map((r) => `<li>
+    <div><b>${esc(r.repo)}</b><small>${esc(r.what)}</small></div>
+    ${repoActions(r)}
   </li>`).join('')}</ul>
 </article>`).join('');
 }
@@ -831,6 +845,9 @@ const SEO_CSS = `
 .faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px 16px}
 .faq summary{cursor:pointer;font-size:14.5px;font-weight:600}
 .faq p{margin-top:8px;font-size:13.5px;color:var(--fg2);line-height:1.6}
+.repo-links{display:inline-flex;gap:4px;flex-wrap:wrap}
+.repo-links a{font-family:var(--mono);font-size:9.5px;padding:3px 7px;border-radius:6px;border:1px solid var(--line2);color:var(--fg2);transition:color .2s,border-color .2s,background .2s}
+.repo-links a:hover{color:var(--c);border-color:rgba(0,229,255,.45);background:var(--surface2)}
 `;
 
 const statusLabel = (p) => (p.status === 'live' ? 'Live' : p.status === 'closed' ? 'Closed' : 'Source only');
@@ -923,6 +940,7 @@ function projectJsonld(p) {
         description: p.description,
         url: p.live || `${BASE}/projects/${p.id}`,
         codeRepository: p.repo || undefined,
+        sameAs: [p.live, pagesHref(p)].filter(Boolean),
         author: { '@id': `${BASE}/#person` },
         keywords: p.stack.join(', '),
       },
@@ -1019,10 +1037,10 @@ function orgPage(o) {
   <h1 style="font-size:clamp(34px,5.6vw,58px)">${esc(o.display)}</h1>
   <p class="seo-lede">${esc(o.tagline)}</p>
   <div class="seo-body"><p>${esc(o.body)}</p><p>Founded and run by <a href="/about">Prakash Gothwal</a> (${esc(SITE.fullName)}), ${esc(o.role.toLowerCase())}.</p></div>
-  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:34px">Repositories</h2>
-  <ul class="plist">${o.repos.map((r) => `<li>
-    <div><a class="t" href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a><small>${esc(r.desc)}</small></div>
-    <span class="tagrow">${r.live ? `<a class="tag" href="${attr(r.live)}" target="_blank" rel="noopener">Live</a>` : ''}${pagesHref(r) ? `<a class="tag" href="${attr(pagesHref(r))}" target="_blank" rel="noopener">Pages</a>` : ''}<a class="tag" href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:34px">Public repositories</h2>
+  <ul class="plist">${repoLinksFor(o.handle).map((r) => `<li>
+    <div><a class="t" href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a><small>${esc(r.what)}</small></div>
+    ${repoActions(r, false)}
   </li>`).join('')}</ul>
   <p class="seo-body" style="margin-top:26px">All projects are listed on the <a href="/projects">projects page</a>, and every repository name is on the <a href="/repos">repositories page</a>.</p>
 </div>
@@ -1049,6 +1067,13 @@ ${footer()}
           url: `${BASE}/orgs/${o.id}`,
           sameAs: [`https://github.com/${o.handle}`],
           founder: { '@id': `${BASE}/#person` },
+          owns: repoLinksFor(o.handle).map((r) => ({
+            '@type': 'SoftwareSourceCode',
+            name: r.repo,
+            description: r.what,
+            codeRepository: repoUrl(r),
+            url: r.live || r.pages || repoUrl(r),
+          })),
         },
       ],
     }).replace(/</g, '\\u003c')}</script>`,
@@ -1057,15 +1082,52 @@ ${footer()}
   });
 }
 
+function repoJsonld() {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'ItemList',
+        '@id': `${BASE}/repos#list`,
+        name: 'Public repositories by Prakash Gothwal',
+        numberOfItems: PUBLIC_REPOS.length,
+        itemListElement: PUBLIC_REPOS.map((r, i) => {
+          const reg = REPO_LINKS.find((x) => x.repo === r.name);
+          return {
+            '@type': 'ListItem',
+            position: i + 1,
+            item: {
+              '@type': 'SoftwareSourceCode',
+              name: r.name,
+              description: r.desc || (reg ? reg.what : 'Public repository'),
+              codeRepository: r.url,
+              programmingLanguage: r.lang || undefined,
+              dateModified: r.pushed,
+              author: { '@id': `${BASE}/#person` },
+              ...(reg && reg.live ? { url: reg.live } : {}),
+            },
+          };
+        }),
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
 function reposPage() {
   const rows = PUBLIC_REPOS.map((r) => {
     const project = PROJECTS.find((p) => p.repo && p.repo.toLowerCase().endsWith(`/${r.name.toLowerCase()}`));
     const what = r.desc || (project ? project.tagline : 'Public repository');
+    const reg = REPO_LINKS.find((x) => x.repo === r.name);
+    const links = reg
+      ? repoActions(reg, false)
+      : `<span class="repo-links"><a href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>`;
     return `<tr>
       <td><a href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>${r.fork ? '<br/><small style="color:var(--fg3);font-size:11px">fork</small>' : ''}</td>
       <td>${esc(what)}${project ? ` · <a href="/projects/${project.id}">project page</a>` : ''}</td>
       <td class="hide-s">${esc(r.lang || '—')}</td>
-      <td class="hide-s">${esc(r.pushed)}</td>
+      <td>${links}</td>
     </tr>`;
   }).join('');
   const body = `${nav()}
@@ -1077,9 +1139,15 @@ function reposPage() {
   <h1 style="font-size:clamp(34px,5.6vw,58px)">Repositories</h1>
   <p class="seo-lede">All ${PUBLIC_REPOS.length} public repositories on <a href="${attr(SITE.github)}" target="_blank" rel="noopener">github.com/itsThePrakash</a>, by name. Every one is mine; nothing here is forked unless it says so.</p>
   <table class="repo-table">
-    <thead><tr><th>Repository</th><th>What it is</th><th class="hide-s">Language</th><th class="hide-s">Last push</th></tr></thead>
+    <thead><tr><th>Repository</th><th>What it is</th><th class="hide-s">Language</th><th>Links</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Organisation repositories</h2>
+  <p class="seo-lede" style="font-size:14.5px">Public repos that live under EkGuruLearning and Print-Buddy. Same person, different owner.</p>
+  <ul class="plist">${REPO_LINKS.filter((r) => ORGS.some((o) => o.handle === r.owner)).map((r) => `<li>
+    <div><a class="t" href="${attr(repoUrl(r))}" target="_blank" rel="noopener">${esc(r.repo)}</a><small>${esc(r.what)} · ${esc(r.owner)}</small></div>
+    ${repoActions(r, false)}
+  </li>`).join('')}</ul>
   <p class="seo-body" style="margin-top:26px">Projects with their own pages are on <a href="/projects">/projects</a>. The organisations behind EkGuru and Print$Buddy are on <a href="/orgs/ekguru">/orgs/ekguru</a> and <a href="/orgs/printsbuddy">/orgs/printsbuddy</a>.</p>
 </div>
 </section>
@@ -1092,7 +1160,7 @@ ${footer()}
     body,
     path: '/repos',
     keywords: ['itsThePrakash repositories', 'Prakash Gothwal GitHub', ...PUBLIC_REPOS.slice(0, 12).map((r) => r.name)],
-    jsonld: itemListJsonld('Repositories by Prakash Gothwal', '/repos', PUBLIC_REPOS.map((r) => ({ name: r.name, url: `${BASE}/repos#${r.name}` }))),
+    jsonld: repoJsonld(),
     extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
     og: 'og-projects.svg',
   });
@@ -1314,16 +1382,17 @@ Sitemap: ${BASE}/sitemap.xml
   return p;
 };
   const pageUrl = (p) => `${BASE}${pageSuffix(p)}`;
+  const lastmod = new Date().toISOString().slice(0, 10);
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${pageUrl('/')}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>${pageUrl('/resume')}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>${pageUrl('/about')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>${pageUrl('/sponsor')}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>${pageUrl('/projects')}</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>${pageUrl('/repos')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-${PROJECTS.map((p) => `  <url><loc>${pageUrl('/projects/${p.id}')}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
-${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
+  <url><loc>${pageUrl('/')}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>${pageUrl('/resume')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${pageUrl('/about')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>${pageUrl('/sponsor')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>${pageUrl('/projects')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>${pageUrl('/repos')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+${PROJECTS.map((p) => `  <url><loc>${pageUrl('/projects/${p.id}')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
+${ORGS.map((o) => `  <url><loc>${pageUrl('/orgs/${o.id}')}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
 `;
   const manifest = {

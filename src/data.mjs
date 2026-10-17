@@ -183,6 +183,36 @@ export const SOCIALS = [
   },
 ];
 
+
+/* ── Every public repository, once ──────────────────────────────────────────
+ * Verified against the GitHub API on 2026-10-17:
+ *   live  → the deployed app
+ *   pages → a real /repos/{owner}/{repo}/pages build (never guessed)
+ *   repo  → source
+ * /repos, /orgs/* and the home org cards all render from this list, so a repo
+ * can never appear in one place with a link missing in another.
+ * ──────────────────────────────────────────────────────────────────────────── */
+export const REPO_LINKS = [
+  { repo: 'EkGuru', owner: 'EkGuruLearning', what: 'Hindi-first learning site, 2,754 static pages', live: 'https://ekguru.shop', pages: 'https://ekguru.shop/', project: 'ekguru' },
+  { repo: 'Questions-', owner: 'EkGuruLearning', what: 'Exam engine — CBT, results, Supabase backend', live: 'https://ekguru-questions.vercel.app', pages: 'https://ekgurulearning.github.io/Questions-/', project: 'ekguru-questions' },
+  { repo: 'PrintsBuddy', owner: 'Print-Buddy', what: 'Hostel print delivery — closed, site archived', live: 'https://printsbuddy.vercel.app', pages: 'https://print-buddy.github.io/PrintsBuddy/', project: 'printsbuddy' },
+  { repo: 'PDF-Forensics-', owner: 'itsThePrakash', what: 'PDF metadata forensics and anomaly reports', live: null, pages: 'https://itstheprakash.github.io/PDF-Forensics-/', project: 'pdf-forensics' },
+  { repo: 'id-maker', owner: 'itsThePrakash', what: 'ID-card generator that runs in the browser', live: null, pages: 'https://itstheprakash.github.io/id-maker/', project: 'id-maker' },
+  { repo: 'how-to-download-View-only-pdf', owner: 'itsThePrakash', what: 'Browser snippet for view-only PDFs', live: null, pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/', project: 'view-only-pdf' },
+  { repo: 'saransh', owner: 'itsThePrakash', what: 'Document summariser — key points, tone, reading time', live: 'https://saranshne.vercel.app', pages: null, project: 'saransh' },
+  { repo: 'TANIK-News-India-', owner: 'itsThePrakash', what: 'Indian news, rewritten into short briefs', live: 'https://tanik-news-india.vercel.app', pages: null, project: 'tanik' },
+  { repo: 'Resume-Parsing-System', owner: 'itsThePrakash', what: 'CVs in, normalised and deduplicated records out', live: null, pages: null, project: 'resume-parsing' },
+  { repo: 'ClassX-Pdf-download', owner: 'itsThePrakash', what: 'Pulls view-restricted course PDFs for offline study', live: null, pages: null, project: 'classx' },
+  { repo: 'C-PLUS-PLUS', owner: 'itsThePrakash', what: 'Every data structure and algorithm I have written', live: null, pages: null, project: 'cpp' },
+  { repo: 'astro-supabase-starter', owner: 'itsThePrakash', what: 'Astro + Supabase starter, MIT licensed', live: 'https://astro-supabase-starter.netlify.app/', pages: null, project: 'astro-supabase' },
+  { repo: 'astro-platform-starter', owner: 'itsThePrakash', what: 'Static-first Astro starter with content collections', live: null, pages: null, project: null },
+  { repo: 'triyal', owner: 'itsThePrakash', what: 'Early Print$Buddy build', live: null, pages: 'https://itstheprakash.github.io/triyal/', project: null },
+  { repo: 'awesome-piracy-', owner: 'itsThePrakash', what: 'A fork kept for reference', live: null, pages: 'https://itstheprakash.github.io/awesome-piracy-/', project: null },
+];
+
+export const repoUrl = (r) => `https://github.com/${r.owner}/${r.repo}`;
+export const repoLinksFor = (owner) => REPO_LINKS.filter((r) => r.owner === owner);
+
 /* ── Public repositories ────────────────────────────────────────────────────
  * Pulled from the GitHub API on 2026-10-17. Used by /repos so each repository
  * name has a real page to rank for. Re-run the query in docs/SETUP.md to update.
@@ -726,6 +756,7 @@ export const PROJECTS = [
     tags: ['Tooling', 'JavaScript'],
     stack: ['JavaScript'],
     live: null,
+    pages: 'https://itstheprakash.github.io/how-to-download-View-only-pdf/',
     repo: 'https://github.com/itsThePrakash/how-to-download-View-only-pdf',
     featured: false,
     status: 'source',
