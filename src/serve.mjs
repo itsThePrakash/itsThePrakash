@@ -54,15 +54,14 @@ createServer((req, res) => {
     'content-type': TYPES[extname(target)] || 'application/octet-stream',
     'cache-control': 'no-store',
   });
-  createReadStream(target).pipe(res);
+  createReadStream(target).on('error', () => res.writeHead(500).end('read error')).pipe(res);
 }).listen(PORT, HOST, () => {
   console.log(`\n  ▸ SIGNAL CORE dev server → http://${HOST}:${PORT}\n`);
 });
 
 function exists(f) {
   try {
-    statSync(f);
-    return true;
+    return statSync(f).isFile();
   } catch {
     return false;
   }

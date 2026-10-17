@@ -1,17 +1,12 @@
 # Sponsors
 
-This site has no ads, no trackers and no paywall. Sponsorship is the only
-money it asks for, and it pays for domains, hosting, API credits and the
-hours behind the free tools.
+Everything on this site is free: no ads, no trackers, no paywall. Sponsorship
+pays for domains, hosting, API credits and the hours behind the free tools.
+
+The same names appear on <https://itstheprakash.vercel.app/sponsor> and on
+[the sponsor wall in the README](README.md#sponsor). Names are never invented
+and private sponsors stay off the list.
 
 ## Wall
 
-Nobody yet. The first name goes here.
-
-<!--
-When someone sponsors, add them here and to SPONSOR.wall in src/data.mjs:
-
-| Sponsor | Since |
-|---|---|
-| Name | 2026-10 |
--->
+_Nobody yet. The first name goes here._

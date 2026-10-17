@@ -6,7 +6,7 @@
 import { writeFileSync, mkdirSync, rmSync, existsSync, statSync, readdirSync, readFileSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, SOCIALS, PROJECTS, ORGS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
+import { SITE, SOCIALS, PROJECTS, ORGS, PUBLIC_REPOS, TIMELINE, STACK, ACHIEVEMENTS_UNLOCKED, ACHIEVEMENTS_CATALOG, GITHUB_SNAPSHOT, SPONSOR, buildIndex } from './data.mjs';
 import { CSS } from './css.mjs';
 import { JS } from './js.mjs';
 import { medal, logoMark, favicon, ogCard, banner, constellation } from './art.mjs';
@@ -192,6 +192,7 @@ function footer() {
   <span class="mono">© <span id="yr"></span> ${esc(SITE.fullName)} · hand-written HTML, no framework</span>
   <span class="mono">Jaipur, IN · <span id="clk"></span></span>
   <span><a href="/about">About</a> ·
+        <a href="/projects">Projects</a> ·
         <a href="/sponsor">Sponsor</a> ·
         <a href="https://github.com/itsThePrakash" target="_blank" rel="noopener">GitHub</a> ·
         <a href="mailto:${esc(SITE.email)}">Email</a> ·
@@ -258,7 +259,7 @@ function projectCards() {
   return ordered.map((p, i) => `<article class="card tilt rv rv-d${(i % 4) + 1}" style="--ac:${p.accent}" data-tags="${p.tags.join(',')}">
   <span class="halo"></span>
   <div class="card-top">
-    <div><div class="kick">${p.pin ? `<span class="pinned">${icon('pin')}Pinned</span> ` : ''}${esc(p.kicker)}</div><h3>${esc(p.name)}</h3></div>
+    <div><div class="kick">${p.pin ? `<span class="pinned">${icon('pin')}Pinned</span> ` : ''}${esc(p.kicker)}</div><h3><a href="/projects/${p.id}">${esc(p.name)}</a></h3></div>
     <span class="badge ${p.status === 'live' ? 'ok' : p.status === 'closed' ? 'closed' : 'src'}">${p.status === 'live' ? '● Live' : p.status === 'closed' ? 'Closed' : 'Source'}</span>
   </div>
   <p class="tag">${esc(p.tagline)}</p>
@@ -267,7 +268,7 @@ function projectCards() {
   <div class="card-acts">
     ${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}${p.status === 'closed' ? 'Site' : 'Live'}</a>` : ''}
     ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages</a>` : ''}
-    <a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>
+    ${p.repo ? `<a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>` : ''}
   </div>
 </article>`).join('');
 }
@@ -275,7 +276,7 @@ function projectCards() {
 function orgs() {
   return ORGS.map((o, i) => `<article class="org rv rv-d${(i % 4) + 1}" style="--ac:${o.accent}">
   <div class="org-top">
-    <div><span class="org-handle">${esc(o.handle)}</span><h3>${esc(o.display)}</h3></div>
+    <div><span class="org-handle">${esc(o.handle)}</span><h3><a href="/orgs/${o.id}">${esc(o.display)}</a></h3></div>
     <span class="badge ok">${esc(o.role)}</span>
   </div>
   <p class="tag">${esc(o.tagline)}</p>
@@ -393,7 +394,7 @@ function work() {
   <div class="sec-head rv">
     <span class="eyebrow">Work</span>
     <h2>Things I built, <span class="grad">still online</span>.</h2>
-    <p class="lede">Twelve public projects. Some are live, one is closed, a few are tools I needed once. Each card links to the deployment, the Pages build and the source.</p>
+    <p class="lede">${PROJECTS.length} projects. Some are live, one is closed, a few are tools I needed once. Each has its own page, plus the deployment, the Pages build and the source.</p>
   </div>
   <div class="pj-bar rv">
     <div class="filters" role="group" aria-label="Filter projects">
@@ -740,6 +741,295 @@ ${footer()}
 }
 
 
+
+/* ── sponsor wall, kept in the repo as well as on the site ───────────────── */
+function sponsorWall() {
+  if (process.env.VERCEL) return; // only the local build touches repo files
+  const wall = SPONSOR.wall || [];
+  const inline = wall.length
+    ? wall.map((w) => (w.url ? `[${w.name}](${w.url})` : w.name)).join(' · ')
+    : '_Nobody yet. The first name goes here._';
+  const md = `# Sponsors
+
+Everything on this site is free: no ads, no trackers, no paywall. Sponsorship
+pays for domains, hosting, API credits and the hours behind the free tools.
+
+The same names appear on <https://itstheprakash.vercel.app/sponsor> and on
+[the sponsor wall in the README](README.md#sponsor). Names are never invented
+and private sponsors stay off the list.
+
+## Wall
+
+${inline}
+`;
+  const target = join(ROOT, 'SPONSORS.md');
+  if (!existsSync(target) || readFileSync(target, 'utf8') !== md) writeFileSync(target, md);
+
+  const readmePath = join(ROOT, 'README.md');
+  const readme = readFileSync(readmePath, 'utf8');
+  const block = `<!-- SPONSORS:START -->\n${inline}\n<!-- SPONSORS:END -->`;
+  const next = readme.replace(/<!-- SPONSORS:START -->[\s\S]*?<!-- SPONSORS:END -->/, block);
+  if (next !== readme) writeFileSync(readmePath, next);
+}
+
+/* ── SEO surfaces: projects, organisations, repositories ─────────────────── */
+const SEO_CSS = `
+.seo-wrap{max-width:860px}
+.crumbs{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--fg3);margin-bottom:20px}
+.crumbs a{color:var(--fg3)}
+.crumbs a:hover{color:var(--c)}
+.seo-lede{font-size:16.5px;color:var(--fg2);margin-top:14px;line-height:1.65;max-width:64ch}
+.seo-body{margin-top:14px;font-size:15px;line-height:1.72;color:var(--fg2);max-width:68ch}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:26px}
+.spec div{background:var(--bg2);padding:13px 15px}
+.spec small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);margin-bottom:4px}
+.spec b{font-size:13.5px;font-weight:600}
+.lnk-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.plist{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px}
+.plist li{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 16px;display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.plist a.t{font-size:15px;font-weight:600;color:var(--fg)}
+.plist a.t:hover{color:var(--c)}
+.plist small{display:block;font-size:12.5px;color:var(--fg3);margin-top:4px;max-width:58ch;line-height:1.5}
+.tagrow{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.repo-table{width:100%;border-collapse:collapse;margin-top:22px;font-size:13.5px}
+.repo-table th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500}
+.repo-table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--fg2)}
+.repo-table td:first-child{white-space:nowrap}
+.repo-table a{color:var(--fg)}
+.repo-table a:hover{color:var(--c)}
+@media(max-width:560px){.repo-table .hide-s{display:none}}
+`;
+
+const statusLabel = (p) => (p.status === 'live' ? 'Live' : p.status === 'closed' ? 'Closed' : 'Source only');
+
+function crumbs(items) {
+  return `<div class="crumbs">${items
+    .map((it) => (it.href ? `<a href="${attr(it.href)}">${esc(it.label)}</a>` : `<span>${esc(it.label)}</span>`))
+    .join('<span>/</span>')}</div>`;
+}
+
+function linksFor(p) {
+  return `${p.live ? `<a class="btn btn-p" href="${attr(p.live)}" target="_blank" rel="noopener">${icon('external')}${p.status === 'closed' ? 'Site' : 'Live site'}</a>` : ''}
+    ${pagesHref(p) ? `<a class="btn btn-g" href="${attr(pagesHref(p))}" target="_blank" rel="noopener">${icon('external')}Pages build</a>` : ''}
+    ${p.repo ? `<a class="btn btn-g" href="${attr(p.repo)}" target="_blank" rel="noopener">${icon('code')}Source</a>` : ''}`;
+}
+
+function projectsPage() {
+  const list = PROJECTS.map(
+    (p) => `<li><div><a class="t" href="/projects/${p.id}">${esc(p.name)}</a><small>${esc(p.tagline)}</small></div>
+      <span class="tagrow">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</span></li>`
+  ).join('');
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Projects' }])}
+  <p class="eyebrow">Projects</p>
+  <h1 style="font-size:clamp(34px,5.6vw,60px)">Everything I have built.</h1>
+  <p class="seo-lede">${PROJECTS.length} projects, each with its own page: what it does, what it runs on, and where to find it. Some are live. One is closed. A few are tools I built because something annoyed me.</p>
+  <ul class="plist">${list}</ul>
+  <h2 style="font-size:clamp(22px,3vw,30px);margin-top:40px">Organisations</h2>
+  <ul class="plist">${ORGS.map(
+    (o) => `<li><div><a class="t" href="/orgs/${o.id}">${esc(o.display)}</a><small>${esc(o.tagline)}</small></div>
+      <span class="tagrow"><span class="tag">${esc(o.handle)}</span></span></li>`
+  ).join('')}</ul>
+  <p class="seo-body" style="margin-top:26px">Every repository is listed by name on the <a href="/repos">repositories page</a>. There is a <a href="/resume">résumé</a> and an <a href="/about">about page</a> too.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: `Projects by Prakash Gothwal — EkGuru, Bhasha Bridge, Saransh`,
+    description: `${PROJECTS.length} projects built by Prakash Gothwal (MNIT Jaipur CSE): EkGuru, Bhasha Bridge, Print$Buddy, Saransh, TANIK, PDF Forensics and more. Live links and source.`,
+    body,
+    path: '/projects',
+    jsonld: itemListJsonld('Projects by Prakash Gothwal', '/projects', PROJECTS.map((p) => ({ name: p.name, url: `${BASE}/projects/${p.id}` }))),
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+function itemListJsonld(name, path, items) {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'ItemList',
+        '@id': `${BASE}${path}#list`,
+        name,
+        numberOfItems: items.length,
+        itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: it.url })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+          { '@type': 'ListItem', position: 2, name, item: `${BASE}${path}` },
+        ],
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function projectJsonld(p) {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      personNode(),
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${BASE}/projects/${p.id}#app`,
+        name: p.name,
+        alternateName: p.kicker,
+        applicationCategory: p.tags.includes('AI') ? 'BusinessApplication' : 'WebApplication',
+        operatingSystem: 'Web',
+        description: p.description,
+        url: p.live || `${BASE}/projects/${p.id}`,
+        codeRepository: p.repo || undefined,
+        author: { '@id': `${BASE}/#person` },
+        keywords: p.stack.join(', '),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+          { '@type': 'ListItem', position: 2, name: 'Projects', item: `${BASE}/projects` },
+          { '@type': 'ListItem', position: 3, name: p.name, item: `${BASE}/projects/${p.id}` },
+        ],
+      },
+    ],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`;
+}
+
+function projectPage(p) {
+  const related = PROJECTS.filter((x) => x.id !== p.id && x.tags.some((t) => p.tags.includes(t))).slice(0, 3);
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Projects', href: '/projects' }, { label: p.name }])}
+  <p class="eyebrow">${esc(p.kicker)}</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">${esc(p.name)}</h1>
+  <p class="seo-lede">${esc(p.tagline)}</p>
+  <div class="seo-body"><p>${esc(p.description)}</p></div>
+  <div class="spec">
+    <div><small>Status</small><b>${statusLabel(p)}</b></div>
+    <div><small>Built with</small><b>${esc(p.stack.join(' · '))}</b></div>
+    <div><small>Made by</small><b>${esc(SITE.fullName)}</b></div>
+  </div>
+  <div class="lnk-row">${linksFor(p)}
+    <a class="btn btn-g" href="/projects">${icon('arrow')}All projects</a>
+  </div>
+  ${related.length ? `<h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:44px">Related projects</h2>
+  <ul class="plist">${related.map((r) => `<li><div><a class="t" href="/projects/${r.id}">${esc(r.name)}</a><small>${esc(r.tagline)}</small></div></li>`).join('')}</ul>` : ''}
+  <p class="seo-body" style="margin-top:30px">More about me on the <a href="/about">about page</a>, or the <a href="/resume">résumé</a>. If one of these saved you time, you can <a href="/sponsor">sponsor the work</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: `${p.name} — ${p.kicker} · Prakash Gothwal`,
+    description: `${p.name}: ${p.tagline} A ${p.kicker.toLowerCase()} by Prakash Gothwal${p.stack.length ? `, built with ${p.stack.slice(0, 3).join(', ')}` : ''}. ${p.live ? 'Live now.' : ''}`.trim(),
+    body,
+    path: `/projects/${p.id}`,
+    jsonld: projectJsonld(p),
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+function orgPage(o) {
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Organisations', href: '/projects' }, { label: o.display }])}
+  <p class="eyebrow">Organisation · ${esc(o.handle)}</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">${esc(o.display)}</h1>
+  <p class="seo-lede">${esc(o.tagline)}</p>
+  <div class="seo-body"><p>${esc(o.body)}</p><p>Founded and run by <a href="/about">Prakash Gothwal</a> (${esc(SITE.fullName)}), ${esc(o.role.toLowerCase())}.</p></div>
+  <h2 style="font-size:clamp(20px,2.6vw,26px);margin-top:34px">Repositories</h2>
+  <ul class="plist">${o.repos.map((r) => `<li>
+    <div><a class="t" href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a><small>${esc(r.desc)}</small></div>
+    <span class="tagrow">${r.live ? `<a class="tag" href="${attr(r.live)}" target="_blank" rel="noopener">Live</a>` : ''}${pagesHref(r) ? `<a class="tag" href="${attr(pagesHref(r))}" target="_blank" rel="noopener">Pages</a>` : ''}<a class="tag" href="${attr(r.url)}" target="_blank" rel="noopener">Source</a></span>
+  </li>`).join('')}</ul>
+  <p class="seo-body" style="margin-top:26px">All projects are listed on the <a href="/projects">projects page</a>, and every repository name is on the <a href="/repos">repositories page</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: `${o.display} (${o.handle}) — organisation by Prakash Gothwal`,
+    description: `${o.display} — ${o.tagline} The ${o.handle} organisation on GitHub, founded by Prakash Gothwal (MNIT Jaipur CSE).`,
+    body,
+    path: `/orgs/${o.id}`,
+    jsonld: `<script type="application/ld+json">${JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        personNode(),
+        {
+          '@type': 'Organization',
+          '@id': `${BASE}/orgs/${o.id}#org`,
+          name: o.display,
+          alternateName: o.handle,
+          description: o.body,
+          url: `${BASE}/orgs/${o.id}`,
+          sameAs: [`https://github.com/${o.handle}`],
+          founder: { '@id': `${BASE}/#person` },
+        },
+      ],
+    }).replace(/</g, '\\u003c')}</script>`,
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
+function reposPage() {
+  const rows = PUBLIC_REPOS.map((r) => {
+    const project = PROJECTS.find((p) => p.repo && p.repo.toLowerCase().endsWith(`/${r.name.toLowerCase()}`));
+    const what = r.desc || (project ? project.tagline : 'Public repository');
+    return `<tr>
+      <td><a href="${attr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a></td>
+      <td>${esc(what)}${project ? ` · <a href="/projects/${project.id}">project page</a>` : ''}</td>
+      <td class="hide-s">${esc(r.lang || '—')}</td>
+      <td class="hide-s">${esc(r.pushed)}</td>
+    </tr>`;
+  }).join('');
+  const body = `${nav()}
+<main id="main">
+<section style="padding-top:128px">
+<div class="wrap seo-wrap">
+  ${crumbs([{ label: 'Home', href: '/' }, { label: 'Repositories' }])}
+  <p class="eyebrow">GitHub</p>
+  <h1 style="font-size:clamp(34px,5.6vw,58px)">Repositories</h1>
+  <p class="seo-lede">All ${PUBLIC_REPOS.length} public repositories on <a href="${attr(SITE.github)}" target="_blank" rel="noopener">github.com/itsThePrakash</a>, by name. Every one is mine; nothing here is forked unless it says so.</p>
+  <table class="repo-table">
+    <thead><tr><th>Repository</th><th>What it is</th><th class="hide-s">Language</th><th class="hide-s">Last push</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p class="seo-body" style="margin-top:26px">Projects with their own pages are on <a href="/projects">/projects</a>. The organisations behind EkGuru and Print$Buddy are on <a href="/orgs/ekguru">/orgs/ekguru</a> and <a href="/orgs/printsbuddy">/orgs/printsbuddy</a>.</p>
+</div>
+</section>
+</main>
+${footer()}
+<script>${minJS(JS)}</script>`;
+  return page({
+    title: 'Repositories — Prakash Gothwal (@itsThePrakash)',
+    description: `All ${PUBLIC_REPOS.length} public repositories from Prakash Gothwal (@itsThePrakash), including EkGuru, PDF-Forensics-, id-maker, saransh and TANIK-News-India-.`,
+    body,
+    path: '/repos',
+    jsonld: itemListJsonld('Repositories by Prakash Gothwal', '/repos', PUBLIC_REPOS.map((r) => ({ name: r.name, url: `${BASE}/repos#${r.name}` }))),
+    extraHead: `<style>${minCSS(SEO_CSS)}</style>`,
+    og: 'og-projects.svg',
+  });
+}
+
 /* ── sponsor ─────────────────────────────────────────────────────────────── */
 const SPONSOR_FAQ = [
   {
@@ -955,6 +1245,10 @@ Sitemap: ${BASE}/sitemap.xml
   <url><loc>${BASE}/resume</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>${BASE}/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>${BASE}/sponsor</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>${BASE}/projects</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>${BASE}/repos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+${PROJECTS.map((p) => `  <url><loc>${BASE}/projects/${p.id}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
+${ORGS.map((o) => `  <url><loc>${BASE}/orgs/${o.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
 `;
   const manifest = {
@@ -977,13 +1271,21 @@ function main() {
   mkdirSync(join(DIST, 'medals'), { recursive: true });
   mkdirSync(join(DIST, 'data'), { recursive: true });
 
+  const seoPages = [
+    ['projects.html', projectsPage()],
+    ['repos.html', reposPage()],
+    ...PROJECTS.map((p) => [`projects/${p.id}.html`, projectPage(p)]),
+    ...ORGS.map((o) => [`orgs/${o.id}.html`, orgPage(o)]),
+  ];
   const pages = [
     ['index.html', homePage()],
     ['resume.html', resumePage()],
     ['about.html', aboutPage()],
     ['sponsor.html', sponsorPage()],
     ['404.html', notFound()],
+    ...seoPages,
   ];
+  for (const dir of ['projects', 'orgs']) mkdirSync(join(DIST, dir), { recursive: true });
   for (const [f, html] of pages) writeFileSync(join(DIST, f), minHTML(html));
 
   const s = sidecars();
@@ -996,6 +1298,7 @@ function main() {
   writeFileSync(join(DIST, 'og-about.svg'), ogCard({ sub: 'About · Kolwa, Dausa · MNIT Jaipur CSE', tag: 'ABOUT' }));
   writeFileSync(join(DIST, 'og-resume.svg'), ogCard({ sub: 'Résumé · B.Tech CSE, MNIT Jaipur 2022–2026', tag: 'RÉSUMÉ' }));
   writeFileSync(join(DIST, 'og-sponsor.svg'), ogCard({ sub: 'Sponsor the work · any amount', tag: 'SPONSOR' }));
+  writeFileSync(join(DIST, 'og-projects.svg'), ogCard({ sub: 'Projects · EkGuru · Bhasha Bridge · Saransh', tag: 'PROJECTS' }));
   writeFileSync(join(DIST, 'banner.svg'), banner());
 
   // static passthrough: anything in public/ is copied verbatim (résumé photo, etc.)
@@ -1004,6 +1307,8 @@ function main() {
   for (const a of [...ACHIEVEMENTS_UNLOCKED, ...ACHIEVEMENTS_CATALOG]) {
     writeFileSync(join(DIST, 'medals', `${a.id}.svg`), medal(a.id, 0));
   }
+
+  sponsorWall();
 
   // report
   const sizes = pages.map(([f]) => [f, statSync(join(DIST, f)).size]);

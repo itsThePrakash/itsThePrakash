@@ -183,6 +183,148 @@ export const SOCIALS = [
   },
 ];
 
+/* ── Public repositories ────────────────────────────────────────────────────
+ * Pulled from the GitHub API on 2026-10-17. Used by /repos so each repository
+ * name has a real page to rank for. Re-run the query in docs/SETUP.md to update.
+ * ──────────────────────────────────────────────────────────────────────────── */
+export const PUBLIC_REPOS = [
+  {
+    "name": "itsThePrakash",
+    "desc": "Config files for my GitHub profile.",
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/itsThePrakash",
+    "pushed": "2026-10-17",
+    "fork": false
+  },
+  {
+    "name": "how-to-download-View-only-pdf",
+    "desc": null,
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/how-to-download-View-only-pdf",
+    "pushed": "2026-10-17",
+    "fork": false
+  },
+  {
+    "name": "PDF-Forensics",
+    "desc": "Minor/Major Project",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/PDF-Forensics",
+    "pushed": "2026-10-17",
+    "fork": true
+  },
+  {
+    "name": "ClassX-Pdf-download",
+    "desc": "ClassX resticted pdf download avalible ",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/ClassX-Pdf-download",
+    "pushed": "2026-06-17",
+    "fork": false
+  },
+  {
+    "name": "PDF-Forensics-",
+    "desc": "Minor/Major Project ",
+    "lang": "Python",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/PDF-Forensics-",
+    "pushed": "2026-04-26",
+    "fork": false
+  },
+  {
+    "name": "TANIK-News-India-",
+    "desc": null,
+    "lang": "TypeScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/TANIK-News-India-",
+    "pushed": "2025-12-05",
+    "fork": false
+  },
+  {
+    "name": "saransh",
+    "desc": null,
+    "lang": "TypeScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/saransh",
+    "pushed": "2025-12-04",
+    "fork": false
+  },
+  {
+    "name": "Resume-Parsing-System",
+    "desc": null,
+    "lang": "Python",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/Resume-Parsing-System",
+    "pushed": "2025-12-03",
+    "fork": false
+  },
+  {
+    "name": "id-maker",
+    "desc": null,
+    "lang": "HTML",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/id-maker",
+    "pushed": "2025-08-23",
+    "fork": false
+  },
+  {
+    "name": "triyal",
+    "desc": null,
+    "lang": "HTML",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/triyal",
+    "pushed": "2025-07-30",
+    "fork": false
+  },
+  {
+    "name": "triyal2printsbuddy",
+    "desc": null,
+    "lang": "JavaScript",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/triyal2printsbuddy",
+    "pushed": "2025-07-30",
+    "fork": false
+  },
+  {
+    "name": "astro-platform-starter",
+    "desc": null,
+    "lang": "Astro",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/astro-platform-starter",
+    "pushed": "2025-05-10",
+    "fork": false
+  },
+  {
+    "name": "astro-supabase-starter",
+    "desc": null,
+    "lang": "Astro",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/astro-supabase-starter",
+    "pushed": "2025-05-10",
+    "fork": false
+  },
+  {
+    "name": "C-PLUS-PLUS",
+    "desc": "all code",
+    "lang": "C++",
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/C-PLUS-PLUS",
+    "pushed": "2023-10-08",
+    "fork": false
+  },
+  {
+    "name": "awesome-piracy-",
+    "desc": "A curated list of awesome warez and piracy links.how   ",
+    "lang": null,
+    "stars": 1,
+    "url": "https://github.com/itsThePrakash/awesome-piracy-",
+    "pushed": "2023-06-18",
+    "fork": true
+  }
+];
+
 /* ── GitHub achievements — unlocked, verified against the live profile ────── */
 export const ACHIEVEMENTS_UNLOCKED = [
   {
@@ -365,6 +507,27 @@ export const ACHIEVEMENTS_CATALOG = [
 
 /* ── Projects. `live` is the deployed URL, `repo` the source. ─────────────── */
 export const PROJECTS = [
+  {
+    id: 'bhasha-bridge',
+    name: 'Bhasha Bridge',
+    kicker: 'Language app',
+    tagline: 'Language learning, built as a web app.',
+    description:
+      'A Next.js web app for language learning with Google sign-in, Postgres behind the lessons and email for account flows. My newest build, and the one I am spending the most time on right now.',
+    tags: ['Next.js', 'EdTech', 'Postgres'],
+    stack: ['Next.js', 'Postgres', 'Google OAuth', 'Vercel'],
+    live: 'https://bhashabridge-iota.vercel.app',
+    repo: null,
+    featured: true,
+    status: 'live',
+    pin: true,
+    metrics: [
+      { k: 'Stack', v: 'Next.js' },
+      { k: 'Auth', v: 'Google' },
+      { k: 'Data', v: 'Postgres' },
+    ],
+    accent: '#ff4d8d',
+  },
   {
     id: 'ekguru',
     name: 'EkGuru',
@@ -848,6 +1011,8 @@ export function buildIndex() {
     kind: 'Page',
     keywords: 'support sponsor donate coffee fund',
   });
+  out.push({ title: 'All projects', subtitle: 'Every project, one page each', url: '/projects', kind: 'Page', keywords: 'work portfolio apps' });
+  out.push({ title: 'Repositories', subtitle: 'All 15 public repos by name', url: '/repos', kind: 'Page', keywords: 'github code source repos' });
   out.push({ title: 'Email me', subtitle: SITE.email, url: `mailto:${SITE.email}`, kind: 'Contact', keywords: 'hire contact work' });
   out.push({ title: 'GitHub profile', subtitle: '@itsThePrakash', url: SITE.github, kind: 'Profile', keywords: 'code repos stars' });
   return out;

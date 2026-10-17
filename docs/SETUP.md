@@ -19,6 +19,10 @@ npm run refresh    # pull fresh GitHub numbers into src/snapshot.json
 | `dist/resume.html` | print-ready résumé (`/resume`, `/cv`, `/resume.pdf` all land here) |
 | `dist/about.html` | the bio page, aimed at name searches (`/about`) |
 | `dist/sponsor.html` | the sponsor page (`/sponsor`) — tiers, rails, wall, FAQ |
+| `dist/projects.html` | index of every project (`/projects`) |
+| `dist/projects/*.html` | one page per project (`/projects/ekguru`, `/projects/bhasha-bridge`, …) |
+| `dist/orgs/*.html` | one page per organisation (`/orgs/ekguru`, `/orgs/printsbuddy`) |
+| `dist/repos.html` | every public repository by name (`/repos`) |
 | `dist/404.html` | themed 404 |
 | `dist/medals/*.svg` | hand-drawn achievement medals, referenced by this README |
 | `dist/banner.svg`, `dist/og*.svg` | the profile banner and per-page social cards |
@@ -151,3 +155,28 @@ Only `githubLive: true`, a non-null `upi` or a non-null `razorpay` gives people 
 way to actually pay. Nothing is invented: if a rail is off, the page does not
 pretend it is on. Activation steps for GitHub Sponsors are in
 [`SPONSOR.md`](SPONSOR.md).
+
+
+## Repository names and the /repos page
+
+`PUBLIC_REPOS` in `src/data.mjs` is a bake of the GitHub repository list: name,
+description, language, stars, last push. `/repos` renders it so every repository
+name has a real page. Refresh it when repos change:
+
+```bash
+gh api '/user/repos?affiliation=owner&visibility=public&per_page=100&sort=pushed' \
+  --jq '[.[] | {name, description, language, stars: .stargazers_count, url: .html_url, homepage: .homepage, pushed: .pushed_at[0:10], fork: .fork, archived: .archived, topics}]'
+```
+
+Paste the output into `PUBLIC_REPOS`, rebuild, push.
+
+## Sponsor wall in the repo
+
+`npm run build` writes the wall in two places from the same `SPONSOR.wall` array:
+
+- `SPONSORS.md`
+- the block between `<!-- SPONSORS:START -->` and `<!-- SPONSORS:END -->` in `README.md`
+
+Add a sponsor to `SPONSOR.wall`, rebuild, commit. The site and the repo can never
+show different names. The build skips these writes on Vercel (`VERCEL` env), so a
+deploy never rewrites your repo files.

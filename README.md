@@ -45,13 +45,24 @@ My house style: **zero dependencies, zero framework runtimes, sub-second first p
 
 Everything on this site is free: no ads, no trackers, no paywall, no email capture. If one of these tools saved you an afternoon, you can [sponsor the work](https://itstheprakash.vercel.app/sponsor) — any amount, one time or monthly, through GitHub Sponsors.
 
-Sponsors get their name on the wall on [/sponsor](https://itstheprakash.vercel.app/sponsor), and only if they want it there. Nothing gets locked behind a payment. The rails (GitHub, and optionally UPI or Razorpay for India) are documented in [`docs/SPONSOR.md`](docs/SPONSOR.md).
+Sponsors get their name on the wall here, and only if they want it there. The same names show up on [/sponsor](https://itstheprakash.vercel.app/sponsor) — one list, generated from `SPONSOR.wall` in `src/data.mjs`, so the repo and the site can never drift apart. Nothing gets locked behind a payment.
+
+<!-- SPONSORS:START -->
+_Nobody yet. The first name goes here._
+<!-- SPONSORS:END -->
 
 ## Deployments and archives
 
 <table>
 <tr>
 <td width="50%" valign="top">
+
+### [Bhasha Bridge](https://bhashabridge-iota.vercel.app) — *Founder*
+**Language learning, built as a web app.**
+Google sign-in, Postgres behind the lessons, email for account flows. The build I am spending the most time on right now.
+<sub>Next.js · Postgres · Google OAuth · Vercel</sub>
+
+<br/>
 
 ### [EkGuru](https://ekguru.shop) — *Founder &amp; CEO*
 **A language bridge that turns Hindi into a door, not a wall.**
@@ -341,7 +352,7 @@ graph LR
 ```
 
 <div align="center">
-<sub>One data file in, a portfolio + a résumé + a sponsor page + a profile README out. No framework, no runtime, no supply chain.</sub>
+<sub>One data file in: a portfolio, a résumé, a sponsor page, a page per project, a page per repository, and this README. No framework, no runtime, no supply chain.</sub>
 </div>
 
 ---
