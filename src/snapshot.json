@@ -9,26 +9,26 @@
   "topLanguages": [
     {
       "name": "JavaScript",
-      "pct": 23
-    },
-    {
-      "name": "Python",
-      "pct": 15
-    },
-    {
-      "name": "TypeScript",
-      "pct": 15
-    },
-    {
-      "name": "HTML",
-      "pct": 15
+      "pct": 25
     },
     {
       "name": "Astro",
-      "pct": 15
+      "pct": 17
     },
     {
-      "name": "null",
+      "name": "HTML",
+      "pct": 17
+    },
+    {
+      "name": "Python",
+      "pct": 17
+    },
+    {
+      "name": "TypeScript",
+      "pct": 17
+    },
+    {
+      "name": "C++",
       "pct": 8
     }
   ],
